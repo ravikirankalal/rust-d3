@@ -1,6 +1,23 @@
 [package]
 name = "rust-d3"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+description = "A Rust library for D3-style data visualizations"
+license = "GPL-3.0"
+repository = "https://github.com/ravikirankalal/rust-d3"
+
+[lib]
+name = "rust_d3"
+path = "src/lib.rs"
+
+[[bin]]
+name = "rust-d3-examples"
+path = "src/main.rs"
 
 [dependencies]
+svg = "0.13"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[dev-dependencies]
+tempfile = "3.8"
