@@ -167,7 +167,7 @@ impl Chart for LineChart {
             let tick_label = SvgUtils::text(
                 x,
                 (self.config.height - self.config.margin_bottom + 18) as f64,
-                &format!("{:.1}", tick),
+                &format!("{tick:.1}"),
             )
             .set("class", "chart-axis-text")
             .set("text-anchor", "middle");
