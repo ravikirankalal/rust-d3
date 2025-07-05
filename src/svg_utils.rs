@@ -92,8 +92,7 @@ impl SvgUtils {
         };
 
         format!(
-            "M {} {} L {} {} A {} {} 0 {} 1 {} {} Z",
-            cx, cy, x1, y1, radius, radius, large_arc, x2, y2
+            "M {cx} {cy} L {x1} {y1} A {radius} {radius} 0 {large_arc} 1 {x2} {y2} Z"
         )
     }
 
