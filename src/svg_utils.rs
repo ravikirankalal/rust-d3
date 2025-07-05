@@ -91,9 +91,7 @@ impl SvgUtils {
             0
         };
 
-        format!(
-            "M {cx} {cy} L {x1} {y1} A {radius} {radius} 0 {large_arc} 1 {x2} {y2} Z"
-        )
+        format!("M {cx} {cy} L {x1} {y1} A {radius} {radius} 0 {large_arc} 1 {x2} {y2} Z")
     }
 
     /// Create default CSS styles for charts
