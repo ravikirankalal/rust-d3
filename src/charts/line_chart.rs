@@ -190,7 +190,7 @@ impl Chart for LineChart {
             let tick_label = SvgUtils::text(
                 (self.config.margin_left - 8) as f64,
                 y + 4.0,
-                &format!("{:.1}", tick),
+                &format!("{tick:.1}"),
             )
             .set("class", "chart-axis-text")
             .set("text-anchor", "end");
