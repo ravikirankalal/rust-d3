@@ -179,9 +179,7 @@ mod tests {
 
     #[test]
     fn test_linear_scale() {
-        let scale = LinearScale::new()
-            .domain(0.0, 100.0)
-            .range(0.0, 500.0);
+        let scale = LinearScale::new().domain(0.0, 100.0).range(0.0, 500.0);
 
         assert_eq!(scale.scale(0.0), 0.0);
         assert_eq!(scale.scale(50.0), 250.0);
@@ -199,7 +197,11 @@ mod tests {
     fn test_ordinal_scale() {
         let scale = OrdinalScale::new()
             .domain(vec!["A".to_string(), "B".to_string(), "C".to_string()])
-            .range(vec!["red".to_string(), "green".to_string(), "blue".to_string()]);
+            .range(vec![
+                "red".to_string(),
+                "green".to_string(),
+                "blue".to_string(),
+            ]);
 
         assert_eq!(scale.scale("A"), Some(&"red".to_string()));
         assert_eq!(scale.scale("B"), Some(&"green".to_string()));

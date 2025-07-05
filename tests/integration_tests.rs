@@ -1,6 +1,6 @@
 //! Integration tests that generate chart images for documentation
 
-use rust_d3::charts::{BarChart, LineChart, PieChart, Chart};
+use rust_d3::charts::{BarChart, Chart, LineChart, PieChart};
 use rust_d3::data::{DataPoint, Point2D};
 use std::fs;
 
@@ -22,8 +22,7 @@ fn test_generate_bar_chart_for_readme() {
         .color("#3498db");
 
     let svg = chart.render();
-    fs::write("target/bar_chart_example.svg", svg.to_string())
-        .expect("Failed to write bar chart");
+    fs::write("target/bar_chart_example.svg", svg.to_string()).expect("Failed to write bar chart");
 }
 
 #[test]
@@ -69,8 +68,7 @@ fn test_generate_pie_chart_for_readme() {
         .show_labels(true);
 
     let svg = chart.render();
-    fs::write("target/pie_chart_example.svg", svg.to_string())
-        .expect("Failed to write pie chart");
+    fs::write("target/pie_chart_example.svg", svg.to_string()).expect("Failed to write pie chart");
 }
 
 #[test]

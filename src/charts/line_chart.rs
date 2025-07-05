@@ -1,9 +1,9 @@
 //! Line chart implementation
 
-use crate::data::{Point2D, DataUtils};
+use super::{add_styles_to_chart, add_title_to_chart, Chart, ChartConfig};
+use crate::data::{DataUtils, Point2D};
 use crate::scales::LinearScale;
 use crate::svg_utils::SvgUtils;
-use super::{Chart, ChartConfig, add_title_to_chart, add_styles_to_chart};
 use svg::Document;
 
 /// Line chart for visualizing continuous data
@@ -93,22 +93,19 @@ impl Chart for LineChart {
         let (min_point, max_point) = DataUtils::extent_2d(&self.data).unwrap();
 
         // Create scales
-        let x_scale = LinearScale::new()
-            .domain(min_point.x, max_point.x)
-            .range(
-                self.config.margin_left as f64,
-                (self.config.width - self.config.margin_right) as f64,
-            );
+        let x_scale = LinearScale::new().domain(min_point.x, max_point.x).range(
+            self.config.margin_left as f64,
+            (self.config.width - self.config.margin_right) as f64,
+        );
 
-        let y_scale = LinearScale::new()
-            .domain(min_point.y, max_point.y)
-            .range(
-                (self.config.height - self.config.margin_bottom) as f64,
-                self.config.margin_top as f64,
-            );
+        let y_scale = LinearScale::new().domain(min_point.y, max_point.y).range(
+            (self.config.height - self.config.margin_bottom) as f64,
+            self.config.margin_top as f64,
+        );
 
         // Convert data points to screen coordinates
-        let screen_points: Vec<(f64, f64)> = self.data
+        let screen_points: Vec<(f64, f64)> = self
+            .data
             .iter()
             .map(|p| (x_scale.scale(p.x), y_scale.scale(p.y)))
             .collect();
@@ -232,7 +229,7 @@ mod tests {
         assert_eq!(chart.config.height, 300);
         assert_eq!(chart.config.title, Some("Test Chart".to_string()));
         assert_eq!(chart.color, "red");
-        assert_eq!(chart.show_points, false);
+        assert!(!chart.show_points);
     }
 
     #[test]
@@ -257,13 +254,10 @@ mod tests {
             Point2D::new(2.0, 15.0),
         ];
 
-        let chart = LineChart::new()
-            .data(data)
-            .title("Test Line Chart");
+        let chart = LineChart::new().data(data).title("Test Line Chart");
 
-        let svg = chart.render();
+        let _svg = chart.render();
         // Test that rendering doesn't panic
-        assert!(true);
     }
 
     #[test]
@@ -271,16 +265,14 @@ mod tests {
         let data = vec![Point2D::new(0.0, 10.0)];
 
         let chart = LineChart::new().data(data);
-        let svg = chart.render();
+        let _svg = chart.render();
         // Test that rendering single point doesn't panic
-        assert!(true);
     }
 
     #[test]
     fn test_empty_line_chart_render() {
         let chart = LineChart::new().title("Empty Chart");
-        let svg = chart.render();
+        let _svg = chart.render();
         // Test that rendering empty chart doesn't panic
-        assert!(true);
     }
 }
