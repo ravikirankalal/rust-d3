@@ -1,0 +1,170 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      release_id: ${{ steps.create_release.outputs.id }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Extract version from tag
+      id: extract_version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release v${{ steps.extract_version.outputs.VERSION }}
+        body: |
+          ## Changes in v${{ steps.extract_version.outputs.VERSION }}
+          
+          ### Features
+          - Rust D3 library for creating D3-style data visualizations
+          - Support for Bar Charts, Line Charts, and Pie/Donut Charts
+          - SVG output with customizable styling
+          - Comprehensive scale types (Linear, Band, Ordinal)
+          
+          ### Assets
+          - `rust-d3-examples` - Binary with example chart generations
+          - Example chart SVG files
+          
+          See the [README](https://github.com/ravikirankalal/rust-d3/blob/v${{ steps.extract_version.outputs.VERSION }}/README.md) for usage examples and API documentation.
+        draft: false
+        prerelease: false
+
+  build-assets:
+    name: Build Release Assets
+    needs: create-release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact_name: rust-d3-examples
+            asset_name: rust-d3-examples-linux-x86_64
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: rust-d3-examples.exe
+            asset_name: rust-d3-examples-windows-x86_64.exe
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact_name: rust-d3-examples
+            asset_name: rust-d3-examples-macos-x86_64
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: ${{ matrix.target }}
+
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-release-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Build release binary
+      run: cargo build --release --bin rust-d3-examples --target ${{ matrix.target }}
+
+    - name: Generate example charts
+      run: cargo run --release --bin rust-d3-examples
+
+    - name: Prepare assets (Unix)
+      if: matrix.os != 'windows-latest'
+      run: |
+        mkdir -p release-assets
+        cp target/${{ matrix.target }}/release/${{ matrix.artifact_name }} release-assets/${{ matrix.asset_name }}
+        chmod +x release-assets/${{ matrix.asset_name }}
+
+    - name: Prepare assets (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        New-Item -ItemType Directory -Path release-assets -Force
+        Copy-Item target/${{ matrix.target }}/release/${{ matrix.artifact_name }} release-assets/${{ matrix.asset_name }}
+
+    - name: Upload binary asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: release-assets/${{ matrix.asset_name }}
+        asset_name: ${{ matrix.asset_name }}
+        asset_content_type: application/octet-stream
+
+    - name: Create examples archive (Ubuntu only)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        cd examples
+        tar -czf ../release-assets/rust-d3-examples-charts.tar.gz *.svg
+        cd ..
+
+    - name: Upload examples archive
+      if: matrix.os == 'ubuntu-latest'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: release-assets/rust-d3-examples-charts.tar.gz
+        asset_name: rust-d3-examples-charts.tar.gz
+        asset_content_type: application/gzip
+
+  publish-crate:
+    name: Publish to crates.io
+    needs: [create-release, build-assets]
+    runs-on: ubuntu-latest
+    if: github.repository == 'ravikirankalal/rust-d3'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-publish-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Verify package
+      run: cargo package --allow-dirty
+
+    - name: Publish to crates.io
+      if: env.CARGO_REGISTRY_TOKEN != ''
+      env:
+        CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+    - name: Log publish status
+      if: env.CARGO_REGISTRY_TOKEN == ''
+      run: |
+        echo "CARGO_REGISTRY_TOKEN not set. Skipping crates.io publish."
+        echo "To enable publishing, add CARGO_REGISTRY_TOKEN secret to the repository."

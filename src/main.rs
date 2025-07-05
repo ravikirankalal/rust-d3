@@ -1,4 +1,4 @@
-use rust_d3::charts::{BarChart, LineChart, PieChart, Chart};
+use rust_d3::charts::{BarChart, Chart, LineChart, PieChart};
 use rust_d3::data::{DataPoint, Point2D};
 use std::fs;
 
@@ -80,7 +80,8 @@ fn main() {
         .show_labels(true);
 
     let donut_svg = donut_chart.render();
-    fs::write("examples/donut_chart.svg", donut_svg.to_string()).expect("Failed to write donut chart");
+    fs::write("examples/donut_chart.svg", donut_svg.to_string())
+        .expect("Failed to write donut chart");
 
     println!("Charts generated successfully!");
     println!("Check the 'examples/' directory for SVG files.");

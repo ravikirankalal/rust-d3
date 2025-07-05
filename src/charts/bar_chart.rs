@@ -1,9 +1,9 @@
 //! Bar chart implementation
 
+use super::{add_styles_to_chart, add_title_to_chart, Chart, ChartConfig};
 use crate::data::{DataPoint, DataUtils};
 use crate::scales::{BandScale, LinearScale};
 use crate::svg_utils::SvgUtils;
-use super::{Chart, ChartConfig, add_title_to_chart, add_styles_to_chart};
 use svg::Document;
 
 /// Bar chart for visualizing categorical data
@@ -83,12 +83,10 @@ impl Chart for BarChart {
             .padding(0.2);
 
         let max_value = DataUtils::max(&self.data).unwrap_or(0.0);
-        let y_scale = LinearScale::new()
-            .domain(0.0, max_value)
-            .range(
-                (self.config.height - self.config.margin_bottom) as f64,
-                self.config.margin_top as f64,
-            );
+        let y_scale = LinearScale::new().domain(0.0, max_value).range(
+            (self.config.height - self.config.margin_bottom) as f64,
+            self.config.margin_top as f64,
+        );
 
         // Draw bars
         for data_point in &self.data {
@@ -195,10 +193,7 @@ mod tests {
 
     #[test]
     fn test_bar_chart_creation() {
-        let chart = BarChart::new()
-            .width(400)
-            .height(300)
-            .title("Test Chart");
+        let chart = BarChart::new().width(400).height(300).title("Test Chart");
 
         assert_eq!(chart.config.width, 400);
         assert_eq!(chart.config.height, 300);
@@ -221,25 +216,18 @@ mod tests {
 
     #[test]
     fn test_bar_chart_render() {
-        let data = vec![
-            DataPoint::new("A", 10.0),
-            DataPoint::new("B", 20.0),
-        ];
+        let data = vec![DataPoint::new("A", 10.0), DataPoint::new("B", 20.0)];
 
-        let chart = BarChart::new()
-            .data(data)
-            .title("Test Bar Chart");
+        let chart = BarChart::new().data(data).title("Test Bar Chart");
 
-        let svg = chart.render();
+        let _svg = chart.render();
         // Test that rendering doesn't panic
-        assert!(true);
     }
 
     #[test]
     fn test_empty_bar_chart_render() {
         let chart = BarChart::new().title("Empty Chart");
-        let svg = chart.render();
+        let _svg = chart.render();
         // Test that rendering empty chart doesn't panic
-        assert!(true);
     }
 }

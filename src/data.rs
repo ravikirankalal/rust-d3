@@ -39,16 +39,16 @@ pub struct DataUtils;
 impl DataUtils {
     /// Find the minimum value in a dataset
     pub fn min(data: &[DataPoint]) -> Option<f64> {
-        data.iter().map(|d| d.value).fold(None, |acc, x| {
-            Some(acc.map_or(x, |acc| acc.min(x)))
-        })
+        data.iter()
+            .map(|d| d.value)
+            .fold(None, |acc, x| Some(acc.map_or(x, |acc| acc.min(x))))
     }
 
     /// Find the maximum value in a dataset
     pub fn max(data: &[DataPoint]) -> Option<f64> {
-        data.iter().map(|d| d.value).fold(None, |acc, x| {
-            Some(acc.map_or(x, |acc| acc.max(x)))
-        })
+        data.iter()
+            .map(|d| d.value)
+            .fold(None, |acc, x| Some(acc.map_or(x, |acc| acc.max(x))))
     }
 
     /// Calculate the sum of all values

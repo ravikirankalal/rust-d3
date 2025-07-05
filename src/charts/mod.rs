@@ -2,8 +2,8 @@
 
 use crate::scales::LinearScale;
 use crate::svg_utils::SvgUtils;
-use svg::Document;
 use svg::node::element::{Group, Style};
+use svg::Document;
 
 pub mod bar_chart;
 pub mod line_chart;
@@ -42,12 +42,14 @@ impl Default for ChartConfig {
 impl ChartConfig {
     /// Get the inner width (excluding margins)
     pub fn inner_width(&self) -> u32 {
-        self.width.saturating_sub(self.margin_left + self.margin_right)
+        self.width
+            .saturating_sub(self.margin_left + self.margin_right)
     }
 
     /// Get the inner height (excluding margins)
     pub fn inner_height(&self) -> u32 {
-        self.height.saturating_sub(self.margin_top + self.margin_bottom)
+        self.height
+            .saturating_sub(self.margin_top + self.margin_bottom)
     }
 }
 
@@ -55,7 +57,7 @@ impl ChartConfig {
 pub trait Chart {
     /// Render the chart to an SVG document
     fn render(&self) -> Document;
-    
+
     /// Get the chart configuration
     fn config(&self) -> &ChartConfig;
 }
@@ -63,13 +65,9 @@ pub trait Chart {
 /// Helper function to add title to chart
 pub fn add_title_to_chart(doc: Document, config: &ChartConfig) -> Document {
     if let Some(title) = &config.title {
-        let title_element = SvgUtils::text(
-            config.width as f64 / 2.0,
-            25.0,
-            title
-        )
-        .set("class", "chart-title");
-        
+        let title_element =
+            SvgUtils::text(config.width as f64 / 2.0, 25.0, title).set("class", "chart-title");
+
         doc.add(title_element)
     } else {
         doc
@@ -77,18 +75,14 @@ pub fn add_title_to_chart(doc: Document, config: &ChartConfig) -> Document {
 }
 
 /// Helper function to create axes for charts
-pub fn create_axes(
-    x_scale: &LinearScale,
-    y_scale: &LinearScale,
-    config: &ChartConfig,
-) -> Group {
+pub fn create_axes(x_scale: &LinearScale, y_scale: &LinearScale, config: &ChartConfig) -> Group {
     let mut group = SvgUtils::group();
-    
+
     let inner_width = config.inner_width() as f64;
     let inner_height = config.inner_height() as f64;
     let margin_left = config.margin_left as f64;
     let margin_top = config.margin_top as f64;
-    
+
     // X axis
     let x_axis = SvgUtils::line(
         margin_left,
@@ -98,7 +92,7 @@ pub fn create_axes(
     )
     .set("class", "chart-axis");
     group = group.add(x_axis);
-    
+
     // Y axis
     let y_axis = SvgUtils::line(
         margin_left,
@@ -108,7 +102,7 @@ pub fn create_axes(
     )
     .set("class", "chart-axis");
     group = group.add(y_axis);
-    
+
     // X axis ticks and labels
     let x_ticks = x_scale.ticks(5);
     for tick in x_ticks {
@@ -120,41 +114,29 @@ pub fn create_axes(
             margin_top + inner_height + 5.0,
         )
         .set("class", "chart-axis");
-        
-        let tick_label = SvgUtils::text(
-            x,
-            margin_top + inner_height + 18.0,
-            &format!("{:.1}", tick),
-        )
-        .set("class", "chart-axis-text")
-        .set("text-anchor", "middle");
-        
+
+        let tick_label =
+            SvgUtils::text(x, margin_top + inner_height + 18.0, &format!("{:.1}", tick))
+                .set("class", "chart-axis-text")
+                .set("text-anchor", "middle");
+
         group = group.add(tick_line).add(tick_label);
     }
-    
+
     // Y axis ticks and labels
     let y_ticks = y_scale.ticks(5);
     for tick in y_ticks {
         let y = margin_top + y_scale.scale(tick);
-        let tick_line = SvgUtils::line(
-            margin_left - 5.0,
-            y,
-            margin_left,
-            y,
-        )
-        .set("class", "chart-axis");
-        
-        let tick_label = SvgUtils::text(
-            margin_left - 8.0,
-            y + 4.0,
-            &format!("{:.1}", tick),
-        )
-        .set("class", "chart-axis-text")
-        .set("text-anchor", "end");
-        
+        let tick_line =
+            SvgUtils::line(margin_left - 5.0, y, margin_left, y).set("class", "chart-axis");
+
+        let tick_label = SvgUtils::text(margin_left - 8.0, y + 4.0, &format!("{:.1}", tick))
+            .set("class", "chart-axis-text")
+            .set("text-anchor", "end");
+
         group = group.add(tick_line).add(tick_label);
     }
-    
+
     group
 }
 
@@ -188,7 +170,7 @@ mod tests {
             margin_bottom: 50,
             title: None,
         };
-        
+
         assert_eq!(config.inner_width(), 300);
         assert_eq!(config.inner_height(), 220);
     }

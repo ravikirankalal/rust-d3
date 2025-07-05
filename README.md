@@ -237,8 +237,21 @@ cargo test --test integration_tests
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. Areas for improvement include:
+Contributions are welcome! Please feel free to submit a Pull Request. 
 
+### Development Setup
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed setup instructions.
+
+### CI/CD Pipeline
+This project uses GitHub Actions for:
+- **Continuous Integration**: Automated testing on every push/PR
+- **Code Quality**: Format checking, linting, and security audits  
+- **Cross-platform Testing**: Linux, Windows, and macOS support
+- **Automated Releases**: Binary builds and crates.io publishing on version tags
+
+[![CI](https://github.com/ravikirankalal/rust-d3/workflows/CI/badge.svg)](https://github.com/ravikirankalal/rust-d3/actions/workflows/ci.yml)
+
+### Areas for Improvement
 - Additional chart types (scatter plots, histograms, box plots)
 - More scale types (log, time scales)
 - Animation support

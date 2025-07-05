@@ -1,8 +1,8 @@
 //! Pie chart implementation
 
+use super::{add_styles_to_chart, add_title_to_chart, Chart, ChartConfig};
 use crate::data::{DataPoint, DataUtils};
 use crate::svg_utils::SvgUtils;
-use super::{Chart, ChartConfig, add_title_to_chart, add_styles_to_chart};
 use svg::Document;
 
 /// Pie chart for visualizing proportional data
@@ -23,9 +23,15 @@ impl PieChart {
             data: Vec::new(),
             config: ChartConfig::default(),
             colors: vec![
-                "#1f77b4".to_string(), "#ff7f0e".to_string(), "#2ca02c".to_string(),
-                "#d62728".to_string(), "#9467bd".to_string(), "#8c564b".to_string(),
-                "#e377c2".to_string(), "#7f7f7f".to_string(), "#bcbd22".to_string(),
+                "#1f77b4".to_string(),
+                "#ff7f0e".to_string(),
+                "#2ca02c".to_string(),
+                "#d62728".to_string(),
+                "#9467bd".to_string(),
+                "#8c564b".to_string(),
+                "#e377c2".to_string(),
+                "#7f7f7f".to_string(),
+                "#bcbd22".to_string(),
                 "#17becf".to_string(),
             ],
             inner_radius: 0.0,
@@ -133,15 +139,26 @@ impl Chart for PieChart {
             if self.inner_radius > 0.0 {
                 // Donut chart - create an annular sector
                 let outer_path = SvgUtils::pie_slice_path(
-                    center_x, center_y, outer_radius, current_angle, end_angle
+                    center_x,
+                    center_y,
+                    outer_radius,
+                    current_angle,
+                    end_angle,
                 );
                 let inner_path = SvgUtils::pie_slice_path(
-                    center_x, center_y, self.inner_radius, current_angle, end_angle
+                    center_x,
+                    center_y,
+                    self.inner_radius,
+                    current_angle,
+                    end_angle,
                 );
 
                 // Create compound path for donut slice
-                let path_data = format!("{} {} Z", outer_path.trim_end_matches(" Z"), 
-                    inner_path.replace("M", "L").replace("Z", ""));
+                let path_data = format!(
+                    "{} {} Z",
+                    outer_path.trim_end_matches(" Z"),
+                    inner_path.replace("M", "L").replace("Z", "")
+                );
 
                 let slice = SvgUtils::path(&path_data)
                     .set("class", "chart-pie")
@@ -151,7 +168,11 @@ impl Chart for PieChart {
             } else {
                 // Regular pie chart
                 let path_data = SvgUtils::pie_slice_path(
-                    center_x, center_y, outer_radius, current_angle, end_angle
+                    center_x,
+                    center_y,
+                    outer_radius,
+                    current_angle,
+                    end_angle,
                 );
 
                 let slice = SvgUtils::path(&path_data)
@@ -195,7 +216,7 @@ impl Chart for PieChart {
 
         for (i, data_point) in self.data.iter().enumerate() {
             let color = &self.colors[i % self.colors.len()];
-            
+
             // Legend color box
             let legend_rect = SvgUtils::rect(legend_x, legend_y, 15.0, 15.0)
                 .set("fill", color.as_str())
@@ -203,12 +224,8 @@ impl Chart for PieChart {
                 .set("stroke-width", 1);
 
             // Legend text
-            let legend_text = SvgUtils::text(
-                legend_x + 20.0,
-                legend_y + 12.0,
-                &data_point.label
-            )
-            .set("class", "chart-axis-text");
+            let legend_text = SvgUtils::text(legend_x + 20.0, legend_y + 12.0, &data_point.label)
+                .set("class", "chart-axis-text");
 
             doc = doc.add(legend_rect).add(legend_text);
             legend_y += 25.0;
@@ -245,7 +262,7 @@ mod tests {
         assert_eq!(chart.config.height, 300);
         assert_eq!(chart.config.title, Some("Test Chart".to_string()));
         assert_eq!(chart.inner_radius, 50.0);
-        assert_eq!(chart.show_labels, false);
+        assert!(!chart.show_labels);
     }
 
     #[test]
@@ -264,43 +281,32 @@ mod tests {
 
     #[test]
     fn test_pie_chart_render() {
-        let data = vec![
-            DataPoint::new("A", 30.0),
-            DataPoint::new("B", 70.0),
-        ];
+        let data = vec![DataPoint::new("A", 30.0), DataPoint::new("B", 70.0)];
 
-        let chart = PieChart::new()
-            .data(data)
-            .title("Test Pie Chart");
+        let chart = PieChart::new().data(data).title("Test Pie Chart");
 
-        let svg = chart.render();
+        let _svg = chart.render();
         // Test that rendering doesn't panic
-        assert!(true);
     }
 
     #[test]
     fn test_donut_chart_render() {
-        let data = vec![
-            DataPoint::new("A", 40.0),
-            DataPoint::new("B", 60.0),
-        ];
+        let data = vec![DataPoint::new("A", 40.0), DataPoint::new("B", 60.0)];
 
         let chart = PieChart::new()
             .data(data)
             .inner_radius(50.0)
             .title("Test Donut Chart");
 
-        let svg = chart.render();
+        let _svg = chart.render();
         // Test that rendering donut chart doesn't panic
-        assert!(true);
     }
 
     #[test]
     fn test_empty_pie_chart_render() {
         let chart = PieChart::new().title("Empty Chart");
-        let svg = chart.render();
+        let _svg = chart.render();
         // Test that rendering empty chart doesn't panic
-        assert!(true);
     }
 
     #[test]

@@ -23,10 +23,7 @@ impl SvgUtils {
 
     /// Create a circle
     pub fn circle(cx: f64, cy: f64, r: f64) -> Circle {
-        Circle::new()
-            .set("cx", cx)
-            .set("cy", cy)
-            .set("r", r)
+        Circle::new().set("cx", cx).set("cy", cy).set("r", r)
     }
 
     /// Create a line
@@ -67,7 +64,7 @@ impl SvgUtils {
         }
 
         let mut path = format!("M {} {}", points[0].0, points[0].1);
-        
+
         for point in points.iter().skip(1) {
             path.push_str(&format!(" L {} {}", point.0, point.1));
         }
@@ -88,7 +85,11 @@ impl SvgUtils {
         let x2 = cx + radius * end_angle.cos();
         let y2 = cy + radius * end_angle.sin();
 
-        let large_arc = if end_angle - start_angle > std::f64::consts::PI { 1 } else { 0 };
+        let large_arc = if end_angle - start_angle > std::f64::consts::PI {
+            1
+        } else {
+            0
+        };
 
         format!(
             "M {} {} L {} {} A {} {} 0 {} 1 {} {} Z",
@@ -116,9 +117,8 @@ mod tests {
 
     #[test]
     fn test_svg_rect() {
-        let rect = SvgUtils::rect(10.0, 20.0, 100.0, 50.0);
+        let _rect = SvgUtils::rect(10.0, 20.0, 100.0, 50.0);
         // We can't easily test the actual SVG content, but we can test that it creates without panic
-        assert!(true);
     }
 
     #[test]
