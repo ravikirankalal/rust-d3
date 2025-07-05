@@ -191,7 +191,7 @@ impl Chart for PieChart {
 
                 let percentage = (data_point.value / total * 100.0).round();
                 let label_text = if percentage >= 5.0 {
-                    format!("{}%", percentage)
+                    format!("{percentage}%")
                 } else {
                     String::new() // Don't show labels for very small slices
                 };
