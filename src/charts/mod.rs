@@ -116,8 +116,8 @@ pub fn create_axes(x_scale: &LinearScale, y_scale: &LinearScale, config: &ChartC
         .set("class", "chart-axis");
 
         let tick_label = SvgUtils::text(x, margin_top + inner_height + 18.0, &format!("{tick:.1}"))
-                .set("class", "chart-axis-text")
-                .set("text-anchor", "middle");
+            .set("class", "chart-axis-text")
+            .set("text-anchor", "middle");
 
         group = group.add(tick_line).add(tick_label);
     }
