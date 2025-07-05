@@ -24,16 +24,16 @@ This library provides a Rust implementation of popular chart types similar to D3
 ## Chart Types Supported
 
 ### Bar Chart
-![Bar Chart Example](target/bar_chart_example.svg)
+![Bar Chart Example](examples/bar_chart.svg)
 
 ### Line Chart  
-![Line Chart Example](target/line_chart_example.svg)
+![Line Chart Example](examples/line_chart.svg)
 
 ### Pie Chart
-![Pie Chart Example](target/pie_chart_example.svg)
+![Pie Chart Example](examples/pie_chart.svg)
 
 ### Donut Chart
-![Donut Chart Example](target/donut_chart_example.svg)
+![Donut Chart Example](examples/donut_chart.svg)
 
 ## Installation
 
