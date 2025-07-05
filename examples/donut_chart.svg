@@ -1,0 +1,51 @@
+<svg height="600" viewBox="0 0 800 600" width="800" xmlns="http://www.w3.org/2000/svg">
+<style>
+.chart-bar { fill: steelblue; stroke: none; }
+        .chart-line { fill: none; stroke: steelblue; stroke-width: 2; }
+        .chart-point { fill: steelblue; stroke: white; stroke-width: 1; }
+        .chart-pie { stroke: white; stroke-width: 1; }
+        .chart-axis { stroke: black; stroke-width: 1; }
+        .chart-axis-text { font-family: Arial, sans-serif; font-size: 12px; fill: black; }
+        .chart-title { font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; fill: black; text-anchor: middle; }
+</style>
+<path class="chart-pie" d="M 400 300 L 400 100 A 200 200 0 1 1 238.19660112501055 417.55705045849464 L 400 300 L 400 220 A 80 80 0 1 1 335.2786404500042 347.02282018339787  Z" fill="#1f77b4"/>
+<text class="chart-axis-text" fill="white" font-weight="bold" text-anchor="middle" x="524.7409133863715" y="363.55866996353654">
+65%
+</text>
+<path class="chart-pie" d="M 400 300 L 238.19660112501055 417.55705045849464 A 200 200 0 0 1 209.78869674096927 238.19660112501055 L 400 300 L 335.2786404500042 347.02282018339787 A 80 80 0 0 1 323.9154786963877 275.2786404500042  Z" fill="#ff7f0e"/>
+<text class="chart-axis-text" fill="white" font-weight="bold" text-anchor="middle" x="261.7236323166807" y="321.90082510563235">
+15%
+</text>
+<path class="chart-pie" d="M 400 300 L 209.78869674096927 238.19660112501055 A 200 200 0 0 1 303.64926517965694 124.73866399122727 L 400 300 L 323.9154786963877 275.2786404500042 A 80 80 0 0 1 361.4597060718628 229.8954655964909  Z" fill="#2ca02c"/>
+<text class="chart-axis-text" fill="white" font-weight="bold" text-anchor="middle" x="292.1281460113895" y="210.76064143518346">
+12%
+</text>
+<path class="chart-pie" d="M 400 300 L 303.64926517965694 124.73866399122727 A 200 200 0 0 1 362.52373708285506 103.54254985426226 L 400 300 L 361.4597060718628 229.8954655964909 A 80 80 0 0 1 385.009494833142 221.4170199417049  Z" fill="#d62728"/>
+<text class="chart-axis-text" fill="white" font-weight="bold" text-anchor="middle" x="352.5766911656592" y="168.27669234640842">
+5%
+</text>
+<path class="chart-pie" d="M 400 300 L 362.52373708285506 103.54254985426226 A 200 200 0 0 1 399.99999999999994 100 L 400 300 L 385.009494833142 221.4170199417049 A 80 80 0 0 1 400 220  Z" fill="#9467bd"/>
+<rect fill="#1f77b4" height="15" stroke="black" stroke-width="1" width="15" x="760" y="50"/>
+<text class="chart-axis-text" x="780" y="62">
+Chrome
+</text>
+<rect fill="#ff7f0e" height="15" stroke="black" stroke-width="1" width="15" x="760" y="75"/>
+<text class="chart-axis-text" x="780" y="87">
+Firefox
+</text>
+<rect fill="#2ca02c" height="15" stroke="black" stroke-width="1" width="15" x="760" y="100"/>
+<text class="chart-axis-text" x="780" y="112">
+Safari
+</text>
+<rect fill="#d62728" height="15" stroke="black" stroke-width="1" width="15" x="760" y="125"/>
+<text class="chart-axis-text" x="780" y="137">
+Edge
+</text>
+<rect fill="#9467bd" height="15" stroke="black" stroke-width="1" width="15" x="760" y="150"/>
+<text class="chart-axis-text" x="780" y="162">
+Others
+</text>
+<text class="chart-title" x="400" y="25">
+Browser Market Share (Donut)
+</text>
+</svg>
