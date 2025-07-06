@@ -251,7 +251,9 @@ mod tests {
         assert_eq!(empty_domain_scale.bandwidth(), 0.0);
         assert_eq!(empty_domain_scale.scale("A"), None);
 
-        let single_item_domain_scale = BandScale::new().domain(vec!["A".to_string()]).range(0.0, 100.0);
+        let single_item_domain_scale = BandScale::new()
+            .domain(vec!["A".to_string()])
+            .range(0.0, 100.0);
         assert_eq!(single_item_domain_scale.scale("A"), Some(5.0));
     }
 
