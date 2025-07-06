@@ -256,8 +256,13 @@ mod tests {
 
         let chart = LineChart::new().data(data).title("Test Line Chart");
 
-        let _svg = chart.render();
-        // Test that rendering doesn't panic
+        let svg_string = chart.render().to_string();
+        assert!(svg_string.contains("<path class=\"chart-line\""));
+        assert!(svg_string.contains("stroke=\"steelblue\""));
+        assert!(svg_string.contains("stroke-width=\"2\""));
+        assert!(svg_string.contains("fill=\"none\""));
+        assert!(svg_string.contains("<circle class=\"chart-point\""));
+        assert!(svg_string.contains("fill=\"steelblue\""));
     }
 
     #[test]
@@ -265,14 +270,41 @@ mod tests {
         let data = vec![Point2D::new(0.0, 10.0)];
 
         let chart = LineChart::new().data(data);
-        let _svg = chart.render();
-        // Test that rendering single point doesn't panic
+        let svg_string = chart.render().to_string();
+        assert!(!svg_string.contains("<path")); // No line for single point
+        assert!(svg_string.contains("<circle")); // Point should still be there
     }
 
     #[test]
     fn test_empty_line_chart_render() {
         let chart = LineChart::new().title("Empty Chart");
-        let _svg = chart.render();
-        // Test that rendering empty chart doesn't panic
+        let svg_string = chart.render().to_string();
+        assert!(svg_string.contains("Empty Chart"));
+        assert!(!svg_string.contains("<path"));
+        assert!(!svg_string.contains("<circle"));
+    }
+
+    #[test]
+    fn test_line_chart_margins() {
+        let chart = LineChart::new().margins(10, 20, 30, 40);
+        assert_eq!(chart.config.margin_top, 10);
+        assert_eq!(chart.config.margin_right, 20);
+        assert_eq!(chart.config.margin_bottom, 30);
+        assert_eq!(chart.config.margin_left, 40);
+    }
+
+    #[test]
+    fn test_line_chart_line_width() {
+        let chart = LineChart::new().line_width(5.0);
+        assert_eq!(chart.line_width, 5.0);
+    }
+
+    #[test]
+    fn test_line_chart_color() {
+        let data = vec![Point2D::new(0.0, 0.0), Point2D::new(1.0, 1.0)];
+        let chart = LineChart::new().data(data).color("red");
+        let svg_string = chart.render().to_string();
+        assert!(svg_string.contains("stroke=\"red\""));
+        assert!(svg_string.contains("fill=\"red\"")); // This checks the fill for the points
     }
 }

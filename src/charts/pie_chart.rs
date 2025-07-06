@@ -285,8 +285,12 @@ mod tests {
 
         let chart = PieChart::new().data(data).title("Test Pie Chart");
 
-        let _svg = chart.render();
-        // Test that rendering doesn't panic
+        let svg_string = chart.render().to_string();
+        assert!(svg_string.contains("<path class=\"chart-pie\""));
+        assert!(svg_string.contains("fill=\"#1f77b4\"")); // Default color for first slice
+        assert!(svg_string.contains("fill=\"#ff7f0e\"")); // Default color for second slice
+        assert!(svg_string.contains("30%")); // Check for label
+        assert!(svg_string.contains("70%")); // Check for label
     }
 
     #[test]
@@ -298,15 +302,21 @@ mod tests {
             .inner_radius(50.0)
             .title("Test Donut Chart");
 
-        let _svg = chart.render();
-        // Test that rendering donut chart doesn't panic
+        let svg_string = chart.render().to_string();
+        assert!(svg_string.contains("<path class=\"chart-pie\""));
+        assert!(svg_string.contains("fill=\"#1f77b4\""));
+        assert!(svg_string.contains("fill=\"#ff7f0e\""));
+        assert!(svg_string.contains("40%"));
+        assert!(svg_string.contains("60%"));
     }
 
     #[test]
     fn test_empty_pie_chart_render() {
         let chart = PieChart::new().title("Empty Chart");
-        let _svg = chart.render();
-        // Test that rendering empty chart doesn't panic
+        let svg_string = chart.render().to_string();
+        assert!(svg_string.contains("Empty Chart"));
+        assert!(!svg_string.contains("<path"));
+        assert!(!svg_string.contains("<circle"));
     }
 
     #[test]
@@ -315,5 +325,51 @@ mod tests {
         let radius = chart.effective_outer_radius();
         assert!(radius > 0.0);
         assert!(radius < 150.0); // Should be less than half the smaller dimension
+
+        let chart_with_outer_radius = PieChart::new().outer_radius(100.0);
+        assert_eq!(chart_with_outer_radius.effective_outer_radius(), 100.0);
+    }
+
+    #[test]
+    fn test_pie_chart_colors() {
+        let colors = vec!["red".to_string(), "blue".to_string()];
+        let chart = PieChart::new().colors(colors.clone());
+        assert_eq!(chart.colors, colors);
+    }
+
+    #[test]
+    fn test_pie_chart_outer_radius() {
+        let chart = PieChart::new().outer_radius(75.0);
+        assert_eq!(chart.outer_radius, 75.0);
+    }
+
+    #[test]
+    fn test_pie_chart_show_labels() {
+        let data = vec![DataPoint::new("A", 100.0)];
+        let chart_with_labels = PieChart::new().data(data.clone()).show_labels(true);
+        let svg_string_with_labels = chart_with_labels.render().to_string();
+        assert!(svg_string_with_labels.contains("100%"));
+
+        let chart_without_labels = PieChart::new().data(data).show_labels(false);
+        let svg_string_without_labels = chart_without_labels.render().to_string();
+        assert!(!svg_string_without_labels.contains("100%"));
+    }
+
+    #[test]
+    fn test_pie_chart_margins() {
+        let chart = PieChart::new().margins(10, 20, 30, 40);
+        assert_eq!(chart.config.margin_top, 10);
+        assert_eq!(chart.config.margin_right, 20);
+        assert_eq!(chart.config.margin_bottom, 30);
+        assert_eq!(chart.config.margin_left, 40);
+    }
+
+    #[test]
+    fn test_pie_chart_zero_total() {
+        let data = vec![DataPoint::new("A", 0.0), DataPoint::new("B", 0.0)];
+        let chart = PieChart::new().data(data).title("Zero Total Chart");
+        let svg_string = chart.render().to_string();
+        assert!(svg_string.contains("Zero Total Chart"));
+        assert!(!svg_string.contains("<path"));
     }
 }

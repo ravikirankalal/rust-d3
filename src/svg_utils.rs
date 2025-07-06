@@ -98,7 +98,7 @@ impl SvgUtils {
     pub fn default_styles() -> String {
         r#"
         .chart-bar { fill: steelblue; stroke: none; }
-        .chart-line { fill: none; stroke: steelblue; stroke-width: 2; }
+        .chart-line { fill: none; stroke-width: 2; }
         .chart-point { fill: steelblue; stroke: white; stroke-width: 1; }
         .chart-pie { stroke: white; stroke-width: 1; }
         .chart-axis { stroke: black; stroke-width: 1; }

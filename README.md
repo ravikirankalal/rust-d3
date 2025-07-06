@@ -219,6 +219,9 @@ cargo run --bin rust-d3-examples
 
 # Generate documentation
 cargo doc --open
+
+# Run test coverage
+cargo tarpaulin
 ```
 
 ## Examples
