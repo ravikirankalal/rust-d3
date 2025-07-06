@@ -156,7 +156,7 @@ impl BandScale {
     /// Get the position of a band
     pub fn scale(&self, value: &str) -> Option<f64> {
         if let Some(index) = self.domain.iter().position(|x| x == value) {
-            let bandwidth = self.bandwidth();
+            let _bandwidth = self.bandwidth();
             let step = (self.range_end - self.range_start) / self.domain.len() as f64;
             Some(self.range_start + index as f64 * step + step * self.padding / 2.0)
         } else {
