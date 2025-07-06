@@ -50,6 +50,10 @@ impl LinearScale {
             return vec![];
         }
 
+        if count == 1 {
+            return vec![self.domain_min];
+        }
+
         let step = (self.domain_max - self.domain_min) / (count - 1) as f64;
         (0..count)
             .map(|i| self.domain_min + i as f64 * step)
@@ -93,6 +97,9 @@ impl OrdinalScale {
 
     /// Scale a value from domain to range
     pub fn scale(&self, value: &str) -> Option<&String> {
+        if self.range.is_empty() {
+            return None;
+        }
         if let Some(index) = self.domain.iter().position(|x| x == value) {
             self.range.get(index % self.range.len())
         } else {
@@ -149,7 +156,7 @@ impl BandScale {
     /// Get the position of a band
     pub fn scale(&self, value: &str) -> Option<f64> {
         if let Some(index) = self.domain.iter().position(|x| x == value) {
-            let _bandwidth = self.bandwidth();
+            let bandwidth = self.bandwidth();
             let step = (self.range_end - self.range_start) / self.domain.len() as f64;
             Some(self.range_start + index as f64 * step + step * self.padding / 2.0)
         } else {
@@ -191,6 +198,18 @@ mod tests {
         let scale = LinearScale::new().domain(0.0, 10.0);
         let ticks = scale.ticks(5);
         assert_eq!(ticks, vec![0.0, 2.5, 5.0, 7.5, 10.0]);
+
+        let empty_ticks = scale.ticks(0);
+        assert!(empty_ticks.is_empty());
+
+        let single_tick = scale.ticks(1);
+        assert_eq!(single_tick, vec![0.0]);
+    }
+
+    #[test]
+    fn test_linear_scale_zero_domain() {
+        let scale = LinearScale::new().domain(0.0, 0.0).range(0.0, 100.0);
+        assert_eq!(scale.scale(0.0), 0.0);
     }
 
     #[test]
@@ -207,6 +226,11 @@ mod tests {
         assert_eq!(scale.scale("B"), Some(&"green".to_string()));
         assert_eq!(scale.scale("C"), Some(&"blue".to_string()));
         assert_eq!(scale.scale("D"), None);
+
+        let empty_range_scale = OrdinalScale::new()
+            .domain(vec!["A".to_string()])
+            .range(vec![]);
+        assert_eq!(empty_range_scale.scale("A"), None);
     }
 
     #[test]
@@ -220,5 +244,23 @@ mod tests {
         assert!(scale.scale("B").is_some());
         assert!(scale.scale("C").is_some());
         assert!(scale.bandwidth() > 0.0);
+
+        assert_eq!(scale.scale("D"), None);
+
+        let empty_domain_scale = BandScale::new().domain(vec![]);
+        assert_eq!(empty_domain_scale.bandwidth(), 0.0);
+        assert_eq!(empty_domain_scale.scale("A"), None);
+
+        let single_item_domain_scale = BandScale::new().domain(vec!["A".to_string()]).range(0.0, 100.0);
+        assert_eq!(single_item_domain_scale.scale("A"), Some(5.0));
+    }
+
+    #[test]
+    fn test_band_scale_padding_clamp() {
+        let scale = BandScale::new().padding(2.0);
+        assert_eq!(scale.padding, 1.0);
+
+        let scale = BandScale::new().padding(-1.0);
+        assert_eq!(scale.padding, 0.0);
     }
 }

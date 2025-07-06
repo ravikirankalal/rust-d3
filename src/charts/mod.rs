@@ -173,4 +173,53 @@ mod tests {
         assert_eq!(config.inner_width(), 300);
         assert_eq!(config.inner_height(), 220);
     }
+
+    #[test]
+    fn test_add_title_to_chart_with_title() {
+        let config = ChartConfig {
+            title: Some("My Chart Title".to_string()),
+            ..Default::default()
+        };
+        let doc = Document::new();
+        let doc_with_title = add_title_to_chart(doc, &config);
+        let svg_string = doc_with_title.to_string();
+        assert!(svg_string.contains("<text"));
+        assert!(svg_string.contains("class=\"chart-title\""));
+        assert!(svg_string.contains("My Chart Title"));
+    }
+
+    #[test]
+    fn test_add_title_to_chart_without_title() {
+        let config = ChartConfig {
+            title: None,
+            ..Default::default()
+        };
+        let doc = Document::new();
+        let doc_without_title = add_title_to_chart(doc, &config);
+        let svg_string = doc_without_title.to_string();
+        assert!(!svg_string.contains("<text"));
+    }
+
+    #[test]
+    fn test_create_axes() {
+        let x_scale = LinearScale::new().domain(0.0, 10.0).range(0.0, 100.0);
+        let y_scale = LinearScale::new().domain(0.0, 100.0).range(200.0, 0.0);
+        let config = ChartConfig::default();
+        let axes_group = create_axes(&x_scale, &y_scale, &config);
+        let svg_string = Document::new().add(axes_group).to_string();
+
+        // Check for x and y axis lines
+        assert!(svg_string.matches("<line").count() >= 2);
+        // Check for x and y ticks
+        assert!(svg_string.matches("<text").count() >= 10);
+    }
+
+    #[test]
+    fn test_add_styles_to_chart() {
+        let doc = Document::new();
+        let doc_with_style = add_styles_to_chart(doc);
+        let svg_string = doc_with_style.to_string();
+        assert!(svg_string.contains("<style>"));
+        assert!(svg_string.contains(".chart-title"));
+    }
 }
