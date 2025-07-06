@@ -22,3 +22,7 @@ target
 
 # VS Code settings
 .vscode/
+
+# Tarpaulin coverage reports
+/tarpaulin-report.html
+/tarpaulin/
