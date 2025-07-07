@@ -1,5 +1,3 @@
-use std::ops::Range;
-
 pub fn histogram<T: Into<f64> + Copy>(data: &[T], bins: usize) -> Vec<Vec<T>> {
     if data.is_empty() || bins == 0 {
         return vec![];

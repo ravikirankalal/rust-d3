@@ -1,6 +1,6 @@
 //! Unit tests for d3 pack layout
 use rust_d3::hierarchy::Node;
-use rust_d3::pack::{pack, PackNode};
+use rust_d3::pack::pack;
 
 #[test]
 fn test_pack() {

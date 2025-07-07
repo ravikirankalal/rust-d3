@@ -83,7 +83,7 @@ pub fn fetch_html(_url: &str) -> Result<String, String> {
 pub fn fetch_blob(url: &str) -> Result<Vec<u8>, String> {
     use std::io::Read;
     match ureq::get(url).call() {
-        Ok(mut resp) => {
+        Ok(resp) => {
             let mut buf = Vec::new();
             resp.into_reader().read_to_end(&mut buf).map_err(|e| e.to_string())?;
             Ok(buf)

@@ -57,9 +57,9 @@ pub fn range(start: f64, stop: f64, step: f64) -> Vec<f64> {
 // Returns tick values for a domain and count.
 pub fn ticks(domain: (f64, f64), count: usize) -> Vec<f64> {
     let (start, stop) = domain;
-    if count < 2 || start == stop {
-        return vec![start];
-    }
+    if count == 0 { return vec![]; }
+    if count == 1 { return vec![start]; }
+    if start == stop { return vec![start]; }
     let step = (stop - start) / (count as f64 - 1.0);
     (0..count).map(|i| start + i as f64 * step).collect()
 }

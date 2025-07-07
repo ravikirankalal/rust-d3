@@ -31,7 +31,7 @@ impl VoronoiDiagram {
                 )
             },
         );
-        let step = ((max_x - min_x).max(max_y - min_y) / 50.0).max(1e-3); // 50x50 grid
+        let _step = ((max_x - min_x).max(max_y - min_y) / 50.0).max(1e-3); // 50x50 grid
         let mut regions: Vec<Vec<(f64, f64)>> = vec![vec![]; n];
         for gx in 0..=50 {
             for gy in 0..=50 {

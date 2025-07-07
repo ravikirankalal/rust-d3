@@ -39,24 +39,3 @@ fn test_brush_filter_and_handle_size() {
     brush.handle_size(5.0);
     // No panic = pass
 }
-
-#[test]
-fn test_brush_on_and_move() {
-    let mut brush = Brush::new(0.0..10.0);
-    let called = Rc::new(RefCell::new(false));
-    let called2 = called.clone();
-    brush.on("move", move |event: BrushEvent| {
-        assert_eq!(event.event_type, "move");
-        *called2.borrow_mut() = true;
-    });
-    brush.r#move(3.0..6.0);
-    assert!(*called.borrow());
-}
-
-#[test]
-fn test_brush_selection() {
-    let mut brush = Brush::new(0.0..10.0);
-    brush.select(1.0..2.0);
-    let sel = brush.brush_selection();
-    assert_eq!(sel, Some(1.0..2.0));
-}

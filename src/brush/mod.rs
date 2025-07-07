@@ -49,6 +49,7 @@ impl Brush {
     pub fn extent(&self) -> &Range<f64> {
         &self.extent
     }
+    // TODO: Implement brushX and brushY with full API parity
     pub fn filter<F>(&mut self, filter: F) -> &mut Self
     where
         F: Fn() -> bool + 'static,

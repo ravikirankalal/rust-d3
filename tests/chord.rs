@@ -1,5 +1,5 @@
 //! Unit test for d3 chord
-use rust_d3::chord::{chord, ChordMatrix, Chord};
+use rust_d3::chord::{chord, Chord};
 
 #[test]
 fn test_chord_matrix() {

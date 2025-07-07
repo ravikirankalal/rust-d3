@@ -35,3 +35,21 @@ impl ForceSimulation {
         self.alpha *= 1.0 - self.alpha_decay;
     }
 }
+
+pub fn force_manybody(nodes: &mut [ForceNode], strength: f64) {
+    let n = nodes.len();
+    for i in 0..n {
+        for j in (i + 1)..n {
+            let dx = nodes[j].x - nodes[i].x;
+            let dy = nodes[j].y - nodes[i].y;
+            let dist_sq = dx * dx + dy * dy + 1e-6; // avoid div by zero
+            let force = strength / dist_sq;
+            let fx = force * dx;
+            let fy = force * dy;
+            nodes[i].vx -= fx;
+            nodes[i].vy -= fy;
+            nodes[j].vx += fx;
+            nodes[j].vy += fy;
+        }
+    }
+}

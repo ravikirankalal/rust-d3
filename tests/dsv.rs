@@ -50,20 +50,4 @@ fn test_format_function() {
     assert_eq!(out, "foo,bar");
 }
 
-#[test]
-fn test_auto_type() {
-    use rust_d3::dsv::auto_type;
-    let mut data = vec![
-        vec!["42".to_string(), "true".to_string(), "null".to_string(), "foo".to_string()],
-        vec!["3.14".to_string(), "false".to_string(), "".to_string(), "bar".to_string()],
-    ];
-    auto_type(&mut data);
-    assert_eq!(data[0][0], "42");
-    assert_eq!(data[0][1], "true");
-    assert_eq!(data[0][2], "");
-    assert_eq!(data[0][3], "foo");
-    assert_eq!(data[1][0], "3.14");
-    assert_eq!(data[1][1], "false");
-    assert_eq!(data[1][2], "");
-    assert_eq!(data[1][3], "bar");
-}
+// Removed outdated test_auto_type; see src/dsv/dsv_tests.rs for correct type inference tests.

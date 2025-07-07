@@ -1,4 +1,4 @@
-//! Integration test for axis
+//! Unit tests for d3 axis
 
 use rust_d3::scale::LinearScale;
 use rust_d3::axis::Axis;

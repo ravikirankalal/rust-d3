@@ -1,2 +1,2 @@
 mod force;
-pub use force::{ForceNode, ForceSimulation};
+pub use force::{force_manybody, ForceNode, ForceSimulation};

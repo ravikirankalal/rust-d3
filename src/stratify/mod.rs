@@ -88,7 +88,7 @@ where
 }
 
 /// Start a stratify builder with a custom id accessor
-pub fn stratify_id<T, FId>(id: FId) -> impl FnOnce(FId) -> StratifyBuilder<T, FId, fn(&T) -> Option<String>>
+pub fn stratify_id<T, FId>(_id: FId) -> impl FnOnce(FId) -> StratifyBuilder<T, FId, fn(&T) -> Option<String>>
 where
     FId: Fn(&T) -> String,
 {

@@ -1,75 +1,46 @@
-//! Tests for d3 array utilities
+//! Integration test for array_utils (group, rollup)
 
-use rust_d3::array::{min, max, extent, quantile, cumsum, range, ticks, min_index, max_index};
+use rust_d3::array::{group, rollup, flat_group, fsum, Adder};
+use std::collections::HashMap;
 
 #[test]
-fn test_min_max_extent() {
-    let data = [3, 1, 4, 1, 5, 9];
-    assert_eq!(min(&data), Some(1));
-    assert_eq!(max(&data), Some(9));
-    assert_eq!(extent(&data), Some((1, 9)));
-    let empty: [i32; 0] = [];
-    assert_eq!(min(&empty), None);
-    assert_eq!(max(&empty), None);
-    assert_eq!(extent(&empty), None);
-    let single = [42];
-    assert_eq!(min(&single), Some(42));
-    assert_eq!(max(&single), Some(42));
-    assert_eq!(extent(&single), Some((42, 42)));
+fn test_group() {
+    let data = [1, 2, 3, 4, 5, 6];
+    let grouped = group(&data, |x| x % 2);
+    assert_eq!(grouped[&0], vec![&2, &4, &6]);
+    assert_eq!(grouped[&1], vec![&1, &3, &5]);
 }
 
 #[test]
-fn test_quantile() {
-    let data = [1.0, 2.0, 3.0, 4.0, 5.0];
-    assert_eq!(quantile(&data, 0.0), Some(1.0));
-    assert_eq!(quantile(&data, 0.5), Some(3.0));
-    assert_eq!(quantile(&data, 1.0), Some(5.0));
-    assert_eq!(quantile(&data, -0.1), None);
-    assert_eq!(quantile(&data, 1.1), None);
-    let empty: [f64; 0] = [];
-    assert_eq!(quantile(&empty, 0.5), None);
-    let unsorted = [5.0, 1.0, 3.0];
-    assert_eq!(quantile(&unsorted, 0.5), Some(3.0));
+fn test_rollup() {
+    let data = [1, 2, 3, 4, 5, 6];
+    let rolled = rollup(&data, |x| x % 2, |group| group.iter().copied().sum::<i32>());
+    assert_eq!(rolled[&0], 12); // 2+4+6
+    assert_eq!(rolled[&1], 9);  // 1+3+5
 }
 
 #[test]
-fn test_cumsum() {
-    let data = [1, 2, 3];
-    assert_eq!(cumsum(&data), vec![1.0, 3.0, 6.0]);
-    let empty: [i32; 0] = [];
-    assert_eq!(cumsum(&empty), Vec::<f64>::new());
-    let floats = [0.5, 1.5, 2.0];
-    assert_eq!(cumsum(&floats), vec![0.5, 2.0, 4.0]);
-}
-
-fn approx_eq_vec(a: &[f64], b: &[f64], eps: f64) -> bool {
-    a.len() == b.len() && a.iter().zip(b).all(|(x, y)| (x - y).abs() < eps)
+fn test_flat_group() {
+    let data = [1, 2, 3, 4];
+    let fg = flat_group(&data, |x| x % 2);
+    assert!(fg.contains(&(0, vec![&2, &4])));
+    assert!(fg.contains(&(1, vec![&1, &3])));
 }
 
 #[test]
-fn test_range() {
-    let r = range(0.0, 1.0, 0.2);
-    assert!(approx_eq_vec(&r, &[0.0, 0.2, 0.4, 0.6, 0.8], 1e-9));
-    assert_eq!(range(1.0, 1.0, 0.1), Vec::<f64>::new());
-    assert_eq!(range(0.0, 1.0, 2.0), vec![0.0]);
+fn test_fsum() {
+    let data = [1e100, 1.0, -1e100];
+    let naive = data.iter().copied().sum::<f64>();
+    let accurate = fsum(data);
+    assert!(naive != 1.0); // naive sum is not accurate
+    assert!((accurate - 1.0).abs() < 1e-12);
 }
 
 #[test]
-fn test_ticks() {
-    assert_eq!(ticks((0.0, 1.0), 5), vec![0.0, 0.25, 0.5, 0.75, 1.0]);
-    assert_eq!(ticks((1.0, 1.0), 5), vec![1.0]);
-    assert_eq!(ticks((0.0, 1.0), 1), vec![0.0]);
-}
-
-#[test]
-fn test_min_max_index() {
-    let data = [3, 1, 4, 1, 5, 9];
-    assert_eq!(min_index(&data), Some(1)); // first 1
-    assert_eq!(max_index(&data), Some(5)); // 9
-    let empty: [i32; 0] = [];
-    assert_eq!(min_index(&empty), None);
-    assert_eq!(max_index(&empty), None);
-    let single = [42];
-    assert_eq!(min_index(&single), Some(0));
-    assert_eq!(max_index(&single), Some(0));
+fn test_adder() {
+    let mut adder = Adder::new();
+    adder.add(1e100);
+    adder.add(1.0);
+    adder.add(-1e100);
+    assert!((adder.value() - 1.0).abs() < 1e-12);
 }

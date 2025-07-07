@@ -1,6 +1,6 @@
 //! Unit tests for d3 tree layout
 use rust_d3::hierarchy::Node;
-use rust_d3::tree::tree;
+use rust_d3::tree::{tree, tree_layout};
 
 #[test]
 fn test_tree() {
@@ -12,4 +12,11 @@ fn test_tree() {
     assert_eq!(result[0].2, "root");
     assert_eq!(result[1].2, "a");
     assert_eq!(result[2].2, "b");
+}
+
+#[test]
+fn test_tree_layout_api() {
+    let root = Node::new("root");
+    // Should be callable and not panic
+    tree_layout(&root);
 }

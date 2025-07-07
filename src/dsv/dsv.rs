@@ -1,6 +1,8 @@
 //! D3 DSV (CSV/TSV) module
 //! Provides CSV/TSV parsing and serialization.
 
+use serde_json::Value;
+
 /// Parse a delimiter-separated values (DSV) string into a vector of records.
 pub fn parse_dsv(input: &str, delimiter: char) -> Vec<Vec<String>> {
     input
@@ -60,6 +62,23 @@ impl DsvFormat {
     pub fn format_rows(&self, records: &[Vec<String>]) -> String {
         records.iter().map(|row| row.join("	")).collect::<Vec<_>>().join("\n")
     }
+    /// d3-dsv: parseRows with row conversion function
+    pub fn parse_rows_with<F>(&self, input: &str, row: F) -> Vec<Value>
+    where
+        F: Fn(&[String]) -> Value,
+    {
+        self.parse(input)
+            .iter()
+            .map(|row_vec| row(row_vec))
+            .collect()
+    }
+    /// d3-dsv: formatRows with row conversion function
+    pub fn format_rows_with<F>(&self, records: &[Vec<String>], row: F) -> String
+    where
+        F: Fn(&[String]) -> String,
+    {
+        records.iter().map(|row_vec| row(row_vec)).collect::<Vec<_>>().join("\n")
+    }
 }
 
 pub fn dsv_format(delimiter: char) -> DsvFormat {
@@ -78,20 +97,31 @@ pub fn format_rows(records: &[Vec<String>]) -> String {
     records.iter().map(|row| row.join("\t")).collect::<Vec<_>>().join("\n")
 }
 
-/// Placeholder for d3.autoType
-pub fn auto_type(object: &mut [Vec<String>]) {
-    for row in object.iter_mut() {
-        for cell in row.iter_mut() {
-            let s = cell.trim();
-            if s.eq_ignore_ascii_case("null") || s.is_empty() {
-                *cell = String::from("");
-            } else if let Ok(n) = s.parse::<f64>() {
-                *cell = n.to_string();
-            } else if s.eq_ignore_ascii_case("true") {
-                *cell = String::from("true");
-            } else if s.eq_ignore_ascii_case("false") {
-                *cell = String::from("false");
-            } // else leave as string
-        }
-    }
+/// d3-dsv: autoType implementation (robust type inference)
+pub fn auto_type(object: &mut [Vec<String>]) -> Vec<Vec<Value>> {
+    object
+        .iter()
+        .map(|row| {
+            row.iter()
+                .map(|cell| {
+                    let s_trimmed = cell.trim();
+                    if s_trimmed.eq_ignore_ascii_case("null") {
+                        Value::Null
+                    } else if s_trimmed.is_empty() {
+                        Value::from("")
+                    } else if let Ok(n) = s_trimmed.parse::<i64>() {
+                        Value::from(n)
+                    } else if let Ok(f) = s_trimmed.parse::<f64>() {
+                        Value::from(f)
+                    } else if s_trimmed.eq_ignore_ascii_case("true") {
+                        Value::from(true)
+                    } else if s_trimmed.eq_ignore_ascii_case("false") {
+                        Value::from(false)
+                    } else {
+                        Value::from(s_trimmed)
+                    }
+                })
+                .collect()
+        })
+        .collect()
 }
