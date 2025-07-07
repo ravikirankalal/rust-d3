@@ -1,5 +1,5 @@
 //! Unit tests for d3 Transition
-use rust_d3::transition::Transition;
+use rust_d3::transition::{Transition, TransitionState, easing};
 use rust_d3::Updatable;
 use std::sync::{Arc, Mutex};
 
@@ -125,4 +125,46 @@ fn test_transition_text_and_style_tween() {
     t.attr_tween("x", |_t, _target| {});
     assert!(t.tweens.contains_key("color"));
     assert!(t.tweens.contains_key("x"));
+}
+
+#[tokio::test]
+async fn test_transition_pause_resume_cancel_finished_end() {
+    let target = MockTarget::new();
+    let mut t = Transition::new(vec![target.clone()], 100);
+    t.attr("x", "1");
+    // Start transition in background
+    let t_clone = t.clone();
+    let handle = tokio::spawn(async move { t_clone.run().await; });
+    // Pause after a short delay
+    tokio::time::sleep(std::time::Duration::from_millis(20)).await;
+    t.pause();
+    assert_eq!(*t.state.lock().unwrap(), rust_d3::transition::TransitionState::Paused);
+    // Resume
+    t.resume();
+    assert_eq!(*t.state.lock().unwrap(), rust_d3::transition::TransitionState::Running);
+    // Cancel
+    t.cancel();
+    assert_eq!(*t.state.lock().unwrap(), rust_d3::transition::TransitionState::Cancelled);
+    // Wait for join
+    let _ = handle.await;
+    assert!(t.finished() || *t.state.lock().unwrap() == rust_d3::transition::TransitionState::Cancelled);
+    // Restart
+    t.restart();
+    assert_eq!(*t.state.lock().unwrap(), rust_d3::transition::TransitionState::Running);
+    // End (should complete quickly)
+    let t2 = t.clone();
+    let h2 = tokio::spawn(async move { t2.run().await; });
+    t.end().await;
+    let _ = h2.await;
+    assert!(t.finished());
+}
+
+#[tokio::test]
+async fn test_transition_builtin_easing() {
+    let target = MockTarget::new();
+    let mut t = Transition::new(vec![target.clone()], 10);
+    t.ease_builtin(rust_d3::transition::easing::quad_in);
+    t.attr("x", "1");
+    t.run().await;
+    assert!(t.finished());
 }
