@@ -41,7 +41,28 @@ macro_rules! interval_stub {
 interval_stub!(Second, 1_000_000_000);
 interval_stub!(Minute, 60_000_000_000);
 interval_stub!(Hour, 3_600_000_000_000);
-interval_stub!(Day, 86_400_000_000_000);
+// Day interval (midnight)
+pub struct Day;
+impl TimeInterval for Day {
+    fn floor(&self, date: NaiveDateTime) -> NaiveDateTime {
+        chrono::NaiveDate::from_ymd_opt(date.year(), date.month(), date.day()).unwrap().and_hms_opt(0, 0, 0).unwrap()
+    }
+    fn ceil(&self, date: NaiveDateTime) -> NaiveDateTime {
+        self.floor(date) + chrono::Duration::days(1)
+    }
+    fn offset(&self, date: NaiveDateTime, step: i32) -> NaiveDateTime {
+        date + chrono::Duration::days(step as i64)
+    }
+    fn range(&self, start: NaiveDateTime, stop: NaiveDateTime, step: i32) -> Vec<NaiveDateTime> {
+        let mut v = Vec::new();
+        let mut d = self.floor(start);
+        while d < stop {
+            v.push(d);
+            d = self.offset(d, step);
+        }
+        v
+    }
+}
 
 // Week interval (starts on Sunday, like D3)
 pub struct Week;

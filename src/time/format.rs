@@ -1,7 +1,7 @@
 // d3-time-format stub
 // Implements timeFormat and timeParse (strftime/strptime-like)
 
-use chrono::{NaiveDateTime};
+use chrono::{NaiveDateTime, Datelike, Timelike};
 use super::locale::TimeLocale;
 
 pub fn time_format(spec: &str, date: &NaiveDateTime) -> String {
