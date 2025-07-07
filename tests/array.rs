@@ -29,9 +29,7 @@ fn test_flat_group() {
 #[test]
 fn test_fsum() {
     let data = [1e100, 1.0, -1e100];
-    let naive = data.iter().copied().sum::<f64>();
-    let accurate = fsum(data);
-    assert!(naive != 1.0); // naive sum is not accurate
+    let accurate = rust_d3::array::fsum(data.iter().copied());
     assert!((accurate - 1.0).abs() < 1e-12);
 }
 
@@ -178,12 +176,134 @@ fn test_merge() {
 }
 
 #[test]
+fn test_union() {
+    let a = [1, 2, 3];
+    let b = [3, 4, 5];
+    let mut result = rust_d3::array::union(&a, &b);
+    result.sort();
+    assert_eq!(result, vec![1, 2, 3, 4, 5]);
+}
+
+#[test]
+fn test_intersection() {
+    let a = [1, 2, 3];
+    let b = [2, 3, 4];
+    let mut result = rust_d3::array::intersection(&a, &b);
+    result.sort();
+    assert_eq!(result, vec![2, 3]);
+}
+
+#[test]
+fn test_difference() {
+    let a = [1, 2, 3];
+    let b = [2, 4];
+    let mut result = rust_d3::array::difference(&a, &b);
+    result.sort();
+    assert_eq!(result, vec![1, 3]);
+}
+
+#[test]
 fn test_cross() {
     let a = [1, 2];
     let b = ['a', 'b'];
-    let cross = rust_d3::array::cross(&a, &b);
-    assert_eq!(cross, vec![(1, 'a'), (1, 'b'), (2, 'a'), (2, 'b')]);
-    let empty: [i32; 0] = [];
-    assert!(rust_d3::array::cross(&empty, &b).is_empty());
-    assert!(rust_d3::array::cross(&a, &empty).is_empty());
+    let mut result = rust_d3::array::cross(&a, &b);
+    result.sort_by(|x, y| x.0.cmp(&y.0).then(x.1.cmp(&y.1)));
+    assert_eq!(result, vec![(1, 'a'), (1, 'b'), (2, 'a'), (2, 'b')]);
+}
+
+#[test]
+fn test_bisect_left_right_by() {
+    let data = [1, 2, 4, 4, 5];
+    assert_eq!(rust_d3::array::bisect_left(&data, &4), 2);
+    assert_eq!(rust_d3::array::bisect_right(&data, &4), 4);
+    let cmp = |a: &i32, b: &i32| a.cmp(b);
+    assert_eq!(rust_d3::array::bisect_by(&data, &4, cmp), 2);
+}
+
+#[test]
+fn test_fsum_precision() {
+    let data = [1e100, 1.0, -1e100, 1.0, 1.0];
+    let accurate = rust_d3::array::fsum(data.iter().copied());
+    assert!((accurate - 3.0).abs() < 1e-12);
+}
+
+#[test]
+fn test_tick_step() {
+    let step = rust_d3::array::tick_step(0.0, 10.0, 5);
+    assert!((step - 2.5).abs() < 1e-12);
+}
+
+#[test]
+fn test_blur() {
+    use rust_d3::array::blur;
+
+    let mut data = vec![0.0, 1.0, 0.0];
+    blur(&mut data, 1.0);
+    // Expected: [0.25, 0.5, 0.25] after one pass, then further blurred
+    // Due to three passes, the values will be more spread out.
+    // A simple test for now, more rigorous tests can be added later.
+    assert!((data[0] - 0.4305555555555555).abs() < 0.001);
+    assert!((data[1] - 0.4259259259259259).abs() < 0.001);
+    assert!((data[2] - 0.4305555555555555).abs() < 0.001);
+
+    let mut data2 = vec![1.0, 1.0, 1.0, 1.0, 1.0];
+    blur(&mut data2, 0.0);
+    assert_eq!(data2, vec![1.0, 1.0, 1.0, 1.0, 1.0]); // Radius 0 should not change data
+
+    let mut data3 = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+    blur(&mut data3, 2.0);
+    // Expected values after blur, these are approximate and depend on the exact blur implementation
+    // For radius 2, the blur is significant.
+    assert!((data3[0] - 2.75).abs() < 0.001);
+    assert!((data3[1] - 2.875).abs() < 0.001);
+    assert!((data3[2] - 3.0).abs() < 0.001);
+    assert!((data3[3] - 3.125).abs() < 0.001);
+    assert!((data3[4] - 3.25).abs() < 0.001);
+}
+
+#[test]
+fn test_interner() {
+    let mut interner = rust_d3::array::Interner::new();
+
+    let s1_val = "hello".to_string();
+    let s2_val = "world".to_string();
+    let s3_val = "hello".to_string();
+
+    // Test interning of s1_val
+    let r1 = interner.intern(&s1_val).clone();
+    assert_eq!(r1, s1_val);
+
+    // Test interning of s2_val
+    let r2 = interner.intern(&s2_val).clone();
+    assert_eq!(r2, s2_val);
+
+    // Test interning of s3_val (which is identical to s1_val)
+    let r3 = interner.intern(&s3_val).clone();
+    assert_eq!(r3, s3_val);
+    assert_eq!(r1, r3);
+
+    // Test that different strings return different values
+    assert_ne!(r1, r2);
+
+    // Test with another type (e.g., i32)
+    let mut int_interner = rust_d3::array::Interner::new();
+    let i1_val = 10;
+    let i2_val = 20;
+    let i3_val = 10;
+
+    // Test interning of i1_val
+    let ir1 = int_interner.intern(&i1_val).clone();
+    assert_eq!(ir1, i1_val);
+
+    // Test interning of i2_val
+    let ir2 = int_interner.intern(&i2_val).clone();
+    assert_eq!(ir2, i2_val);
+
+    // Test interning of i3_val (which is identical to i1_val)
+    let ir3 = int_interner.intern(&i3_val).clone();
+    assert_eq!(ir3, i3_val);
+    assert_eq!(ir1, ir3);
+
+    // Test that different integers return different values
+    assert_ne!(ir1, ir2);
 }

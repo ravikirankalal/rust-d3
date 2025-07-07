@@ -4,35 +4,35 @@ This checklist tracks the parity between the official d3.js modules and your Rus
 
 | D3.js Module           | Rust Equivalent? | Status   | Notes/Features Missing |
 |------------------------|------------------|----------|------------------------|
-| d3-array               | array/ (unified, D3.js-like API) | Complete | All utils/adv merged, all tests pass |
-| d3-axis                | axis/axis.rs                                   | Complete |                        |
-| d3-brush               | brush/ (unified)                                | Complete | brush_adv/ merged      |
-| d3-chord               | chord/ (unified)                                | Complete | chord_adv/ merged      |
-| d3-color               | color/ (unified)                                | Complete | color_adv/, color_utils/ merged |
-| d3-contour             | contour/                                       | Complete |                        |
-| d3-delaunay            | delaunay/                                      | Complete |                        |
-| d3-dispatch            | dispatch/ (unified)                             | Complete | dispatch_adv/ merged   |
-| d3-drag                | drag/ (unified)                                 | Complete | drag_adv/ merged       |
-| d3-dsv                 | dsv/ (unified)                                  | Complete | dsv_adv/ merged        |
-| d3-ease                | ease/                                           | Complete |                        |
-| d3-fetch               | fetch/ (unified)                                | Complete | fetch_adv/ merged      |
+| d3-array               | array/ (unified, D3.js-like API) | Complete  | All set operations (union, intersection, difference), cross, full bisect functionality (.by), fsum precision, and tickStep exposure implemented and tested. |
+| d3-axis                | axis/axis.rs                                   | Partial  | Missing: tickArguments, tickSize (inner/outer), tickPadding, offset. SVG rendering is a stub. Verify: AxisScale ownership, flexible tick arguments, tickFormat options. |
+| d3-brush               | brush/ (unified)                                | Partial  | Missing: 2D brush, touchable, keyModifiers, full filter/handleSize logic, "start"/"end" events, SVG rendering. Verify: extent (set functionality). |
+| d3-chord               | chord/ (unified)                                | Partial  | Missing: full chord layout generation (angles, radius, padding, sorting), and ribbon shape generator. |
+| d3-color               | color/ (unified)                                | Partial  | Missing: full color space representation (RGB, HSL, Lab, etc.), parsing, conversion, manipulation (brighter/darker), and formatting. Current implementation is a basic color scale. |
+| d3-contour             | contour/                                       | Partial  | Missing: proper Kernel Density Estimation (KDE) for contourDensity, GeoJSON output. Marching squares logic needs thorough review for correctness (e.g., case 5). |
+| d3-delaunay            | delaunay/                                      | Partial  | Missing: efficient triangulation algorithm (current is O(N^3)), half-edge topology, neighbors, Voronoi diagram, convex hull, rendering. Optimized find is missing. |
+| d3-dispatch            | dispatch/ (unified)                             | Partial  | Missing: passing arguments to callbacks, removing callbacks, subtypes (e.g., event.foo), and copy() method. |
+| d3-drag                | drag/ (unified)                                 | Partial  | Missing: core drag behavior implementation, event handling (start/drag/end), and all customization methods (container, filter, touchable, subject, clickDistance). |
+| d3-dsv                 | dsv/ (unified)                                  | Partial  | Missing: object-based parsing/formatting, formatBody, formatRow, formatValue, and full RFC 4180 compliance (quoting, escaping). parse_rows and format_rows are incorrectly implemented. |
+| d3-ease                | ease/                                           | Complete | Potential minor mathematical precision differences. No default parameters for configurable easing functions. |
+| d3-fetch               | fetch/ (unified)                                | Partial  | Missing: `init` options for requests, `row` accessor/converter for CSV/TSV, and `d3.autoType` integration. Functional differences in XML and image fetching. |
 | d3-force               | force/ (unified)                                | Complete | Quadtree implemented for ManyBody and Collide forces. |
-| d3-format              | format/ (unified)                               | Complete | format_adv/ merged     |
-| d3-geo                 | geo/ (unified)                                  | Complete | geo_adv/, geo_proj/, geo_proj_adv/ merged |
-| d3-hierarchy           | hierarchy/ (unified)                            | Complete | all cluster, pack, partition, stratify, tree, treemap merged |
-| d3-interpolate         | interpolate/ (unified)                          | Complete | all adv/utils merged   |
-| d3-path                | path/                                           | Complete |                        |
-| d3-polygon             | polygon/ (unified)                              | Complete | polygon_hull/ merged   |
-| d3-quadtree            | quadtree/                                       | Complete |                        |
-| d3-random              | random/                                         | Complete |                        |
-| d3-scale               | scale/                                          | Complete |                        |
-| d3-scale-chromatic     | scale_chromatic/                                | Complete |                        |
-| d3-selection           | selection/ (unified, D3.js-like API)            | Complete | selection_adv/ merged  |
-| d3-shape               | shape/ (unified, D3.js-like API)                | Complete | all adv/utils/stack/symbol merged |
-| d3-time                | time/ (unified, D3.js-like API)                 | Complete | time_adv/ merged       |
-| d3-time-format         | time_format/ (unified, D3.js-like API)          | Complete | time_format_adv/ merged|
-| d3-timer               | timer/                                          | Complete |                        |
-| d3-transition          | transition/ (unified, D3.js-like API)           | Complete | transition_adv/ merged |
+| d3-format              | format/ (unified)                               | Partial  | Missing: comprehensive format specifier (fill, align, sign, width, trim zeros, full type support), robust locale support, and advanced formatPrefix. |
+| d3-geo                 | geo/ (unified)                                  | Partial  | Missing: wide range of projections, extensive projection customization, spherical geometry operations, full GeoJSON handling, adaptive sampling, geoGraticule, geoIdentity. |
+| d3-hierarchy           | hierarchy/ (unified)                            | Partial  | Missing: hierarchy creation (from flat/nested data), automatic computation of node properties (depth, height, value, parent), rich navigation methods (ancestors, descendants, leaves, links, path), and all layout algorithms (tree, cluster, partition, pack, treemap). |
+| d3-interpolate         | interpolate/ (unified)                          | Partial  | Missing: automatic type detection, date interpolation, full color space interpolation (Lab, Hcl, Cubehelix), transform/path/piecewise/basis/discrete interpolation. Limited array/object/string interpolation. |
+| d3-path                | path/                                           | Partial  | Missing: relative commands, full arc variants (e.g., arcTo), elliptical arc, and explicit current point tracking. Arc/Bezier/Quadratic curve implementations need verification for full SVG/D3.js compliance. |
+| d3-polygon             | polygon/ (unified)                              | Partial  | Missing: polygonHull. Area function returns absolute value, D3.js returns signed. |
+| d3-quadtree            | quadtree/                                       | Partial  | Missing: hierarchical structure, efficient add/remove, root/data/size methods, optimized find, visit/visitAfter, x/y accessors, extent setting. Current implementation is a basic point container. |
+| d3-random              | random/                                         | Partial  | Missing: randomInt, Beta, Pareto, Weibull, Gumbel, Logistic, Binomial, Geometric, Poisson distributions. Lacks seeded randomness. |
+| d3-scale               | scale/                                          | Partial  | Missing: `clamp()` (D3.js behavior), `nice()` (D3.js behavior), `interpolate()`, `unknown()`, `rangeRound()`, `copy()`. `ticks()` and `tickFormat()` are basic. |
+| d3-scale-chromatic     | scale_chromatic/                                | Partial  | Missing: extensive categorical, sequential (multi-hue/single-hue), diverging, and cyclical color schemes. Sequential interpolators use basic lookup tables instead of smooth interpolation. |
+| d3-selection           | selection/ (unified, D3.js-like API)            | Partial  | Missing: DOM integration, CSS selector-based selection, full data join (creating/removing/updating DOM elements), event handling (on/dispatch), and many DOM manipulation methods (append, insert, remove, html, text, property, classed, style, attr). Transition integration is stubbed. |
+| d3-shape               | shape/ (unified, D3.js-like API)                | Partial  | Missing: curve interpolation, links, stacks, extensive symbol types. Limited customization via accessors. SVG path generation needs verification. |
+| d3-time                | time/ (unified, D3.js-like API)                 | Partial  | Missing: comprehensive time interval objects (floor, ceil, round, offset, range, every), extensive time scale customization (ticks, tickFormat, nice, clamp, interpolate, unknown), and UTC time support. |
+| d3-time-format         | time_format/ (unified, D3.js-like API)          | Partial  | Missing: robust locale support, d3.timeMultiFormat, and full set of format specifier directives. |
+| d3-timer               | timer/                                          | Partial  | Missing: `time` parameter for timers, `timer.restart()`. `timerFlush()` and underlying timer mechanisms differ from D3.js. |
+| d3-transition          | transition/ (unified, D3.js-like API)           | Partial  | Missing: DOM integration, robust scheduling, automatic interpolation, per-element delay/duration/ease. Limited merge/select/filter behavior. |
 | d3-zoom                | zoom/ (unified, D3.js-like API)                 | Complete | zoom_adv/ merged       |
 | d3-collection          | collection/ (unified)                           | Complete | all group/rollup/keys/values/entries merged |
 | d3-request (legacy)    | fetch/                                          | Complete | replaced by d3-fetch   |

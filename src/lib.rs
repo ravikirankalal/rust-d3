@@ -47,7 +47,7 @@ pub fn add(left: u64, right: u64) -> u64 {
 
 pub use selection::Selection;
 pub use array::{
-    min, max, extent, quantile, cumsum, ticks, group, rollup, flat_group, range, min_index, max_index, fsum, Adder, flatten, sum, mean, median, mode, variance, deviation, pairs, transpose, zip, least, greatest, shuffle, permute, ascending, descending, bisect, merge, cross
+    min, max, extent, quantile, cumsum, ticks, group, rollup, flat_group, range, min_index, max_index, fsum, Adder, flatten, sum, mean, median, mode, variance, deviation, pairs, transpose, zip, least, greatest, shuffle, permute, ascending, descending, bisect, merge, cross, Bin, bin, sturges_thresholds
 };
 pub use axis::Axis;
 pub use shape::{LineGenerator, Stack, StackedSeries, SeriesMeta};

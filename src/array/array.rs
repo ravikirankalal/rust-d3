@@ -131,7 +131,7 @@ pub fn merge<T: Clone>(arrays: &[Vec<T>]) -> Vec<T> {
 /// Returns the shuffled array
 pub fn shuffle<T>(data: &mut [T]) {
     use rand::seq::SliceRandom;
-    data.shuffle(&mut rand::thread_rng());
+    data.shuffle(&mut rand::rngs::ThreadRng::default());
 }
 
 /// Returns the permuted array
@@ -181,4 +181,235 @@ pub fn variance<T: Into<f64> + Copy>(data: &[T]) -> Option<f64> {
         d * d
     }).sum::<f64>() / n as f64;
     Some(var)
+}
+
+/// Represents a single bin in a histogram.
+#[derive(Debug, PartialEq)]
+pub struct Bin<T> {
+    pub x0: f64,
+    pub x1: f64,
+    pub data: Vec<T>,
+}
+
+/// Generates thresholds for binning using Sturges' formula.
+pub fn sturges_thresholds(data: &[f64], min: f64, max: f64) -> Vec<f64> {
+    if data.is_empty() {
+        return Vec::new();
+    }
+    let k = (data.len() as f64).log2().ceil() as usize + 1;
+    let step = (max - min) / k as f64;
+    (0..=k).map(|i| min + i as f64 * step).collect()
+}
+
+/// Computes the histogram (bins) for a given dataset.
+///
+/// # Arguments
+/// * `data` - The input data.
+/// * `value` - A function to extract the numeric value from each data point.
+/// * `thresholds` - A function that generates the bin thresholds.
+pub fn bin<T, V, F, G>(data: &[T], value: F, thresholds: G) -> Vec<Bin<T>>
+where
+    T: Clone,
+    V: Into<f64>,
+    F: Fn(&T) -> V,
+    G: Fn(&[f64], f64, f64) -> Vec<f64>,
+{
+    if data.is_empty() {
+        return Vec::new();
+    }
+
+    let mut values: Vec<f64> = data.iter().map(|d| value(d).into()).collect();
+    values.sort_by(|a, b| a.partial_cmp(b).unwrap());
+
+    let min_val = *values.first().unwrap();
+    let max_val = *values.last().unwrap();
+
+    let thresholds_vec = thresholds(&values, min_val, max_val);
+    if thresholds_vec.is_empty() {
+        return Vec::new();
+    }
+
+    let mut bins: Vec<Bin<T>> = Vec::new();
+    for i in 0..thresholds_vec.len() - 1 {
+        bins.push(Bin {
+            x0: thresholds_vec[i],
+            x1: thresholds_vec[i + 1],
+            data: Vec::new(),
+        });
+    }
+
+    for (_i, d) in data.iter().enumerate() {
+        let val = value(d).into();
+        let mut bin_index = -1;
+
+        // Find the correct bin for the value
+        for (j, bin) in bins.iter().enumerate() {
+            if val >= bin.x0 && (val < bin.x1 || (j == bins.len() - 1 && val == bin.x1)) {
+                bin_index = j as isize;
+                break;
+            }
+        }
+
+        if bin_index != -1 {
+            bins[bin_index as usize].data.push(d.clone());
+        }
+    }
+    bins
+}
+
+/// Applies a 1D blur to a mutable slice of f64 values.
+/// This approximates a Gaussian blur by applying three iterations of a moving average (box filter).
+///
+/// # Arguments
+/// * `data` - The mutable slice of f64 values to blur.
+/// * `radius` - The blur radius. A larger radius means more blur.
+pub fn blur(data: &mut [f64], radius: f64) {
+    if data.is_empty() || radius <= 0.0 { return; }
+
+    let r = radius as usize;
+    let n = data.len();
+
+    // Three passes of a box filter approximate a Gaussian blur
+    for _ in 0..3 {
+        let temp = data.to_vec();
+        for i in 0..n {
+            let mut sum = 0.0;
+            let mut count = 0;
+            for j in (i as isize - r as isize).max(0) as usize ..= (i + r).min(n - 1) {
+                sum += temp[j];
+                count += 1;
+            }
+            data[i] = sum / count as f64;
+        }
+    }
+}
+
+use std::collections::HashMap;
+use std::hash::Hash;
+
+/// A simple interner for values that are `Clone + Eq + Hash`.
+pub struct Interner<T> {
+    map: HashMap<T, T>,
+}
+
+impl<T> Interner<T>
+where
+    T: Clone + Eq + Hash,
+{
+    /// Creates a new, empty `Interner`.
+    pub fn new() -> Self {
+        Interner {
+            map: HashMap::new(),
+        }
+    }
+
+    /// Interns a value, returning a reference to the canonical instance.
+    pub fn intern(&mut self, value: &T) -> &T {
+        if self.map.contains_key(value) {
+            self.map.get(value).unwrap()
+        } else {
+            self.map.insert(value.clone(), value.clone());
+            self.map.get(value).unwrap()
+        }
+    }
+}
+
+use std::collections::HashSet;
+
+/// Returns the union of two slices as a Vec (set union, unique values).
+pub fn union<T: Clone + Eq + Hash>(a: &[T], b: &[T]) -> Vec<T> {
+    let set: HashSet<_> = a.iter().cloned().chain(b.iter().cloned()).collect();
+    set.into_iter().collect()
+}
+
+/// Returns the intersection of two slices as a Vec (set intersection).
+pub fn intersection<T: Clone + Eq + Hash>(a: &[T], b: &[T]) -> Vec<T> {
+    let set_a: HashSet<_> = a.iter().cloned().collect();
+    let set_b: HashSet<_> = b.iter().cloned().collect();
+    set_a.intersection(&set_b).cloned().collect()
+}
+
+/// Returns the difference of two slices as a Vec (set difference: a - b).
+pub fn difference<T: Clone + Eq + Hash>(a: &[T], b: &[T]) -> Vec<T> {
+    let set_a: HashSet<_> = a.iter().cloned().collect();
+    let set_b: HashSet<_> = b.iter().cloned().collect();
+    set_a.difference(&set_b).cloned().collect()
+}
+
+/// Returns the cartesian product (cross) of two slices.
+pub fn cross<A: Clone, B: Clone>(a: &[A], b: &[B]) -> Vec<(A, B)> {
+    let mut result = Vec::new();
+    for x in a {
+        for y in b {
+            result.push((x.clone(), y.clone()));
+        }
+    }
+    result
+}
+
+/// Returns the index where to insert item x in a sorted slice to maintain order (bisect_left).
+pub fn bisect_left<T: Ord>(data: &[T], x: &T) -> usize {
+    let mut lo = 0;
+    let mut hi = data.len();
+    while lo < hi {
+        let mid = (lo + hi) / 2;
+        if &data[mid] < x {
+            lo = mid + 1;
+        } else {
+            hi = mid;
+        }
+    }
+    lo
+}
+
+/// Returns the index where to insert item x in a sorted slice to maintain order (bisect_right).
+pub fn bisect_right<T: Ord>(data: &[T], x: &T) -> usize {
+    let mut lo = 0;
+    let mut hi = data.len();
+    while lo < hi {
+        let mid = (lo + hi) / 2;
+        if &data[mid] <= x {
+            lo = mid + 1;
+        } else {
+            hi = mid;
+        }
+    }
+    lo
+}
+
+/// Returns the index where to insert item x in a sorted slice using a custom comparator (bisect_by).
+pub fn bisect_by<T, F>(data: &[T], x: &T, mut cmp: F) -> usize
+where
+    F: FnMut(&T, &T) -> std::cmp::Ordering,
+{
+    let mut lo = 0;
+    let mut hi = data.len();
+    while lo < hi {
+        let mid = (lo + hi) / 2;
+        if cmp(&data[mid], x) == std::cmp::Ordering::Less {
+            lo = mid + 1;
+        } else {
+            hi = mid;
+        }
+    }
+    lo
+}
+
+/// High-precision floating point sum (Kahan summation).
+pub fn fsum(data: &[f64]) -> f64 {
+    let mut sum = 0.0;
+    let mut c = 0.0;
+    for &x in data {
+        let y = x - c;
+        let t = sum + y;
+        c = (t - sum) - y;
+        sum = t;
+    }
+    sum
+}
+
+/// Returns the step size between ticks for a domain and count (tickStep).
+pub fn tick_step(start: f64, stop: f64, count: usize) -> f64 {
+    if count == 0 { return 0.0; }
+    (stop - start) / (count as f64 - 1.0)
 }
