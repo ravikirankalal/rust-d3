@@ -87,22 +87,35 @@ where
 }
 
 // --- D3 Array Utils Advanced (from array_utils_adv) ---
-/// D3.js: d3.bisect (stub)
-pub fn bisect<T: PartialOrd>(_arr: &[T], _x: &T) -> usize {
-    // TODO: Implement bisect logic
-    0
+/// Returns the bisect index for x in a sorted array (d3.bisect)
+pub fn bisect<T: PartialOrd>(arr: &[T], x: &T) -> usize {
+    let mut low = 0;
+    let mut high = arr.len();
+    while low < high {
+        let mid = (low + high) / 2;
+        if &arr[mid] < x {
+            low = mid + 1;
+        } else {
+            high = mid;
+        }
+    }
+    low
 }
 
-/// D3.js: d3.merge (stub)
-pub fn merge<T: Clone>(_arrays: &[Vec<T>]) -> Vec<T> {
-    // TODO: Implement merge logic
-    Vec::new()
+/// Returns the merge of multiple arrays (d3.merge)
+pub fn merge<T: Clone>(arrays: &[Vec<T>]) -> Vec<T> {
+    arrays.iter().flat_map(|v| v.clone()).collect()
 }
 
-/// D3.js: d3.cross (stub)
-pub fn cross<T: Clone, U: Clone>(_a: &[T], _b: &[U]) -> Vec<(T, U)> {
-    // TODO: Implement cross logic
-    Vec::new()
+/// Returns the cross product of two arrays (d3.cross)
+pub fn cross<T: Clone, U: Clone>(a: &[T], b: &[U]) -> Vec<(T, U)> {
+    let mut result = Vec::new();
+    for x in a {
+        for y in b {
+            result.push((x.clone(), y.clone()));
+        }
+    }
+    result
 }
 
 /// Flattens a vector of vectors into a single vector.
@@ -180,4 +193,120 @@ pub fn min_index<T: Ord + Copy>(data: &[T]) -> Option<usize> {
 /// Returns the index of the maximum value
 pub fn max_index<T: Ord + Copy>(data: &[T]) -> Option<usize> {
     data.iter().enumerate().max_by_key(|&(_, v)| v).map(|(i, _)| i)
+}
+
+// --- Additional statistics functions ---
+/// Returns the sum of the array elements.
+pub fn sum<T: Into<f64> + Copy>(data: &[T]) -> f64 {
+    data.iter().copied().map(Into::into).sum()
+}
+
+/// Returns the mean (average) of the array elements.
+pub fn mean<T: Into<f64> + Copy>(data: &[T]) -> Option<f64> {
+    let n = data.len();
+    if n == 0 {
+        None
+    } else {
+        Some(sum(data) / n as f64)
+    }
+}
+
+/// Returns the median of the array elements.
+pub fn median<T: Into<f64> + Copy>(data: &[T]) -> Option<f64> {
+    let n = data.len();
+    if n == 0 {
+        return None;
+    }
+    let mut v: Vec<f64> = data.iter().map(|&x| x.into()).collect();
+    v.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    let mid = n as f64 / 2.0;
+    if n % 2 == 0 {
+        Some((v[mid as usize - 1] + v[mid as usize]) / 2.0)
+    } else {
+        Some(v[mid.floor() as usize])
+    }
+}
+
+/// Returns the mode (most common value)
+pub fn mode<T: Ord + Copy + std::hash::Hash>(data: &[T]) -> Option<T> {
+    use std::collections::HashMap;
+    if data.is_empty() { return None; }
+    let mut counts = HashMap::new();
+    for &x in data {
+        *counts.entry(x).or_insert(0) += 1;
+    }
+    counts.into_iter().max_by_key(|&(_, count)| count).map(|(val, _)| val)
+}
+
+/// Returns the variance of the array (d3.variance, population variance)
+pub fn variance<T: Into<f64> + Copy>(data: &[T]) -> Option<f64> {
+    let n = data.len();
+    if n == 0 { return None; }
+    let mean = data.iter().map(|&x| x.into()).sum::<f64>() / n as f64;
+    let var = data.iter().map(|&x| {
+        let d = x.into() - mean;
+        d * d
+    }).sum::<f64>() / n as f64;
+    Some(var)
+}
+
+/// Returns the deviation (standard deviation) of the array (d3.deviation)
+pub fn deviation<T: Into<f64> + Copy>(data: &[T]) -> Option<f64> {
+    variance(data).map(|v| v.sqrt())
+}
+
+/// Returns the pairs of adjacent elements (d3.pairs)
+pub fn pairs<T: Copy>(data: &[T]) -> Vec<(T, T)> {
+    data.windows(2).map(|w| (w[0], w[1])).collect()
+}
+
+/// Returns the transpose of a 2D array (d3.transpose)
+pub fn transpose<T: Copy>(data: &[Vec<T>]) -> Vec<Vec<T>> {
+    if data.is_empty() { return vec![]; }
+    let len = data[0].len();
+    (0..len)
+        .map(|i| data.iter().map(|row| row[i]).collect())
+        .collect()
+}
+
+/// Returns the zip of multiple arrays (d3.zip)
+pub fn zip<T: Copy>(arrays: &[&[T]]) -> Vec<Vec<T>> {
+    if arrays.is_empty() { return vec![]; }
+    let len = arrays[0].len();
+    (0..len)
+        .map(|i| arrays.iter().map(|arr| arr[i]).collect())
+        .collect()
+}
+
+/// Returns the least element according to Ord (d3.least)
+pub fn least<T: Ord + Copy>(data: &[T]) -> Option<T> {
+    data.iter().copied().min()
+}
+
+/// Returns the greatest element according to Ord (d3.greatest)
+pub fn greatest<T: Ord + Copy>(data: &[T]) -> Option<T> {
+    data.iter().copied().max()
+}
+
+/// Shuffles the array in place (d3.shuffle)
+pub fn shuffle<T>(data: &mut [T]) {
+    use rand::seq::SliceRandom;
+    use rand::thread_rng;
+    let mut rng = thread_rng();
+    data.shuffle(&mut rng);
+}
+
+/// Returns a new array with elements permuted by indexes (d3.permute)
+pub fn permute<T: Copy>(data: &[T], indexes: &[usize]) -> Vec<T> {
+    indexes.iter().map(|&i| data[i]).collect()
+}
+
+/// Returns -1, 0, or 1 for ascending order (d3.ascending)
+pub fn ascending<T: Ord>(a: T, b: T) -> i32 {
+    a.cmp(&b) as i32
+}
+
+/// Returns -1, 0, or 1 for descending order (d3.descending)
+pub fn descending<T: Ord>(a: T, b: T) -> i32 {
+    b.cmp(&a) as i32
 }

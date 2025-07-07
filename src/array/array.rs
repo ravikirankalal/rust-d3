@@ -147,3 +147,26 @@ pub fn descending<T: Ord>(_a: T, _b: T) -> i32 {
     // TODO: Implement
     0
 }
+
+/// Returns the sum of the array (d3.sum)
+pub fn sum<T: Into<f64> + Copy>(data: &[T]) -> f64 {
+    data.iter().map(|&x| x.into()).sum()
+}
+
+/// Returns the mean of the array (d3.mean)
+pub fn mean<T: Into<f64> + Copy>(data: &[T]) -> Option<f64> {
+    if data.is_empty() { None } else { Some(sum(data) / data.len() as f64) }
+}
+
+/// Returns the median of the array (d3.median)
+pub fn median<T: Into<f64> + Copy>(data: &[T]) -> Option<f64> {
+    if data.is_empty() { return None; }
+    let mut v: Vec<f64> = data.iter().map(|&x| x.into()).collect();
+    v.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    let mid = v.len() / 2;
+    if v.len() % 2 == 0 {
+        Some((v[mid - 1] + v[mid]) / 2.0)
+    } else {
+        Some(v[mid])
+    }
+}

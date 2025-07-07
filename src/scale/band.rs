@@ -24,4 +24,22 @@ impl<T: PartialEq + Clone> BandScale<T> {
         let pos = self.domain.iter().position(|d| d == value)?;
         Some(r0 + pos as f64 * step)
     }
+    pub fn domain(&self) -> &Vec<T> {
+        &self.domain
+    }
+    pub fn range(&self) -> (f64, f64) {
+        self.range
+    }
+    pub fn set_domain(&mut self, domain: Vec<T>) {
+        self.domain = domain;
+    }
+    pub fn set_range(&mut self, range: (f64, f64)) {
+        self.range = range;
+    }
+    pub fn step(&self) -> f64 {
+        let n = self.domain.len() as f64;
+        let (r0, r1) = self.range;
+        if n == 0.0 { return 0.0; }
+        (r1 - r0) / n
+    }
 }

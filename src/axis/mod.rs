@@ -2,4 +2,4 @@
 
 mod axis;
 
-pub use axis::Axis;
+pub use axis::{Axis, AxisOrientation, AxisScale};
