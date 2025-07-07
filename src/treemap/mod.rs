@@ -1,4 +1,4 @@
-"""//! D3 Treemap module
+//! D3 Treemap module
 //! Provides treemap layout for hierarchical data (see d3-treemap in JS).
 
 use crate::hierarchy::Node;
@@ -47,7 +47,7 @@ fn squarify(weights: &[f64], x: f64, y: f64, w: f64, h: f64) -> Vec<(f64, f64, f
     let mut ws = weights.to_vec();
     ws.sort_by(|a, b| b.partial_cmp(a).unwrap());
     let n = ws.len();
-    let mut used = 0.0;
+    let _used = 0.0;
     for (i, &weight) in ws.iter().enumerate() {
         let frac = weight / sum;
         if w >= h {
@@ -55,7 +55,6 @@ fn squarify(weights: &[f64], x: f64, y: f64, w: f64, h: f64) -> Vec<(f64, f64, f
                 w - (x0 - x) // fill remaining width
             } else {
                 let v = rem_w * frac;
-                used += v;
                 v
             };
             rects.push((x0, y0, rw, rem_h));
@@ -66,7 +65,6 @@ fn squarify(weights: &[f64], x: f64, y: f64, w: f64, h: f64) -> Vec<(f64, f64, f
                 h - (y0 - y) // fill remaining height
             } else {
                 let v = rem_h * frac;
-                used += v;
                 v
             };
             rects.push((x0, y0, rem_w, rh));
@@ -163,7 +161,7 @@ impl Treemap {
         self.padding = padding;
         self
     }
-    pub fn layout<T: Copy + Default>(&self, root: &mut Node<T>) {
+    pub fn layout<T: Copy + Default + Into<f64>>(&self, root: &mut Node<T>) {
         match self.tiling {
             TreemapTiling::Slice => layout_slice(root, 0.0, 0.0, self.width, self.height, self.padding),
             TreemapTiling::Dice => layout_dice(root, 0.0, 0.0, self.width, self.height, self.padding),
@@ -235,13 +233,13 @@ fn layout_slicedice<T: Copy + Default>(node: &mut Node<T>, x0: f64, y0: f64, x1:
     }
 }
 
-fn layout_squarify<T: Copy + Default>(node: &mut Node<T>, x0: f64, y0: f64, x1: f64, y1: f64, padding: f64) {
+fn layout_squarify<T: Copy + Default + Into<f64>>(node: &mut Node<T>, x0: f64, y0: f64, x1: f64, y1: f64, padding: f64) {
     node.x0 = x0;
     node.y0 = y0;
     node.x1 = x1;
     node.y1 = y1;
 
-    let children_weights: Vec<f64> = node.children.iter().map(|c| c.value).collect();
+    let children_weights: Vec<f64> = node.children.iter().map(|c| c.value.into()).collect();
     let child_rects = squarify(&children_weights, x0, y0, x1 - x0, y1 - y0);
 
     for (i, child) in node.children.iter_mut().enumerate() {
@@ -251,13 +249,13 @@ fn layout_squarify<T: Copy + Default>(node: &mut Node<T>, x0: f64, y0: f64, x1: 
     }
 }
 
-fn layout_binary<T: Copy + Default>(node: &mut Node<T>, x0: f64, y0: f64, x1: f64, y1: f64, padding: f64) {
+fn layout_binary<T: Copy + Default + Into<f64>>(node: &mut Node<T>, x0: f64, y0: f64, x1: f64, y1: f64, padding: f64) {
     node.x0 = x0;
     node.y0 = y0;
     node.x1 = x1;
     node.y1 = y1;
 
-    let children_weights: Vec<f64> = node.children.iter().map(|c| c.value).collect();
+    let children_weights: Vec<f64> = node.children.iter().map(|c| c.value.into()).collect();
     let child_rects = binary(&children_weights, x0, y0, x1 - x0, y1 - y0);
 
     for (i, child) in node.children.iter_mut().enumerate() {
@@ -266,4 +264,3 @@ fn layout_binary<T: Copy + Default>(node: &mut Node<T>, x0: f64, y0: f64, x1: f6
         }
     }
 }
-""

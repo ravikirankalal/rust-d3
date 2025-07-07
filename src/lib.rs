@@ -34,6 +34,12 @@ pub mod stratify;
 pub mod brush;
 pub mod zoom;
 pub mod collection;
+pub mod treemap;
+pub mod ease;
+pub mod interaction;
+pub mod partitioning;
+pub mod radial;
+pub mod time_format;
 
 pub fn add(left: u64, right: u64) -> u64 {
     left + right
@@ -75,3 +81,8 @@ pub use scale::{
     LinearScale, LogScale, PowScale, SqrtScale, OrdinalScale, BandScale
 };
 pub use transition::TextSet;
+pub use ease::*;
+pub use interaction::*;
+pub use partitioning::*;
+pub use radial::*;
+pub use time_format::*;

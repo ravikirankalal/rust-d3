@@ -1,4 +1,4 @@
-'''pub fn linear(t: f64) -> f64 {
+pub fn linear(t: f64) -> f64 {
     t
 }
 
@@ -163,4 +163,3 @@ pub fn elastic_in_out(t: f64, a: f64, p: f64) -> f64 {
         a * (-20.0 * t + 10.0).exp2() * ((2.0 * t - 0.5 - s) * (2.0 * std::f64::consts::PI) / p).sin() * 0.5 + 1.0
     }
 }
-''
