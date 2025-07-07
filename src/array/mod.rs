@@ -28,6 +28,25 @@ pub mod greatest;
 pub mod least_index;
 pub mod greatest_index;
 pub mod fsum;
+pub mod blur;
+pub mod union;
+pub mod intersection;
+pub mod difference;
+pub mod symmetric_difference;
+pub use union::union;
+pub use intersection::intersection;
+pub use difference::difference;
+pub use symmetric_difference::symmetric_difference;
+pub mod sort;
+pub mod sort_by;
+pub mod summarize;
+pub mod transform;
+pub use sort::sort;
+pub use sort_by::sort_by;
+pub use summarize::summarize;
+pub use transform::transform;
+pub mod intern;
+pub use intern::{intern_set, intern_map};
 
 #[cfg(test)]
 mod tests {
@@ -61,6 +80,13 @@ mod tests {
     use super::least_index::least_index;
     use super::greatest_index::greatest_index;
     use super::fsum::fsum;
+    use super::blur::blur1d;
+    use super::{union, intersection, difference, symmetric_difference};
+    use super::sort::{sort};
+    use super::sort_by::{sort_by};
+    use super::summarize::{summarize};
+    use super::transform::{transform};
+    use super::intern::{intern_set, intern_map};
     use std::cmp::Ordering;
     use std::collections::HashMap;
 
@@ -480,6 +506,72 @@ mod tests {
         assert_eq!(fsum(&[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]), 5.5);
         assert_eq!(fsum(&[]), 0.0);
         assert_eq!(fsum(&[1.0]), 1.0);
+    }
+
+    #[test]
+    fn test_blur1d() {
+        let input = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+        let blurred = blur1d(&input, 1);
+        let expected = vec![1.5, 2.0, 3.0, 4.0, 4.5];
+        for (b, e) in blurred.iter().zip(expected.iter()) {
+            assert!((b - e).abs() < 1e-6, "blurred value {} != expected {}", b, e);
+        }
+    }
+
+    #[test]
+    fn test_set_ops() {
+        let a = vec![1, 2, 3];
+        let b = vec![3, 4, 5];
+        let mut u = union(&a, &b);
+        u.sort();
+        assert_eq!(u, vec![1, 2, 3, 4, 5]);
+        let mut i = intersection(&a, &b);
+        i.sort();
+        assert_eq!(i, vec![3]);
+        let mut d = difference(&a, &b);
+        d.sort();
+        assert_eq!(d, vec![1, 2]);
+        let mut s = symmetric_difference(&a, &b);
+        s.sort();
+        assert_eq!(s, vec![1, 2, 4, 5]);
+    }
+
+    #[test]
+    fn test_sort_summarize_transform() {
+        let arr = vec![3, 1, 4, 1, 5, 9, 2];
+        let sorted = sort(&arr);
+        assert_eq!(sorted, vec![1, 1, 2, 3, 4, 5, 9]);
+        let sorted_by = sort_by(&arr, |a, b| b.cmp(a));
+        assert_eq!(sorted_by, vec![9, 5, 4, 3, 2, 1, 1]);
+        let arrf = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+        let summary = summarize(&arrf).unwrap();
+        assert!((summary.0 - 1.0).abs() < 1e-6); // min
+        assert!((summary.1 - 5.0).abs() < 1e-6); // max
+        assert!((summary.2 - 3.0).abs() < 1e-6); // mean
+        assert!((summary.3 - 3.0).abs() < 1e-6); // median
+        assert!((summary.4 - 2.0).abs() < 1e-6); // variance
+        let arr2 = vec![1, 2, 3];
+        let transformed: Vec<String> = transform(&arr2, |x| format!("{}!", x));
+        assert_eq!(transformed, vec!["1!", "2!", "3!"]);
+    }
+
+    #[test]
+    fn test_intern() {
+        use std::collections::{HashSet, HashMap};
+        let mut set = HashSet::new();
+        let a = intern_set(&mut set, "foo".to_string()).clone();
+        let b = intern_set(&mut set, "foo".to_string()).clone();
+        assert_eq!(a, b);
+        let c = intern_set(&mut set, "bar".to_string()).clone();
+        assert_ne!(a, c);
+
+        let mut map = HashMap::new();
+        let v1 = *intern_map(&mut map, "key1", 42);
+        assert_eq!(v1, 42);
+        let v2 = *intern_map(&mut map, "key1", 99);
+        assert_eq!(v2, 42); // Should not overwrite
+        let v3 = *intern_map(&mut map, "key2", 7);
+        assert_eq!(v3, 7);
     }
 }
 

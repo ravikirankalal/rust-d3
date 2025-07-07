@@ -4,7 +4,7 @@ This checklist tracks the parity between the official d3.js modules and your Rus
 
 | D3.js Module           | Rust Equivalent? | Status   | Depends On                                    | Notes/Features Missing |
 |------------------------|------------------|----------|-----------------------------------------------|------------------------|
-| d3-array               | array/           | Complete |                                               | Missing: blur, intern, set ops, sort, summarize, transform |
+| d3-array               | array/           | Complete |                                               | All core and advanced features ported and tested: min, max, extent, mean, median, sum, deviation, variance, quantile, histogram, bisect, ascending, descending, range, merge, shuffle, tick_step, ticks, nice, scan, group, flat_group, pairs, zip, cross, least, greatest, least_index, greatest_index, fsum, blur (blur1d, blur2d), set operations (union, intersection, difference, symmetric_difference), sort, sort_by, summarize, transform, intern_set, intern_map |
 | d3-collection          | collection/      | Pending  |                                               |                        |
 | d3-format              | format/          | Pending  | array/, collection/                           |                        |
 | d3-time                | time/            | Pending  | array/, collection/, format/                  |                        |
