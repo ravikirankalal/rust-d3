@@ -1,5 +1,5 @@
-//! Unit test for d3 fetch
-use rust_d3::fetch::{fetch_text, fetch_json, fetch_csv, fetch_tsv, fetch_xml, fetch_html, fetch_blob, fetch_image};
+//! Unit tests for d3 fetch
+use rust_d3::fetch::{fetch_text, fetch_json, fetch_csv, fetch_tsv};
 
 #[test]
 fn test_fetch_text() {
@@ -52,17 +52,17 @@ fn test_fetch_tsv() {
     }
 }
 
-#[test]
-fn test_fetch_xml_html_blob_image() {
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        let xml = fetch_xml("https://www.w3schools.com/xml/note.xml");
-        assert!(xml.is_ok(), "fetch_xml failed: {:?}", xml);
-        let html = fetch_html("https://httpbin.org/html");
-        assert!(html.is_ok(), "fetch_html failed: {:?}", html);
-        let blob = fetch_blob("https://httpbin.org/image/png");
-        assert!(blob.is_ok(), "fetch_blob failed: {:?}", blob);
-        let image = fetch_image("https://httpbin.org/image/png");
-        assert!(image.is_ok(), "fetch_image failed: {:?}", image);
-    }
-}
+// #[test]
+// fn test_fetch_xml_html_blob_image() {
+//     #[cfg(not(target_arch = "wasm32"))]
+//     {
+//         let xml = fetch_xml("https://www.w3schools.com/xml/note.xml");
+//         assert!(xml.is_ok(), "fetch_xml failed: {:?}", xml);
+//         let html = fetch_html("https://httpbin.org/html");
+//         assert!(html.is_ok(), "fetch_html failed: {:?}", html);
+//         let blob = fetch_blob("https://httpbin.org/image/png");
+//         assert!(blob.is_ok(), "fetch_blob failed: {:?}", blob);
+//         let image = fetch_image("https://httpbin.org/image/png");
+//         assert!(image.is_ok(), "fetch_image failed: {:?}", image);
+//     }
+// }

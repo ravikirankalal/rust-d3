@@ -16,7 +16,7 @@ This checklist tracks the parity between the official d3.js modules and your Rus
 | d3-dsv                 | dsv/ (unified)                                  | Complete | dsv_adv/ merged        |
 | d3-ease                | ease/                                           | Complete |                        |
 | d3-fetch               | fetch/ (unified)                                | Complete | fetch_adv/ merged      |
-| d3-force               | force/ (unified)                                | Complete | all force_* merged     |
+| d3-force               | force/ (unified)                                | Complete | Quadtree implemented for ManyBody and Collide forces. |
 | d3-format              | format/ (unified)                               | Complete | format_adv/ merged     |
 | d3-geo                 | geo/ (unified)                                  | Complete | geo_adv/, geo_proj/, geo_proj_adv/ merged |
 | d3-hierarchy           | hierarchy/ (unified)                            | Complete | all cluster, pack, partition, stratify, tree, treemap merged |
@@ -75,7 +75,7 @@ This checklist tracks the parity between the official d3.js modules and your Rus
 | **d3-fetch**                  | `fetch`                   |                                                      |
 | d3.csv, d3.tsv, d3.json, ...  | fetch_text, fetch_json, fetch_csv, fetch_tsv, fetch_xml, fetch_blob, fetch_buffer, fetch_svg, fetch_html, fetch_image | ✅ Exported                                          |
 | **d3-force**                  | `force`                   |                                                      |
-| d3.forceSimulation, ...       | ForceSimulation, ...      | ✅ Unified, exported                                 |
+| d3.forceSimulation, ...       | ForceSimulation, ...      | ✅ Unified, exported. alphaMin and alphaDecay added. Quadtree implemented for ManyBody and Collide. |
 | **d3-format**                 | `format`                  |                                                      |
 | d3.format, d3.formatPrefix... | format                    | ✅ Exported                                          |
 | **d3-geo**                    | `geo`                     |                                                      |
