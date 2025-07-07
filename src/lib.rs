@@ -1,2 +1,4 @@
-// Only export the array module for isolated testing
+//! rust-d3 library root
+
+// Add more modules as you port them
 pub mod array;

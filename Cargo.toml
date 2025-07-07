@@ -3,13 +3,24 @@ name = "rust-d3"
 version = "0.1.0"
 edition = "2024"
 
+[lib]
+name = "rust_d3"
+path = "src/lib.rs"
+
+[[bin]]
+name = "rust-d3-bin"
+path = "src/main.rs"
+
+default-run = "rust-d3-bin"
+
 [dependencies]
 chrono = "0.4.41"
 rand = "0.9.1"
 rand_distr = "0.5.1"
-ureq = "2.9"
+ureq = "3.0.12"
 palette = "0.7.6"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
 csv = "1.3"
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "time"] }
+regex = "1.10"
