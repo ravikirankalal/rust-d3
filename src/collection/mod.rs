@@ -46,6 +46,26 @@ pub mod merge_maps;
 pub use merge_maps::merge_maps;
 pub mod invert;
 pub use invert::invert;
+pub mod find_key;
+pub use find_key::find_key;
+pub mod find_value;
+pub use find_value::find_value;
+pub mod map_filter;
+pub use map_filter::map_filter;
+pub mod map_entries;
+pub use map_entries::map_entries;
+pub mod partition_map;
+pub use partition_map::partition_map;
+pub mod update_map;
+pub use update_map::update_map;
+pub mod remove_keys;
+pub use remove_keys::remove_keys;
+pub mod retain_keys;
+pub use retain_keys::retain_keys;
+pub mod merge_with;
+pub use merge_with::merge_with;
+pub mod map_to_vec;
+pub use map_to_vec::map_to_vec;
 
 #[cfg(test)]
 mod tests {
@@ -310,6 +330,107 @@ mod tests {
         let result = rollup(&data, |x| x.0, |vs| vs.iter().map(|x| x.1).sum::<i32>());
         assert_eq!(result[&"a"], 3);
         assert_eq!(result[&"b"], 3);
+    }
+
+    #[test]
+    fn test_find_key() {
+        let mut m = HashMap::new();
+        m.insert("a", 1);
+        m.insert("b", 2);
+        assert_eq!(find_key(&m, |k| *k == "b"), Some(&"b"));
+        assert_eq!(find_key(&m, |k| *k == "z"), None);
+    }
+
+    #[test]
+    fn test_find_value() {
+        let mut m = HashMap::new();
+        m.insert("a", 1);
+        m.insert("b", 2);
+        assert_eq!(find_value(&m, |v| *v == 2), Some(&2));
+        assert_eq!(find_value(&m, |v| *v == 3), None);
+    }
+
+    #[test]
+    fn test_map_filter() {
+        let mut m = HashMap::new();
+        m.insert("a", 1);
+        m.insert("b", 2);
+        let mf = map_filter(&m, |_, v| if *v % 2 == 0 { Some(v * 10) } else { None });
+        assert_eq!(mf.get("a"), None);
+        assert_eq!(mf.get("b"), Some(&20));
+    }
+
+    #[test]
+    fn test_map_entries() {
+        let mut m = HashMap::new();
+        m.insert("a", 1);
+        m.insert("b", 2);
+        let v = map_entries(&m, |k, v| format!("{}-{}", k, v));
+        assert!(v.contains(&"a-1".to_string()));
+        assert!(v.contains(&"b-2".to_string()));
+    }
+
+    #[test]
+    fn test_partition_map() {
+        let mut m = HashMap::new();
+        m.insert("a", 1);
+        m.insert("b", 2);
+        let (even, odd) = partition_map(&m, |_, v| *v % 2 == 0);
+        assert_eq!(even.get("b"), Some(&2));
+        assert_eq!(odd.get("a"), Some(&1));
+    }
+
+    #[test]
+    fn test_update_map() {
+        let mut m = HashMap::new();
+        m.insert("a", 1);
+        m.insert("b", 2);
+        update_map(&mut m, |_, v| *v *= 10);
+        assert_eq!(m["a"], 10);
+        assert_eq!(m["b"], 20);
+    }
+
+    #[test]
+    fn test_remove_keys() {
+        let mut m = HashMap::new();
+        m.insert(1, "a");
+        m.insert(2, "b");
+        remove_keys(&mut m, vec![1]);
+        assert!(!m.contains_key(&1));
+        assert!(m.contains_key(&2));
+    }
+
+    #[test]
+    fn test_retain_keys() {
+        let mut m = HashMap::new();
+        m.insert(1, "a");
+        m.insert(2, "b");
+        retain_keys(&mut m, vec![2]);
+        assert!(!m.contains_key(&1));
+        assert!(m.contains_key(&2));
+    }
+
+    #[test]
+    fn test_merge_with() {
+        let mut a = HashMap::new();
+        a.insert("x", 1);
+        a.insert("y", 2);
+        let mut b = HashMap::new();
+        b.insert("y", 3);
+        b.insert("z", 4);
+        let merged = merge_with(&a, &b, |_, v1, v2| v1 + v2);
+        assert_eq!(merged["x"], 1);
+        assert_eq!(merged["y"], 5);
+        assert_eq!(merged["z"], 4);
+    }
+
+    #[test]
+    fn test_map_to_vec() {
+        let mut m = HashMap::new();
+        m.insert(2, "b");
+        m.insert(1, "a");
+        let v = map_to_vec(&m);
+        assert_eq!(v, vec!["a", "b"]);
     }
 }
 
