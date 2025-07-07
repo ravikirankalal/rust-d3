@@ -16,10 +16,7 @@ pub fn time_ticks(start: NaiveDateTime, end: NaiveDateTime, count: usize) -> Vec
         .collect()
 }
 
-/// D3.js: d3.timeInterval.every (stub)
-pub fn time_interval_every_placeholder() -> &'static str {
-    "timeInterval.every not implemented"
-}
+
 
 /// Checks if a year is a leap year.
 pub fn is_leap_year(year: i32) -> bool {

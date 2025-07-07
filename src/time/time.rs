@@ -27,9 +27,7 @@ pub fn format_time(dt: NaiveDateTime, fmt: &str) -> String {
     dt.format(fmt).to_string()
 }
 
-/// Placeholder for d3-time API parity.
-/// See: https://github.com/d3/d3-time#api-reference
-/// TODO: Implement full API parity with d3-time (timeInterval, timeDay, timeWeek, timeMonth, timeYear, etc.)
+
 pub fn time_day(start: NaiveDateTime, end: NaiveDateTime) -> Vec<NaiveDateTime> {
     let mut days = Vec::new();
     let mut current = start;

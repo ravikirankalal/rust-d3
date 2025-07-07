@@ -38,13 +38,4 @@ impl<T> Node<T> {
     }
 }
 
-/// Placeholder for d3-hierarchy API parity.
-/// See: https://github.com/d3/d3-hierarchy#api-reference
-/// TODO: Implement full API parity with d3-hierarchy (hierarchy, stratify, tree, cluster, pack, partition, treemap, etc.)
-pub fn hierarchy<T>(_data: T) {
-    // TODO: Implement hierarchy logic
-}
 
-pub fn stratify<T>(_data: T) {
-    // TODO: Implement stratify logic
-}

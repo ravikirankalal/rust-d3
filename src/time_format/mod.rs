@@ -39,10 +39,7 @@ pub fn time_multi_format(_dt: NaiveDateTime) -> String {
     String::new()
 }
 
-/// D3.js: d3.timeFormatLocale (stub)
-pub fn time_format_locale_placeholder() -> &'static str {
-    "timeFormatLocale not implemented"
-}
+
 
 /// Formats a date using multiple formats based on conditions (like d3.timeMultiFormat).
 pub fn time_format_multi(dt: NaiveDateTime) -> String {

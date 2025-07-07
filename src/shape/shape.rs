@@ -10,9 +10,7 @@ impl LineGenerator {
         data.iter().map(|d| accessor(d)).collect()
     }
 
-    /// Placeholder for d3-shape API parity.
-    /// See: https://github.com/d3/d3-shape#api-reference
-    /// TODO: Implement full API parity with d3-shape (area, arc, pie, line, radialArea, radialLine, symbol, etc.)
+    
 
     // D3.js area generator: returns a vector of points outlining the area under the curve
     pub fn area<T, F>(data: &[T], mut accessor: F) -> Vec<(f64, f64)>

@@ -207,9 +207,7 @@ pub fn stack_order_none<T>() {
     // TODO: Implement stack order strategies (none, ascending, descending, reverse, etc.)
 }
 
-pub fn stack_offset_none<T>() {
-    // TODO: Implement stack offset strategies (none, expand, silhouette, wiggle, diverging, etc.)
-}
+
 
 // --- Stack Advanced ---
 pub fn stack_offset_expand(series: &mut [Vec<(f64, f64)>]) {

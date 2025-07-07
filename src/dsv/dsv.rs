@@ -41,7 +41,7 @@ pub fn to_tsv(records: &[Vec<String>]) -> String {
 /// See: https://github.com/d3/d3-dsv#api-reference
 /// TODO: Implement full API parity with d3-dsv (dsvFormat, parseRows, format, formatRows, autoType, etc.)
 
-/// Placeholder for d3.dsvFormat(delimiter)
+
 pub struct DsvFormat {
     delimiter: char,
 }

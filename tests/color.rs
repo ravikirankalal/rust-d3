@@ -110,8 +110,4 @@ fn test_color_hsl_fractional_and_clamp() {
     assert_eq!(c.r, 255);
 }
 
-#[test]
-fn test_color_utils_placeholder() {
-    use rust_d3::color::color_utils_placeholder;
-    assert_eq!(color_utils_placeholder(), "color utils not implemented");
-}
+

@@ -66,8 +66,4 @@ pub fn polygon_length(polygon: &[(f64, f64)]) -> f64 {
     len
 }
 
-pub fn polygon_hull(_points: &[(f64, f64)]) -> Vec<(f64, f64)> {
-    // polygon_hull module removed; implement or stub as needed
-    // TODO: Implement convex hull algorithm here
-    todo!("convex_hull not implemented: polygon_hull module removed during unification cleanup")
-}
+

@@ -22,9 +22,7 @@ impl PathBuilder {
     pub fn to_string(&self) -> String {
         self.d.trim().to_string()
     }
-    /// Placeholder for d3-path API parity.
-    /// See: https://github.com/d3/d3-path#api-reference
-    /// TODO: Implement full API parity with d3-path (arc, quadraticCurveTo, bezierCurveTo, rect, etc.)
+    
     pub fn arc(&mut self, x: f64, y: f64, r: f64, a0: f64, a1: f64) {
         // SVG arc: A rx ry x-axis-rotation large-arc-flag sweep-flag x y
         let large_arc = if (a1 - a0).abs() > std::f64::consts::PI { 1 } else { 0 };

@@ -26,7 +26,7 @@ impl Delaunay {
             da.partial_cmp(&db).unwrap()
         }).map(|(i, _)| i)
     }
-    // TODO: Add more methods as per d3-delaunay API
+    
 }
 
 // Bowyer–Watson algorithm for Delaunay triangulation (brute-force, O(n^3))

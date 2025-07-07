@@ -26,9 +26,7 @@ pub fn bisect_right<T: PartialOrd>(arr: &[T], x: &T) -> usize {
     lo
 }
 
-/// Placeholder for d3.bisector and related bisector functions.
-/// See: https://github.com/d3/d3-array#bisector
-/// TODO: Implement full API parity with d3-array bisector functions.
+
 pub struct Bisector;
 
 impl Bisector {

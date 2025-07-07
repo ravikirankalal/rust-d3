@@ -82,7 +82,7 @@ pub use scale::{
 };
 pub use transition::TextSet;
 pub use ease::*;
-pub use interaction::*;
+
 pub use partitioning::*;
 pub use radial::*;
 pub use time_format::*;

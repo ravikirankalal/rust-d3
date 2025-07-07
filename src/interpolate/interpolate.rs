@@ -7,9 +7,7 @@ pub fn interpolate(a: f64, b: f64, t: f64) -> f64 {
     a + (b - a) * t
 }
 
-/// Placeholder for d3-interpolate API parity.
-/// See: https://github.com/d3/d3-interpolate#api-reference
-/// TODO: Implement full API parity with d3-interpolate (interpolateArray, interpolateRound, interpolateRgb, interpolateHsl, interpolateObject, etc.)
+
 pub fn interpolate_array<T>(a: &[T], b: &[T], t: f64) -> Vec<T>
 where
     T: Copy + Into<f64> + From<f64>,

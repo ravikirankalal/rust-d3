@@ -33,5 +33,5 @@ pub fn sunburst<T: Clone>(root: &Node<T>, radius: f64) -> Vec<PartitionedNode<T>
     result
 }
 
-// TODO: Implement full d3.partitioning (sunburst, treemap, etc.) with all options and accessors
+
 // (Unit tests moved to tests/integration.rs)

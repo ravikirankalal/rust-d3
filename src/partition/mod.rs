@@ -33,5 +33,5 @@ pub fn partition<T: Clone>(root: &Node<T>, width: f64, height: f64) -> Vec<Parti
     result
 }
 
-// TODO: Implement full d3.partition layout (including value, sort, size, round, etc.)
+
 // (Unit tests moved to tests/integration.rs)

@@ -1,5 +1,5 @@
 // D3 pack layout module for Rust D3
-// Provides a simple pack layout for hierarchical data (bubble packing, placeholder).
+// Provides a simple pack layout for hierarchical data (bubble packing).
 
 use crate::hierarchy::Node;
 

@@ -18,9 +18,7 @@ pub fn histogram<T: Into<f64> + Copy>(data: &[T], bins: usize) -> Vec<Vec<T>> {
     result
 }
 
-/// Placeholder for d3.bin, d3.histogram, and related binning functions.
-/// See: https://github.com/d3/d3-array#binning
-/// TODO: Implement full API parity with d3-array binning functions.
+
 pub fn bin<T: Into<f64> + PartialOrd + Copy>(values: &[T]) -> Vec<Vec<&T>> {
     if values.is_empty() {
         return vec![];

@@ -18,7 +18,4 @@ pub fn tree<T: Clone>(root: &Node<T>, depth: usize) -> Vec<(usize, usize, T)> {
     result
 }
 
-/// D3.js tree layout API stubs for full parity
-pub fn tree_layout<T>(_root: &crate::hierarchy::Node<T>) {
-    // TODO: Implement tree layout options
-}
+

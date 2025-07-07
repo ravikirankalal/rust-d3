@@ -85,7 +85,7 @@ impl Brush {
     }
 }
 
-/// Placeholder for d3.brushX and d3.brushY
+
 pub fn brush_x() -> Brush {
     Brush::new(0.0..1.0)
 }

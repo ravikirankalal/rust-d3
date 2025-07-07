@@ -64,9 +64,6 @@ pub fn ticks(domain: (f64, f64), count: usize) -> Vec<f64> {
     (0..count).map(|i| start + i as f64 * step).collect()
 }
 
-/// TODO: Implement d3-array missing functions for full parity
-/// See: https://github.com/d3/d3-array
-
 /// Returns the index of the minimum value
 pub fn min_index<T: Ord + Copy>(data: &[T]) -> Option<usize> {
     data.iter().enumerate().min_by_key(|&(_, v)| v).map(|(i, _)| i)
@@ -78,74 +75,78 @@ pub fn max_index<T: Ord + Copy>(data: &[T]) -> Option<usize> {
 }
 
 /// Returns the mode (most common value)
-pub fn mode<T: Ord + Copy>(_data: &[T]) -> Option<T> {
-    // TODO: Implement
-    None
+pub fn mode<T: Ord + Copy + std::hash::Hash>(data: &[T]) -> Option<T> {
+    use std::collections::HashMap;
+    if data.is_empty() { return None; }
+    let mut counts = HashMap::new();
+    for &x in data {
+        *counts.entry(x).or_insert(0) += 1;
+    }
+    counts.into_iter().max_by_key(|&(_, count)| count).map(|(val, _)| val)
 }
 
 /// Returns the deviation (standard deviation)
-pub fn deviation<T: Into<f64> + Copy>(_data: &[T]) -> Option<f64> {
-    // TODO: Implement
-    None
+pub fn deviation<T: Into<f64> + Copy>(data: &[T]) -> Option<f64> {
+    variance(data).map(|v| v.sqrt())
 }
 
 /// Returns the least element
-pub fn least<T: Ord + Copy>(_data: &[T]) -> Option<T> {
-    // TODO: Implement
-    None
+pub fn least<T: Ord + Copy>(data: &[T]) -> Option<T> {
+    data.iter().copied().min()
 }
 
 /// Returns the greatest element
-pub fn greatest<T: Ord + Copy>(_data: &[T]) -> Option<T> {
-    // TODO: Implement
-    None
+pub fn greatest<T: Ord + Copy>(data: &[T]) -> Option<T> {
+    data.iter().copied().max()
 }
 
 /// Returns the pairs of adjacent elements
-pub fn pairs<T: Copy>(_data: &[T]) -> Vec<(T, T)> {
-    // TODO: Implement
-    vec![]
+pub fn pairs<T: Copy>(data: &[T]) -> Vec<(T, T)> {
+    data.windows(2).map(|w| (w[0], w[1])).collect()
 }
 
 /// Returns the transpose of a 2D array
-pub fn transpose<T: Copy>(_data: &[Vec<T>]) -> Vec<Vec<T>> {
-    // TODO: Implement
-    vec![]
+pub fn transpose<T: Copy>(data: &[Vec<T>]) -> Vec<Vec<T>> {
+    if data.is_empty() { return vec![]; }
+    let len = data[0].len();
+    (0..len)
+        .map(|i| data.iter().map(|row| row[i]).collect())
+        .collect()
 }
 
 /// Returns the zip of multiple arrays
-pub fn zip<T: Copy>(_arrays: &[&[T]]) -> Vec<Vec<T>> {
-    // TODO: Implement
-    vec![]
+pub fn zip<T: Copy>(arrays: &[&[T]]) -> Vec<Vec<T>> {
+    if arrays.is_empty() { return vec![]; }
+    let len = arrays[0].len();
+    (0..len)
+        .map(|i| arrays.iter().map(|arr| arr[i]).collect())
+        .collect()
 }
 
 /// Returns the merge of multiple arrays
-pub fn merge<T: Copy>(_arrays: &[&[T]]) -> Vec<T> {
-    // TODO: Implement
-    vec![]
+pub fn merge<T: Clone>(arrays: &[Vec<T>]) -> Vec<T> {
+    arrays.iter().flat_map(|v| v.clone()).collect()
 }
 
 /// Returns the shuffled array
-pub fn shuffle<T: Copy>(_data: &mut [T]) {
-    // TODO: Implement
+pub fn shuffle<T>(data: &mut [T]) {
+    use rand::seq::SliceRandom;
+    data.shuffle(&mut rand::thread_rng());
 }
 
 /// Returns the permuted array
-pub fn permute<T: Copy>(_data: &[T], _indexes: &[usize]) -> Vec<T> {
-    // TODO: Implement
-    vec![]
+pub fn permute<T: Copy>(data: &[T], indexes: &[usize]) -> Vec<T> {
+    indexes.iter().map(|&i| data[i]).collect()
 }
 
 /// Returns the ascending order of two values
-pub fn ascending<T: Ord>(_a: T, _b: T) -> i32 {
-    // TODO: Implement
-    0
+pub fn ascending<T: Ord>(a: T, b: T) -> i32 {
+    a.cmp(&b) as i32
 }
 
 /// Returns the descending order of two values
-pub fn descending<T: Ord>(_a: T, _b: T) -> i32 {
-    // TODO: Implement
-    0
+pub fn descending<T: Ord>(a: T, b: T) -> i32 {
+    b.cmp(&a) as i32
 }
 
 /// Returns the sum of the array (d3.sum)
@@ -169,4 +170,15 @@ pub fn median<T: Into<f64> + Copy>(data: &[T]) -> Option<f64> {
     } else {
         Some(v[mid])
     }
+}
+
+pub fn variance<T: Into<f64> + Copy>(data: &[T]) -> Option<f64> {
+    let n = data.len();
+    if n == 0 { return None; }
+    let mean = data.iter().map(|&x| x.into()).sum::<f64>() / n as f64;
+    let var = data.iter().map(|&x| {
+        let d = x.into() - mean;
+        d * d
+    }).sum::<f64>() / n as f64;
+    Some(var)
 }
