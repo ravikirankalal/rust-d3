@@ -22,6 +22,8 @@ pub use format::format;
 pub mod locale;
 pub use locale::Locale;
 
+// D3-time and d3-time-format modules
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -123,3 +125,7 @@ mod tests {
         let _ = format(".2f", 1234.56); // Locale stub
     }
 }
+
+// d3-format: TODO stubs for alternate form (#) and type n
+// - Type n: locale-aware number formatting (not yet implemented)
+// - Alternate form (#): not fully tested for all types
