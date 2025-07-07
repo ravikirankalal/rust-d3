@@ -378,8 +378,6 @@ pub trait ClassedSet { fn set_classed(&mut self, name: &str, value: bool); }
 pub trait TextSet { fn set_text(&mut self, value: &str); }
 pub trait HtmlSet { fn set_html(&mut self, value: &str); }
 
-use std::rc::{Rc, Weak};
-use std::cell::RefCell;
 
 pub trait NodeLike: Clone {
     fn append(&mut self, child: Self);
