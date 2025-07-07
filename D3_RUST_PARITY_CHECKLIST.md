@@ -4,7 +4,7 @@ This checklist tracks the parity between the official d3.js modules and your Rus
 
 | D3.js Module           | Rust Equivalent? | Status   | Depends On                                    | Notes/Features Missing |
 |------------------------|------------------|----------|-----------------------------------------------|------------------------|
-| d3-array               | array/           | Complete |                                               | All D3.js d3-array features implemented and tested: min, max, extent, sum, mean, median, mode, variance, deviation, quantile, quantile_sorted, quantile_sorted_inclusive, quantile_index, quantile_sorted_index, quantile_sorted_index_inclusive, quantile_rank, quantile_sorted_rank, cumsum, ticks, tick_step, range, shuffle, permute, ascending, descending, min_index, max_index, fsum, Adder, pairs, transpose, zip, merge, least, greatest, group, rollup, flat_group, bisect, bisect_left, bisect_right, bisect_by, set operations (union, intersection, difference), cross, bin, sturges_thresholds, freedman_diaconis_thresholds, scott_thresholds, rice_thresholds, sqrt_thresholds, blur, Interner. No missing or incomplete features. |
+| d3-array               | array/           | Pending  |                                               |                        |
 | d3-collection          | collection/      | Pending  |                                               |                        |
 | d3-format              | format/          | Pending  | array/, collection/                           |                        |
 | d3-time                | time/            | Pending  | array/, collection/, format/                  |                        |
