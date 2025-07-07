@@ -1,6 +1,6 @@
 //! Integration test for array_utils (group, rollup)
 
-use rust_d3::array::{group, rollup, flat_group, fsum, Adder};
+use rust_d3::array::{group, rollup, flat_group, Adder};
 
 #[test]
 fn test_group() {
@@ -306,4 +306,262 @@ fn test_interner() {
 
     // Test that different integers return different values
     assert_ne!(ir1, ir2);
+}
+
+#[test]
+fn test_quantile_sorted() {
+    let sorted = [1.0, 2.0, 3.0, 4.0, 5.0];
+    assert_eq!(rust_d3::array::quantile_sorted(&sorted, 0.0), Some(1.0));
+    assert_eq!(rust_d3::array::quantile_sorted(&sorted, 0.5), Some(3.0));
+    assert_eq!(rust_d3::array::quantile_sorted(&sorted, 1.0), Some(5.0));
+    assert_eq!(rust_d3::array::quantile_sorted(&[] as &[f64], 0.5), None);
+}
+
+#[test]
+fn test_quantile_index() {
+    let data = [10.0, 20.0, 30.0, 40.0, 50.0];
+    let idx = rust_d3::array::quantile_index(&data, 0.5).unwrap();
+    assert!(data[idx] == 30.0);
+    let idx0 = rust_d3::array::quantile_index(&data, 0.0).unwrap();
+    assert!(data[idx0] == 10.0);
+    let idx1 = rust_d3::array::quantile_index(&data, 1.0).unwrap();
+    assert!(data[idx1] == 50.0);
+    assert!(rust_d3::array::quantile_index(&[] as &[f64], 0.5).is_none());
+}
+
+#[test]
+fn test_quantile_sorted_index() {
+    let sorted = [1.0, 2.0, 3.0, 4.0, 5.0];
+    assert_eq!(rust_d3::array::quantile_sorted_index(&sorted, 0.0), Some(0));
+    assert_eq!(rust_d3::array::quantile_sorted_index(&sorted, 0.5), Some(2));
+    assert_eq!(rust_d3::array::quantile_sorted_index(&sorted, 1.0), Some(4));
+    assert_eq!(rust_d3::array::quantile_sorted_index(&[] as &[f64], 0.5), None);
+}
+
+#[test]
+fn test_quantile_sorted_inclusive() {
+    let sorted = [1.0, 2.0, 3.0, 4.0, 5.0];
+    assert_eq!(rust_d3::array::quantile_sorted_inclusive(&sorted, 0.0), Some(1.0));
+    assert_eq!(rust_d3::array::quantile_sorted_inclusive(&sorted, 0.5), Some(3.0));
+    assert_eq!(rust_d3::array::quantile_sorted_inclusive(&sorted, 1.0), Some(5.0));
+    assert_eq!(rust_d3::array::quantile_sorted_inclusive(&[] as &[f64], 0.5), None);
+}
+
+#[test]
+fn test_quantile_rank() {
+    let sorted = [1.0, 2.0, 3.0, 4.0, 5.0];
+    assert!((rust_d3::array::quantile_rank(&sorted, 3.0).unwrap() - 0.5).abs() < 1e-6);
+    assert!((rust_d3::array::quantile_rank(&sorted, 1.0).unwrap() - 0.0).abs() < 1e-6);
+    assert!((rust_d3::array::quantile_rank(&sorted, 5.0).unwrap() - 1.0).abs() < 1e-6);
+    assert!(rust_d3::array::quantile_rank(&[] as &[f64], 3.0).is_none());
+}
+
+#[test]
+fn test_quantile_sorted_rank() {
+    let sorted = [1.0, 2.0, 3.0, 4.0, 5.0];
+    assert!((rust_d3::array::quantile_sorted_rank(&sorted, 3.0).unwrap() - 0.5).abs() < 1e-6);
+}
+
+#[test]
+fn test_quantile_sorted_index_inclusive() {
+    let sorted = [1.0, 2.0, 3.0, 4.0, 5.0];
+    assert_eq!(rust_d3::array::quantile_sorted_index_inclusive(&sorted, 0.0), Some(0));
+    assert_eq!(rust_d3::array::quantile_sorted_index_inclusive(&sorted, 0.5), Some(2));
+    assert_eq!(rust_d3::array::quantile_sorted_index_inclusive(&sorted, 1.0), Some(4));
+    assert_eq!(rust_d3::array::quantile_sorted_index_inclusive(&[] as &[f64], 0.5), None);
+}
+
+#[test]
+fn test_rice_thresholds() {
+    let data = [1.0, 2.0, 3.0, 4.0, 5.0];
+    let min = 1.0;
+    let max = 5.0;
+    let thresholds = rust_d3::array::rice_thresholds(&data, min, max);
+    assert!(thresholds.len() >= 2);
+    assert!((thresholds[0] - min).abs() < 1e-6);
+    assert!(thresholds.last().unwrap() >= &max);
+}
+
+#[test]
+fn test_sqrt_thresholds() {
+    let data = [1.0, 2.0, 3.0, 4.0, 5.0];
+    let min = 1.0;
+    let max = 5.0;
+    let thresholds = rust_d3::array::sqrt_thresholds(&data, min, max);
+    assert!(thresholds.len() >= 2);
+    assert!((thresholds[0] - min).abs() < 1e-6);
+    assert!(thresholds.last().unwrap() >= &max);
+}
+
+#[test]
+fn test_sturges_thresholds() {
+    let data = [1.0, 2.0, 3.0, 4.0, 5.0];
+    let min = 1.0;
+    let max = 5.0;
+    let thresholds = rust_d3::array::sturges_thresholds(&data, min, max);
+    assert!(thresholds.len() >= 2);
+    assert!((thresholds[0] - min).abs() < 1e-6);
+    assert!((thresholds.last().unwrap() - max).abs() < 1e-6 || thresholds.last().unwrap() > &max);
+}
+
+#[test]
+fn test_freedman_diaconis_thresholds() {
+    let data = [1.0, 2.0, 3.0, 4.0, 5.0];
+    let min = 1.0;
+    let max = 5.0;
+    let thresholds = rust_d3::array::freedman_diaconis_thresholds(&data, min, max);
+    assert!(thresholds.len() >= 2);
+    assert!((thresholds[0] - min).abs() < 1e-6);
+    assert!(thresholds.last().unwrap() >= &max);
+}
+
+#[test]
+fn test_scott_thresholds() {
+    let data = [1.0, 2.0, 3.0, 4.0, 5.0];
+    let min = 1.0;
+    let max = 5.0;
+    let thresholds = rust_d3::array::scott_thresholds(&data, min, max);
+    assert!(thresholds.len() >= 2);
+    assert!((thresholds[0] - min).abs() < 1e-6);
+    assert!(thresholds.last().unwrap() >= &max);
+}
+
+#[test]
+fn test_bin_sturges() {
+    use rust_d3::array::{bin, sturges_thresholds};
+    let data = [1.0, 2.0, 3.0, 4.0, 5.0];
+    let bins = bin(&data, |x| *x, sturges_thresholds);
+    let total: usize = bins.iter().map(|b| b.data.len()).sum();
+    assert_eq!(total, data.len());
+    assert!(!bins.is_empty());
+}
+
+#[test]
+fn test_range() {
+    let r = rust_d3::array::range(0.0, 1.0, 0.2);
+    let expected = vec![0.0, 0.2, 0.4, 0.6, 0.8];
+    assert_eq!(r.len(), expected.len());
+    for (a, b) in r.iter().zip(expected.iter()) {
+        assert!((a - b).abs() < 1e-9);
+    }
+    let r_neg = rust_d3::array::range(1.0, 0.0, -0.2);
+    let expected_neg = vec![1.0, 0.8, 0.6, 0.4, 0.2];
+    assert_eq!(r_neg.len(), expected_neg.len());
+    for (a, b) in r_neg.iter().zip(expected_neg.iter()) {
+        assert!((a - b).abs() < 1e-9);
+    }
+    let r_zero = rust_d3::array::range(0.0, 0.0, 1.0);
+    assert!(r_zero.is_empty());
+    // Check that the stop value is not included
+    let r2 = rust_d3::array::range(0.0, 1.0, 0.3);
+    for v in &r2 { assert!(*v < 1.0); }
+    let r2_neg = rust_d3::array::range(1.0, 0.0, -0.3);
+    for v in &r2_neg { assert!(*v > 0.0); }
+}
+
+#[test]
+fn test_ticks() {
+    let t = rust_d3::array::ticks((0.0, 1.0), 5);
+    assert_eq!(t, vec![0.0, 0.25, 0.5, 0.75, 1.0]);
+    let t_one = rust_d3::array::ticks((2.0, 2.0), 1);
+    assert_eq!(t_one, vec![2.0]);
+    let t_zero = rust_d3::array::ticks((0.0, 1.0), 0);
+    assert!(t_zero.is_empty());
+}
+
+#[test]
+fn test_min_index_max_index() {
+    let data = [3, 1, 4, 2];
+    assert_eq!(rust_d3::array::min_index(&data), Some(1));
+    assert_eq!(rust_d3::array::max_index(&data), Some(2));
+    let empty: [i32; 0] = [];
+    assert_eq!(rust_d3::array::min_index(&empty), None);
+    assert_eq!(rust_d3::array::max_index(&empty), None);
+}
+
+#[test]
+fn test_bin_empty() {
+    use rust_d3::array::{bin, sturges_thresholds};
+    let data: [f64; 0] = [];
+    let bins = bin(&data, |x| *x, sturges_thresholds);
+    assert!(bins.is_empty());
+}
+
+#[test]
+fn test_quantile_sorted_inclusive_out_of_bounds() {
+    let sorted = [1.0, 2.0, 3.0];
+    assert_eq!(rust_d3::array::quantile_sorted_inclusive(&sorted, -0.1), None);
+    assert_eq!(rust_d3::array::quantile_sorted_inclusive(&sorted, 1.1), None);
+}
+
+#[test]
+fn test_quantile_sorted_index_inclusive_out_of_bounds() {
+    let sorted = [1.0, 2.0, 3.0];
+    assert_eq!(rust_d3::array::quantile_sorted_index_inclusive(&sorted, -0.1), None);
+    assert_eq!(rust_d3::array::quantile_sorted_index_inclusive(&sorted, 1.1), None);
+}
+
+#[test]
+fn test_quantile_index_out_of_bounds() {
+    let data = [1.0, 2.0, 3.0];
+    assert_eq!(rust_d3::array::quantile_index(&data, -0.1), None);
+    assert_eq!(rust_d3::array::quantile_index(&data, 1.1), None);
+}
+
+#[test]
+fn test_quantile_sorted_index_out_of_bounds() {
+    let sorted = [1.0, 2.0, 3.0];
+    assert_eq!(rust_d3::array::quantile_sorted_index(&sorted, -0.1), None);
+    assert_eq!(rust_d3::array::quantile_sorted_index(&sorted, 1.1), None);
+}
+
+#[test]
+fn test_quantile_rank_out_of_bounds() {
+    let sorted = [1.0, 2.0, 3.0];
+    assert!(rust_d3::array::quantile_rank(&sorted, 0.0).unwrap() <= 0.0);
+    assert!(rust_d3::array::quantile_rank(&sorted, 4.0).unwrap() >= 1.0);
+}
+
+#[test]
+fn test_tick_step_edge_cases() {
+    assert_eq!(rust_d3::array::tick_step(0.0, 0.0, 0), 0.0);
+    assert_eq!(rust_d3::array::tick_step(1.0, 1.0, 1), 0.0);
+}
+
+#[test]
+fn test_shuffle_empty() {
+    let mut data: [i32; 0] = [];
+    rust_d3::array::shuffle(&mut data);
+    assert!(data.is_empty());
+}
+
+#[test]
+fn test_merge_nested_empty() {
+    let arrays: Vec<Vec<i32>> = vec![vec![], vec![], vec![]];
+    let merged: Vec<i32> = rust_d3::array::merge(&arrays);
+    assert!(merged.is_empty());
+}
+
+#[test]
+fn test_cross_empty() {
+    let a: [i32; 0] = [];
+    let b: [i32; 0] = [];
+    let result = rust_d3::array::cross(&a, &b);
+    assert!(result.is_empty());
+}
+
+#[test]
+fn test_zip_jagged() {
+    let a = [1, 2];
+    let b = [3];
+    let zipped = std::panic::catch_unwind(|| rust_d3::array::zip(&[&a, &b]));
+    assert!(zipped.is_err() || zipped.as_ref().map(|z| z.len()).unwrap_or(0) == 1);
+}
+
+#[test]
+fn test_transpose_jagged() {
+    let data = vec![vec![1, 2], vec![3]];
+    // Should panic or return only as many columns as the shortest row
+    let result = std::panic::catch_unwind(|| rust_d3::array::transpose(&data));
+    assert!(result.is_err() || result.is_ok()); // Accept either, but should not crash the test runner
 }
