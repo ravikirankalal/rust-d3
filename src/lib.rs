@@ -1,43 +1,156 @@
-//! # Rust D3
-//!
-//! A Rust library for D3-style data visualizations.
-//!
-//! This library provides tools for creating various types of charts and data visualizations,
-//! similar to the popular D3.js library but written in Rust.
-//!
-//! ## Features
-//!
-//! - Bar charts
-//! - Line charts
-//! - Pie charts
-//! - Customizable scales and axes
-//! - SVG output generation
-//!
-//! ## Example
-//!
-//! ```rust
-//! use rust_d3::charts::{BarChart, Chart};
-//! use rust_d3::data::DataPoint;
-//!
-//! let data = vec![
-//!     DataPoint::new("A", 10.0),
-//!     DataPoint::new("B", 20.0),
-//!     DataPoint::new("C", 15.0),
-//! ];
-//!
-//! let chart = BarChart::new()
-//!     .width(400)
-//!     .height(300)
-//!     .data(data);
-//!
-//! let svg = chart.render();
-//! ```
+pub mod axis;
+pub mod scale;
+pub mod selection;
+pub mod color;
+pub mod shape;
+pub mod shape_adv;
+pub mod hierarchy;
+pub mod array;
+pub mod interpolate;
+pub mod interpolate_adv;
+pub mod time;
+pub mod force;
+pub mod transition;
+pub mod quadtree;
+pub mod voronoi;
+pub mod statistics;
+pub mod binning;
+pub mod stack;
+pub mod cluster;
+pub mod tree;
+pub mod pack;
+pub mod partition;
+pub mod bundle;
+pub mod chord;
+pub mod polygon;
+pub mod partitioning;
+pub mod polygon_hull;
+pub mod bisector;
+pub mod extent;
+pub mod nice;
+pub mod random;
+pub mod format;
+pub mod time_format;
+pub mod ease;
+pub mod timer;
+pub mod dispatch;
+pub mod path;
+pub mod geo;
+pub mod contour;
+pub mod fetch;
+pub mod dsv;
+pub mod interaction;
+pub mod stratify;
+pub mod brush;
+pub mod zoom;
+pub mod drag;
+pub mod treemap;
+pub mod stack_adv;
+pub mod partition_adv;
+pub mod pack_adv;
+pub mod chord_adv;
+pub mod bundle_adv;
+pub mod geo_adv;
+pub mod shape_utils;
+pub mod array_utils;
+pub mod interpolate_utils;
+pub mod color_utils;
+pub mod force_adv;
+pub mod radial;
+pub mod collection;
+pub mod partitioning_adv;
+pub mod shape_adv2;
+pub mod geo_proj;
+pub mod curve;
+pub mod symbol;
+pub mod treemap_adv;
+pub mod cluster_adv;
+pub mod collection_adv;
+pub mod dispatch_adv;
+pub mod selection_adv;
+pub mod transition_adv;
+pub mod force_manybody;
+pub mod force_collide;
+pub mod force_link;
+pub mod force_center;
+pub mod force_x;
+pub mod force_y;
+pub mod force_radial;
+pub mod force_bound;
+pub mod brush_adv;
+pub mod zoom_adv;
+pub mod drag_adv;
+pub mod time_adv;
+pub mod dsv_adv;
+pub mod fetch_adv;
+pub mod color_adv;
+pub mod interpolate_adv2;
+pub mod geo_proj_adv;
+pub mod time_format_adv;
+pub mod array_utils_adv;
+pub mod color_utils_adv;
+pub mod format_adv;
+pub mod extent_adv;
+pub mod curve_adv2;
+pub mod pack_utils;
+pub mod scale_chromatic;
+pub mod delaunay;
 
-pub mod charts;
-pub mod data;
-pub mod scales;
-pub mod svg_utils;
+pub fn add(left: u64, right: u64) -> u64 {
+    left + right
+}
 
-pub use charts::*;
-pub use data::*;
-pub use scales::*;
+pub use selection::Selection;
+pub use array::{min, max, extent, quantile, cumsum, range, ticks};
+pub use axis::Axis;
+pub use shape::LineGenerator;
+pub use shape_adv::{area, arc};
+pub use hierarchy::Node;
+pub use interpolate::interpolate;
+pub use interpolate_adv::{interpolate_array, interpolate_color_rgb};
+pub use time::{TimeScale, format_time};
+pub use force::{ForceNode, ForceSimulation};
+pub use transition::Transition;
+pub use quadtree::{Point, Quadtree};
+pub use voronoi::{VoronoiCell, VoronoiDiagram};
+pub use statistics::{mean, sum, median, variance};
+pub use binning::histogram;
+pub use bisector::{bisect_left, bisect_right};
+pub use bundle::bundle;
+pub use chord::{ChordMatrix, Chord, chord};
+pub use cluster::cluster;
+pub use dispatch::Dispatcher;
+pub use dsv::{parse_csv, to_csv, parse_tsv, to_tsv};
+pub use fetch::fetch_text;
+pub use format::{format_comma, format_fixed};
+
+pub use ease::{linear, quad_in, quad_out, quad_in_out};
+pub use geo::equirectangular;
+pub use nice::nice;
+pub use pack::{PackNode, pack};
+pub use partition::{PartitionNode, partition};
+pub use partitioning::{PartitionedNode, sunburst};
+pub use path::PathBuilder;
+pub use polygon::{area as polygon_area, centroid as polygon_centroid, contains as polygon_contains};
+pub use polygon_hull::convex_hull;
+pub use random::{random_uniform, random_normal, random_exponential};
+pub use stack::stack;
+pub use stratify::{FlatNode, stratify};
+pub use time_format::{format_time as time_format, parse_time as time_parse};
+pub use timer::{timeout, interval, now as timer_now};
+pub use tree::tree;
+pub use contour::{contours, ContourLine};
+pub use brush::Brush;
+pub use zoom::Zoom;
+pub use drag::DragState;
+
+pub use radial::radial_layout;
+pub use symbol::symbol_circle;
+
+pub use scale_chromatic::{
+    scheme_category10, scheme_accent, scheme_dark2, scheme_paired, scheme_set1, scheme_set2, scheme_set3, scheme_pastel1, scheme_pastel2, scheme_tableau10,
+    interpolate_viridis, interpolate_inferno, interpolate_plasma, interpolate_magma
+};
+pub use pack_adv::{PackConfig, pack_with_config};
+pub use crate::stack::builder::{Stack, StackedSeries, SeriesMeta};
+pub use treemap_adv::{TreemapTiler, TreemapTiling};
