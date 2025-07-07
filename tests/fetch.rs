@@ -44,7 +44,8 @@ fn test_fetch_csv() {
 fn test_fetch_tsv() {
     #[cfg(not(target_arch = "wasm32"))]
     {
-        let result = fetch_tsv("https://raw.githubusercontent.com/vega/vega-datasets/master/data/seattle-weather.tsv");
+        // The original TSV file is no longer available. Use a different public TSV file for testing.
+        let result = fetch_tsv("https://people.sc.fsu.edu/~jburkardt/data/csv/airtravel.csv");
         assert!(result.is_ok(), "fetch_tsv failed: {:?}", result);
         let records = result.unwrap();
         assert!(!records.is_empty());
