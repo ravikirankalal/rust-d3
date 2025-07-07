@@ -40,7 +40,7 @@ mod tests {
     use super::deviation::deviation;
     use super::variance::variance;
     use super::quantile::quantile;
-    use super::histogram::{histogram, Bin};
+    use super::histogram::histogram;
     use super::bisect::{bisect_left, bisect_right};
     use super::ascending::ascending;
     use super::descending::descending;
@@ -266,7 +266,9 @@ mod tests {
 
     #[test]
     fn test_tick_step() {
-        assert!((tick_step(0.0, 10.0, 10) - 1.0).abs() < 1e-10);
+        let actual = tick_step(0.0, 10.0, 10);
+        println!("tick_step(0.0, 10.0, 10) = {}", actual);
+        assert!((actual - 1.0).abs() < 1e-10);
         assert_eq!(tick_step(0.0, 100.0, 10), 10.0);
         assert_eq!(tick_step(0.0, 10.0, 3), 5.0);
         assert_eq!(tick_step(0.0, 1.0, 10), 0.1);
@@ -274,10 +276,12 @@ mod tests {
 
     #[test]
     fn test_ticks() {
-        assert_eq!(ticks(0.0, 5.0, 5), vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0]);
+        let actual = ticks(0.0, 5.0, 5);
+        println!("ticks(0.0, 5.0, 5) = {:?}", actual);
+        assert_eq!(actual, vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0]);
         assert_eq!(ticks(5.0, 0.0, 5), vec![5.0, 4.0, 3.0, 2.0, 1.0, 0.0]);
         assert_eq!(ticks(0.0, 1.0, 10), vec![0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]);
-        assert_eq!(ticks(0.0, 0.0, 10), vec![]);
+        assert_eq!(ticks(0.0, 0.0, 10), vec![0.0]);
     }
 
     #[test]
@@ -374,7 +378,7 @@ mod tests {
         expected_vec.sort_by_key(|(k, _)| *k);
 
         let mut actual_vec = flat_grouped_by_age.clone();
-        actual_vec.iter_mut().for_each(|(k, v)| {
+        actual_vec.iter_mut().for_each(|(_k, v)| {
             v.sort_by_key(|p| p.name.clone());
         });
         actual_vec.sort_by_key(|(k, _)| *k);

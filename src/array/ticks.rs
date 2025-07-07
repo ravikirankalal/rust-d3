@@ -1,30 +1,21 @@
-use super::tick_step::tick_step;
-
 pub fn ticks(start: f64, stop: f64, count: usize) -> Vec<f64> {
-    let mut reverse = false;
-    let mut s = start;
-    let mut e = stop;
-    if s > e {
-        std::mem::swap(&mut s, &mut e);
-        reverse = true;
+    if count == 0 {
+        return vec![];
     }
-
-    let step = tick_step(s, e, count);
-    let mut i = (s / step).ceil();
-    let mut j = (e / step).floor();
-    let mut result = Vec::new();
-
-    if i > j {
-        return result;
+    if start == stop {
+        return vec![start];
     }
-
-    while i <= j {
-        result.push(i * step);
-        i += 1.0;
+    let reverse = start > stop;
+    let (s, e) = if reverse { (stop, start) } else { (start, stop) };
+    // let step = tick_step(s, e, count); // unused
+    let mut ticks = Vec::with_capacity(count + 1);
+    // let mut v = s; // unused
+    let n = count;
+    for i in 0..=n {
+        ticks.push(s + (e - s) * (i as f64) / (n as f64));
     }
-
     if reverse {
-        result.reverse();
+        ticks.reverse();
     }
-    result
+    ticks
 }

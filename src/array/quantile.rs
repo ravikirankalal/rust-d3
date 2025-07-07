@@ -7,7 +7,7 @@ pub fn quantile(arr: &[f64], p: f64) -> Option<f64> {
     }
 
     let n = arr.len();
-    let index = (p * (n as f64 - 1.0));
+    let index = p * (n as f64 - 1.0);
     let index_floor = index.floor() as usize;
     let index_ceil = index.ceil() as usize;
 
