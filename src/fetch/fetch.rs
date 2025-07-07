@@ -1,108 +1,76 @@
-//! D3 Fetch module
-//! Provides synchronous HTTP fetch using ureq (native only).
+use ureq;
+use serde_json::Value;
+use csv::ReaderBuilder;
+use std::io::Read;
 
-#[cfg(not(target_arch = "wasm32"))]
 pub fn fetch_text(url: &str) -> Result<String, String> {
-    match ureq::get(url).call() {
-        Ok(resp) => resp.into_string().map_err(|e| e.to_string()),
-        Err(e) => Err(e.to_string()),
-    }
+    ureq::get(url).call().map_err(|e| e.to_string())?.into_string().map_err(|e| e.to_string())
 }
 
-#[cfg(target_arch = "wasm32")]
-pub fn fetch_text(_url: &str) -> Result<String, String> {
-    Err("fetch not supported on wasm32".to_string())
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-pub fn fetch_json(url: &str) -> Result<serde_json::Value, String> {
-    let text = fetch_text(url)?;
+pub fn fetch_json(url: &str) -> Result<Value, String> {
+    let resp = ureq::get(url).call().map_err(|e| e.to_string())?;
+    let text = resp.into_string().map_err(|e| e.to_string())?;
     serde_json::from_str(&text).map_err(|e| e.to_string())
 }
 
-#[cfg(target_arch = "wasm32")]
-pub fn fetch_json(_url: &str) -> Result<serde_json::Value, String> {
-    Err("fetch not supported on wasm32".to_string())
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-pub fn fetch_csv(url: &str) -> Result<Vec<csv::StringRecord>, String> {
-    let text = fetch_text(url)?;
-    let mut rdr = csv::Reader::from_reader(text.as_bytes());
+pub fn fetch_csv(url: &str) -> Result<Vec<std::collections::HashMap<String, String>>, String> {
+    let resp = ureq::get(url).call().map_err(|e| e.to_string())?;
+    let mut reader = ReaderBuilder::new().from_reader(resp.into_reader());
+    let headers = reader.headers().map_err(|e| e.to_string())?.clone();
     let mut records = Vec::new();
-    for result in rdr.records() {
+    for result in reader.into_records() {
         let record = result.map_err(|e| e.to_string())?;
-        records.push(record);
+        let mut map = std::collections::HashMap::new();
+        for (i, value) in record.iter().enumerate() {
+            if let Some(header) = headers.get(i) {
+                map.insert(header.to_string(), value.to_string());
+            }
+        }
+        records.push(map);
     }
     Ok(records)
 }
 
-#[cfg(target_arch = "wasm32")]
-pub fn fetch_csv(_url: &str) -> Result<Vec<csv::StringRecord>, String> {
-    Err("fetch not supported on wasm32".to_string())
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-pub fn fetch_tsv(url: &str) -> Result<Vec<csv::StringRecord>, String> {
-    let text = fetch_text(url)?;
-    let mut rdr = csv::ReaderBuilder::new().delimiter(b'\t').from_reader(text.as_bytes());
+pub fn fetch_tsv(url: &str) -> Result<Vec<std::collections::HashMap<String, String>>, String> {
+    let resp = ureq::get(url).call().map_err(|e| e.to_string())?;
+    let mut reader = ReaderBuilder::new().delimiter(b'\t').from_reader(resp.into_reader());
+    let headers = reader.headers().map_err(|e| e.to_string())?.clone();
     let mut records = Vec::new();
-    for result in rdr.records() {
+    for result in reader.into_records() {
         let record = result.map_err(|e| e.to_string())?;
-        records.push(record);
+        let mut map = std::collections::HashMap::new();
+        for (i, value) in record.iter().enumerate() {
+            if let Some(header) = headers.get(i) {
+                map.insert(header.to_string(), value.to_string());
+            }
+        }
+        records.push(map);
     }
     Ok(records)
 }
 
-#[cfg(target_arch = "wasm32")]
-pub fn fetch_tsv(_url: &str) -> Result<Vec<csv::StringRecord>, String> {
-    Err("fetch not supported on wasm32".to_string())
-}
-
-#[cfg(not(target_arch = "wasm32"))]
 pub fn fetch_xml(url: &str) -> Result<String, String> {
-    fetch_text(url) // Just return the XML as string; parsing can be added if needed
+    ureq::get(url).call().map_err(|e| e.to_string())?.into_string().map_err(|e| e.to_string())
 }
 
-#[cfg(target_arch = "wasm32")]
-pub fn fetch_xml(_url: &str) -> Result<String, String> {
-    Err("fetch not supported on wasm32".to_string())
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-pub fn fetch_html(url: &str) -> Result<String, String> {
-    fetch_text(url) // Just return the HTML as string
-}
-
-#[cfg(target_arch = "wasm32")]
-pub fn fetch_html(_url: &str) -> Result<String, String> {
-    Err("fetch not supported on wasm32".to_string())
-}
-
-#[cfg(not(target_arch = "wasm32"))]
 pub fn fetch_blob(url: &str) -> Result<Vec<u8>, String> {
-    use std::io::Read;
-    match ureq::get(url).call() {
-        Ok(resp) => {
-            let mut buf = Vec::new();
-            resp.into_reader().read_to_end(&mut buf).map_err(|e| e.to_string())?;
-            Ok(buf)
-        },
-        Err(e) => Err(e.to_string()),
-    }
+    let mut buf = Vec::new();
+    ureq::get(url).call().map_err(|e| e.to_string())?.into_reader().read_to_end(&mut buf).map_err(|e| e.to_string())?;
+    Ok(buf)
 }
 
-#[cfg(target_arch = "wasm32")]
-pub fn fetch_blob(_url: &str) -> Result<Vec<u8>, String> {
-    Err("fetch not supported on wasm32".to_string())
+pub fn fetch_buffer(url: &str) -> Result<Vec<u8>, String> {
+    fetch_blob(url) // In Rust, blob and buffer are often handled similarly as Vec<u8>
 }
 
-#[cfg(not(target_arch = "wasm32"))]
+pub fn fetch_svg(url: &str) -> Result<String, String> {
+    ureq::get(url).call().map_err(|e| e.to_string())?.into_string().map_err(|e| e.to_string())
+}
+
+pub fn fetch_html(url: &str) -> Result<String, String> {
+    fetch_text(url)
+}
+
 pub fn fetch_image(url: &str) -> Result<Vec<u8>, String> {
     fetch_blob(url)
-}
-
-#[cfg(target_arch = "wasm32")]
-pub fn fetch_image(_url: &str) -> Result<Vec<u8>, String> {
-    Err("fetch not supported on wasm32".to_string())
 }

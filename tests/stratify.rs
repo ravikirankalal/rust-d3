@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use rust_d3::stratify::{stratify, FlatNode, stratify_parent_id};
-    use rust_d3::hierarchy::hierarchy::Node;
+    
 
     #[test]
     fn test_stratify_basic() {

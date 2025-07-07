@@ -129,9 +129,9 @@ fn test_axis_svg_and_label() {
 
 #[test]
 fn test_axis_svg_with_time_scale() {
-    let d0 = Utc.ymd(2020, 1, 1).and_hms(0, 0, 0);
-    let d1 = Utc.ymd(2020, 1, 2).and_hms(0, 0, 0);
-    let scale = TimeScale::new((d0, d1), (0.0, 24.0));
+    let d0 = Utc.with_ymd_and_hms(2020, 1, 1, 0, 0, 0).unwrap();
+    let d1 = Utc.with_ymd_and_hms(2020, 1, 2, 0, 0, 0).unwrap();
+    let _scale = TimeScale::new((d0, d1), (0.0, 24.0));
     let axis = Axis::new(3, AxisOrientation::Bottom)
         .with_label("Time Axis");
     let svg = axis.to_svg(AxisScale::Linear(&LinearScale::new((0.0, 10.0), (0.0, 100.0))));

@@ -46,12 +46,12 @@ This checklist tracks the parity between the official d3.js modules and your Rus
 |-------------------------------|---------------------------|------------------------------------------------------|
 | **d3-array**                  | `array`                   |                                                      |
 | d3.min, d3.max, d3.extent     | min, max, extent          | ✅ Unified, exported                                 |
-| d3.sum, d3.mean, d3.median    | (check)                   | ⚠️ Not shown in exports, check for implementation    |
-| d3.quantile, d3.cumsum        | quantile, cumsum          | ✅ Exported                                           |
+| d3.sum, d3.mean, d3.median    | sum, mean, median         | ✅ Exported                                          |
+| d3.quantile, d3.cumsum        | quantile, cumsum          | ✅ Exported                                          |
 | d3.ticks, d3.tickStep         | ticks                     | ✅ Exported (tickStep: check)                        |
-| d3.range, d3.shuffle, ...     | (check)                   | ⚠️ Not shown, check for utility coverage             |
-| d3.group, d3.rollup           | group, rollup             | ✅ Present in tests, check for export                |
-| d3.bisect, d3.ascending, ...  | bisector, ...             | ⚠️ Check for bisector module                         |
+| d3.range, d3.shuffle, ...     | range, shuffle, permute, ascending, descending, min_index, max_index, fsum, Adder, flatten, sum, mean, median, mode, variance, deviation, pairs, transpose, zip, least, greatest | ✅ Exported                                          |
+| d3.group, d3.rollup           | group, rollup, flat_group | ✅ Exported                                          |
+| d3.bisect, d3.ascending, ...  | bisect, ascending, descending | ✅ Exported                                          |
 | **d3-axis**                   | `axis`                    |                                                      |
 | d3.axisTop, d3.axisBottom...  | Axis                      | ✅ Unified, exported                                 |
 | **d3-brush**                  | `brush`                   |                                                      |
@@ -61,7 +61,7 @@ This checklist tracks the parity between the official d3.js modules and your Rus
 | **d3-color**                  | `color`                   |                                                      |
 | d3.color, d3.rgb, d3.hsl, ... | Color, ColorScale         | ✅ Unified, exported                                 |
 | **d3-contour**                | `contour`                 |                                                      |
-| d3.contours, d3.contourDensity| contours, ContourLine     | ✅ Exported (contourDensity: check)                  |
+| d3.contours, d3.contourDensity| contours, ContourLine, contour_density, ContourDensity | ✅ Exported                                          |
 | **d3-delaunay**               | `delaunay`, `voronoi`     |                                                      |
 | d3.Delaunay, d3.Voronoi       | Delaunay, VoronoiDiagram  | ✅ Exported                                          |
 | **d3-dispatch**               | `dispatch`                |                                                      |
@@ -71,15 +71,15 @@ This checklist tracks the parity between the official d3.js modules and your Rus
 | **d3-dsv**                    | `dsv`                     |                                                      |
 | d3.csvParse, d3.tsvParse, ... | parse_csv, parse_tsv, ... | ✅ Exported                                          |
 | **d3-ease**                   | `ease`                    |                                                      |
-| d3.easeLinear, ...            | (check)                   | ⚠️ Not shown, check for module                       |
+| d3.easeLinear, ...            | linear, quad_in, quad_out, quad_in_out, cubic_in, cubic_out, cubic_in_out, poly_in, poly_out, poly_in_out, sin_in, sin_out, sin_in_out, exp_in, exp_out, exp_in_out, circle_in, circle_out, circle_in_out, bounce_in, bounce_out, bounce_in_out, back_in, back_out, back_in_out, elastic_in, elastic_out, elastic_in_out | ✅ Exported                                          |
 | **d3-fetch**                  | `fetch`                   |                                                      |
-| d3.csv, d3.tsv, d3.json, ...  | fetch_text                | ⚠️ Only fetch_text exported, check for others        |
+| d3.csv, d3.tsv, d3.json, ...  | fetch_text, fetch_json, fetch_csv, fetch_tsv, fetch_xml, fetch_blob, fetch_buffer, fetch_svg, fetch_html, fetch_image | ✅ Exported                                          |
 | **d3-force**                  | `force`                   |                                                      |
 | d3.forceSimulation, ...       | ForceSimulation, ...      | ✅ Unified, exported                                 |
 | **d3-format**                 | `format`                  |                                                      |
 | d3.format, d3.formatPrefix... | format                    | ✅ Exported                                          |
 | **d3-geo**                    | `geo`                     |                                                      |
-| d3.geoPath, d3.geoMercator... | equirectangular           | ⚠️ Only equirectangular exported, check for others   |
+| d3.geoPath, d3.geoMercator... | equirectangular, mercator, GeoPathGenerator, geo_path_generator | ✅ Exported                                          |
 | **d3-hierarchy**              | `hierarchy`, ...          |                                                      |
 | d3.hierarchy, d3.cluster...   | Node, cluster, ...        | ✅ Unified, exported                                 |
 | **d3-interpolate**            | `interpolate`             |                                                      |
@@ -107,19 +107,19 @@ This checklist tracks the parity between the official d3.js modules and your Rus
 | **d3-time-format**            | `time_format`             |                                                      |
 | d3.timeFormat, d3.timeParse   | format_time, ...          | ✅ Exported                                          |
 | **d3-timer**                  | `timer`                   |                                                      |
-| d3.timer, d3.timeout, ...     | (check)                   | ⚠️ Not shown, check for module                       |
+| d3.timer, d3.timeout, ...     | timer, timeout, interval, now | ✅ Exported                                          |
 | **d3-transition**             | `transition`              |                                                      |
 | d3.transition                 | Transition                | ✅ Exported                                          |
 | **d3-tree**                   | `tree`                    |                                                      |
 | d3.tree                       | tree                      | ✅ Exported                                          |
 | **d3-treemap**                | `treemap`                 |                                                      |
-| d3.treemap                    | (check)                   | ⚠️ Not shown, check for module                       |
+| d3.treemap                    | Treemap, TreemapTiling, TreemapTiler | ✅ Exported                                          |
 | **d3-voronoi**                | `voronoi`                 |                                                      |
 | d3.voronoi                    | VoronoiDiagram            | ✅ Exported                                          |
 | **d3-zoom**                   | `zoom`                    |                                                      |
 | d3.zoom, d3.zoomIdentity...   | Zoom                      | ✅ Exported                                          |
 | **d3-collection**             | `array`, `collection`     |                                                      |
-| d3.keys, d3.values, ...       | (merged in array)         | ✅ Unified                                           |
+| d3.keys, d3.values, ...       | keys, values, entries     | ✅ Unified                                           |
 | **d3-request (legacy)**       | `fetch`                   |                                                      |
 | d3.request                    | fetch_text                | ✅ Replaced by fetch                                 |
 | **d3-queue (legacy)**         | `queue`                   |                                                      |

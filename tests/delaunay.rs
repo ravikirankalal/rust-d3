@@ -1,5 +1,5 @@
 //! Tests for Delaunay triangulation implementation
-use rust_d3::delaunay::{Delaunay, Triangle};
+use rust_d3::delaunay::Delaunay;
 
 #[test]
 fn test_delaunay_basic() {

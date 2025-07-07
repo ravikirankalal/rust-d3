@@ -47,7 +47,7 @@ impl LogScale {
         let (d0, d1) = self.domain;
         self.domain = (self.base.powf(d0.log(self.base).floor()), self.base.powf(d1.log(self.base).ceil()));
     }
-    pub fn ticks(&self, count: usize) -> Vec<f64> {
+    pub fn ticks(&self, _count: usize) -> Vec<f64> {
         let (d0, d1) = self.domain;
         let log = |x: f64| x.log(self.base);
         let exp = |x: f64| self.base.powf(x);

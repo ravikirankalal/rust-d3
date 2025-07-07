@@ -1,5 +1,5 @@
 //! Unit test for d3 contour
-use rust_d3::contour::{contours, ContourLine};
+use rust_d3::contour::contours;
 
 #[test]
 fn test_contours_simple() {
@@ -63,7 +63,7 @@ fn test_contours_non_square_grid() {
 #[test]
 fn test_contours_marching_squares_cases() {
     // Helper to build a 2x2 grid
-    let mut grid = |a, b, c, d| vec![vec![a, b], vec![d, c]];
+    let grid = |a, b, c, d| vec![vec![a, b], vec![d, c]];
     let t = 1.0;
     // Case 1: only top-left >= t
     let lines = contours(&grid(2.0, 0.0, 0.0, 0.0), t);

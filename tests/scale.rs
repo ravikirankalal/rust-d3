@@ -55,8 +55,8 @@ fn test_sqrt_scale() {
 
 #[test]
 fn test_time_scale_basic() {
-    let d0 = Utc.ymd(2020, 1, 1).and_hms(0, 0, 0);
-    let d1 = Utc.ymd(2020, 1, 2).and_hms(0, 0, 0);
+    let d0 = Utc.with_ymd_and_hms(2020, 1, 1, 0, 0, 0).unwrap();
+    let d1 = Utc.with_ymd_and_hms(2020, 1, 2, 0, 0, 0).unwrap();
     let scale = TimeScale::new((d0, d1), (0.0, 24.0));
     assert!((scale.scale(d0) - 0.0).abs() < 1e-6);
     assert!((scale.scale(d1) - 24.0).abs() < 1e-6);
@@ -64,8 +64,8 @@ fn test_time_scale_basic() {
 
 #[test]
 fn test_time_scale_invert() {
-    let d0 = Utc.ymd(2020, 1, 1).and_hms(0, 0, 0);
-    let d1 = Utc.ymd(2020, 1, 2).and_hms(0, 0, 0);
+    let d0 = Utc.with_ymd_and_hms(2020, 1, 1, 0, 0, 0).unwrap();
+    let d1 = Utc.with_ymd_and_hms(2020, 1, 2, 0, 0, 0).unwrap();
     let scale = TimeScale::new((d0, d1), (0.0, 24.0));
     let dt = scale.invert(12.0);
     assert_eq!(dt.hour(), 12);
@@ -73,8 +73,8 @@ fn test_time_scale_invert() {
 
 #[test]
 fn test_time_scale_ticks_and_format() {
-    let d0 = Utc.ymd(2020, 1, 1).and_hms(0, 0, 0);
-    let d1 = Utc.ymd(2020, 1, 2).and_hms(0, 0, 0);
+    let d0 = Utc.with_ymd_and_hms(2020, 1, 1, 0, 0, 0).unwrap();
+    let d1 = Utc.with_ymd_and_hms(2020, 1, 2, 0, 0, 0).unwrap();
     let scale = TimeScale::new((d0, d1), (0.0, 24.0));
     let ticks = scale.ticks(3);
     assert_eq!(ticks.len(), 3);
@@ -85,8 +85,8 @@ fn test_time_scale_ticks_and_format() {
 
 #[test]
 fn test_time_scale_nice_and_clamp() {
-    let d0 = Utc.ymd(2020, 1, 1).and_hms(5, 30, 0);
-    let d1 = Utc.ymd(2020, 1, 2).and_hms(18, 45, 0);
+    let d0 = Utc.with_ymd_and_hms(2020, 1, 1, 5, 30, 0).unwrap();
+    let d1 = Utc.with_ymd_and_hms(2020, 1, 2, 18, 45, 0).unwrap();
     let mut scale = TimeScale::new((d0, d1), (0.0, 24.0));
     scale.nice();
     let (nice0, nice1) = scale.domain();

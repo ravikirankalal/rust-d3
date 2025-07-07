@@ -1,5 +1,5 @@
 //! Unit tests for d3 Transition
-use rust_d3::transition::{Transition, TransitionState, easing};
+use rust_d3::transition::Transition;
 use rust_d3::Updatable;
 use std::sync::{Arc, Mutex};
 
@@ -105,7 +105,7 @@ fn test_transition_selection_methods() {
     let target = MockTarget::new();
     let t = Transition::new(vec![target.clone()], 10);
     let t2 = t.select(|_| true);
-    let t3 = t.select_all(|_| true);
+    let _t3 = t.select_all(|_| true);
     let t4 = t.merge(&t2);
     let t5 = t.filter(|_| true);
     assert_eq!(t.size(), 1);

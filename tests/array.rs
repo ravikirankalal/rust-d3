@@ -1,7 +1,6 @@
 //! Integration test for array_utils (group, rollup)
 
 use rust_d3::array::{group, rollup, flat_group, fsum, Adder};
-use std::collections::HashMap;
 
 #[test]
 fn test_group() {

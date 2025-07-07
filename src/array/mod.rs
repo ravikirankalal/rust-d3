@@ -291,9 +291,7 @@ pub fn greatest<T: Ord + Copy>(data: &[T]) -> Option<T> {
 /// Shuffles the array in place (d3.shuffle)
 pub fn shuffle<T>(data: &mut [T]) {
     use rand::seq::SliceRandom;
-    use rand::thread_rng;
-    let mut rng = thread_rng();
-    data.shuffle(&mut rng);
+    data.shuffle(&mut rand::rngs::ThreadRng::default());
 }
 
 /// Returns a new array with elements permuted by indexes (d3.permute)

@@ -1,7 +1,5 @@
 //! Unit test for d3 brush
-use rust_d3::brush::{brush_x, brush_y, BrushEvent, Brush};
-use std::rc::Rc;
-use std::cell::RefCell;
+use rust_d3::brush::{brush_x, brush_y, Brush};
 
 #[test]
 fn test_brush_select_and_clear() {

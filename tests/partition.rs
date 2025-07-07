@@ -1,6 +1,6 @@
 //! Unit tests for d3 partition layout
 use rust_d3::hierarchy::Node;
-use rust_d3::partition::{partition, PartitionNode};
+use rust_d3::partition::partition;
 
 #[test]
 fn test_partition() {

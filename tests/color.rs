@@ -94,8 +94,8 @@ fn test_color_hsl_all_branches() {
 #[test]
 fn test_color_hsl_fractional_and_clamp() {
     // Fractional hue
-    let c = Color::hsl(45.5, 1.0, 0.5);
-    assert!(c.r <= 255 && c.g <= 255 && c.b <= 255);
+    let _c = Color::hsl(45.5, 1.0, 0.5);
+    
     // Clamp/rounding
     let c = Color::hsl(0.0, 1.0, 0.5);
     assert_eq!(c.r, 255);

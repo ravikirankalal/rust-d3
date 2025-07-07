@@ -1,5 +1,5 @@
 //! Unit tests for d3 voronoi (placeholder)
-use rust_d3::voronoi::{VoronoiDiagram, VoronoiCell};
+use rust_d3::voronoi::VoronoiDiagram;
 
 #[test]
 fn test_voronoi_diagram() {

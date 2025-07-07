@@ -79,3 +79,116 @@ pub fn contours(
 fn interp(v0: f64, v1: f64, threshold: f64) -> f64 {
     if (v1 - v0).abs() < 1e-12 { 0.0 } else { (threshold - v0) / (v1 - v0) }
 }
+
+// New ContourDensity implementation
+pub struct ContourDensity<T> {
+    x_accessor: Box<dyn Fn(&T) -> f64>,
+    y_accessor: Box<dyn Fn(&T) -> f64>,
+    weight_accessor: Box<dyn Fn(&T) -> f64>,
+    size: (usize, usize),
+    cell_size: usize,
+    thresholds: Vec<f64>,
+    bandwidth: f64,
+}
+
+impl<T: 'static> ContourDensity<T> {
+    pub fn new() -> Self {
+        Self {
+            x_accessor: Box::new(|d: &T| {
+                let point = d as *const T as *const (f64, f64);
+                unsafe { (*point).0 }
+            }),
+            y_accessor: Box::new(|d: &T| {
+                let point = d as *const T as *const (f64, f64);
+                unsafe { (*point).1 }
+            }),
+            weight_accessor: Box::new(|_: &T| 1.0),
+            size: (960, 500), // Default size
+            cell_size: 4,    // Default cell size
+            thresholds: vec![], // Default empty, will be generated if not set
+            bandwidth: 20.0, // Default bandwidth
+        }
+    }
+
+    pub fn x<A>(mut self, accessor: A) -> Self
+    where
+        A: Fn(&T) -> f64 + 'static,
+    {
+        self.x_accessor = Box::new(accessor);
+        self
+    }
+
+    pub fn y<A>(mut self, accessor: A) -> Self
+    where
+        A: Fn(&T) -> f64 + 'static,
+    {
+        self.y_accessor = Box::new(accessor);
+        self
+    }
+
+    pub fn weight<A>(mut self, accessor: A) -> Self
+    where
+        A: Fn(&T) -> f64 + 'static,
+    {
+        self.weight_accessor = Box::new(accessor);
+        self
+    }
+
+    pub fn size(mut self, size: (usize, usize)) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn cell_size(mut self, cell_size: usize) -> Self {
+        self.cell_size = cell_size;
+        self
+    }
+
+    pub fn thresholds(mut self, thresholds: Vec<f64>) -> Self {
+        self.thresholds = thresholds;
+        self
+    }
+
+    pub fn bandwidth(mut self, bandwidth: f64) -> Self {
+        self.bandwidth = bandwidth;
+        self
+    }
+
+    pub fn contours(&self, data: &[T]) -> Vec<ContourLine> {
+        let nx = (self.size.0 as f64 / self.cell_size as f64).ceil() as usize;
+        let ny = (self.size.1 as f64 / self.cell_size as f64).ceil() as usize;
+
+        let mut grid = vec![vec![0.0; nx]; ny];
+
+        // Simple density accumulation (not full KDE)
+        for d in data {
+            let x = (self.x_accessor)(d);
+            let y = (self.y_accessor)(d);
+            let weight = (self.weight_accessor)(d);
+
+            let gx = (x / self.cell_size as f64).floor() as usize;
+            let gy = (y / self.cell_size as f64).floor() as usize;
+
+            if gx < nx && gy < ny {
+                grid[gy][gx] += weight;
+            }
+        }
+
+        let mut all_lines = Vec::new();
+        let thresholds_to_use = if self.thresholds.is_empty() {
+            // Generate some default thresholds if not provided
+            vec![1.0, 2.0, 3.0, 4.0, 5.0]
+        } else {
+            self.thresholds.clone()
+        };
+
+        for &threshold in &thresholds_to_use {
+            all_lines.extend(contours(&grid, threshold));
+        }
+        all_lines
+    }
+}
+
+pub fn contour_density<T: 'static>() -> ContourDensity<T> {
+    ContourDensity::new()
+}

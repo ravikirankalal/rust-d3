@@ -284,35 +284,11 @@ impl<T: Clone + PartialEq> Selection<T> {
     pub fn order(&mut self) {}
 }
 
-// Event handling support (minimal parity)
-use std::collections::HashMap;
 
-pub struct EventHandler<T> {
-    handlers: HashMap<String, Vec<Box<dyn Fn(&T)>>>,
-}
-
-impl<T> EventHandler<T> {
-    pub fn new() -> Self {
-        Self { handlers: HashMap::new() }
-    }
-    pub fn on<F>(&mut self, event: &str, handler: F)
-    where
-        F: Fn(&T) + 'static,
-    {
-        self.handlers.entry(event.to_string()).or_default().push(Box::new(handler));
-    }
-    pub fn dispatch(&self, event: &str, data: &T) {
-        if let Some(handlers) = self.handlers.get(event) {
-            for h in handlers {
-                h(data);
-            }
-        }
-    }
-}
 
 impl<T> Selection<T> {
     // Attach an event handler (for API parity)
-    pub fn on<F>(&mut self, event: &str, handler: F) -> &mut Self
+    pub fn on<F>(&mut self, _event: &str, _handler: F) -> &mut Self
     where
         F: Fn(&T) + 'static,
     {
@@ -321,7 +297,7 @@ impl<T> Selection<T> {
         self
     }
     // Dispatch an event (for API parity)
-    pub fn dispatch(&self, event: &str) -> &Self {
+    pub fn dispatch(&self, _event: &str) -> &Self {
         // No-op: for API parity only
         self
     }

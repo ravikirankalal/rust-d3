@@ -1,4 +1,4 @@
-//! D3 Treemap module
+"""//! D3 Treemap module
 //! Provides treemap layout for hierarchical data (see d3-treemap in JS).
 
 use crate::hierarchy::Node;
@@ -168,11 +168,8 @@ impl Treemap {
             TreemapTiling::Slice => layout_slice(root, 0.0, 0.0, self.width, self.height, self.padding),
             TreemapTiling::Dice => layout_dice(root, 0.0, 0.0, self.width, self.height, self.padding),
             TreemapTiling::SliceDice => layout_slicedice(root, 0.0, 0.0, self.width, self.height, 0, self.padding),
-            // Advanced tiling (Squarify, Binary) is not supported for Node hierarchies in this API.
-            _ => {
-                // Not implemented: advanced tiling for Node hierarchies
-                // Use TreemapTiler directly for flat weights.
-            }
+            TreemapTiling::Squarify => layout_squarify(root, 0.0, 0.0, self.width, self.height, self.padding),
+            TreemapTiling::Binary => layout_binary(root, 0.0, 0.0, self.width, self.height, self.padding),
         }
     }
 }
@@ -237,3 +234,36 @@ fn layout_slicedice<T: Copy + Default>(node: &mut Node<T>, x0: f64, y0: f64, x1:
         }
     }
 }
+
+fn layout_squarify<T: Copy + Default>(node: &mut Node<T>, x0: f64, y0: f64, x1: f64, y1: f64, padding: f64) {
+    node.x0 = x0;
+    node.y0 = y0;
+    node.x1 = x1;
+    node.y1 = y1;
+
+    let children_weights: Vec<f64> = node.children.iter().map(|c| c.value).collect();
+    let child_rects = squarify(&children_weights, x0, y0, x1 - x0, y1 - y0);
+
+    for (i, child) in node.children.iter_mut().enumerate() {
+        if let Some(rect) = child_rects.get(i) {
+            layout_squarify(child, rect.0, rect.1, rect.0 + rect.2, rect.1 + rect.3, padding);
+        }
+    }
+}
+
+fn layout_binary<T: Copy + Default>(node: &mut Node<T>, x0: f64, y0: f64, x1: f64, y1: f64, padding: f64) {
+    node.x0 = x0;
+    node.y0 = y0;
+    node.x1 = x1;
+    node.y1 = y1;
+
+    let children_weights: Vec<f64> = node.children.iter().map(|c| c.value).collect();
+    let child_rects = binary(&children_weights, x0, y0, x1 - x0, y1 - y0);
+
+    for (i, child) in node.children.iter_mut().enumerate() {
+        if let Some(rect) = child_rects.get(i) {
+            layout_binary(child, rect.0, rect.1, rect.0 + rect.2, rect.1 + rect.3, padding);
+        }
+    }
+}
+""

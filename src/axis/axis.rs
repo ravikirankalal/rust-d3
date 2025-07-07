@@ -139,7 +139,7 @@ impl Axis {
             AxisOrientation::Right => "right",
         };
         let mut svg = format!("<g class='axis axis-{}'>\n", orientation);
-        for (pos, label) in ticks {
+        for (_pos, label) in ticks {
             svg.push_str(&format!("  <g class='tick'><text>{}</text></g>\n", label));
         }
         if let Some(ref label) = self.label {
