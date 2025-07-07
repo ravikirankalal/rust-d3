@@ -3,4 +3,4 @@
 mod selection;
 
 pub use selection::Selection;
-pub use selection::{AttrSet, StyleSet, PropertySet, ClassedSet, TextSet, HtmlSet};
+pub use selection::{AttrSet, StyleSet, PropertySet, ClassedSet, TextSet, HtmlSet, NodeLike};

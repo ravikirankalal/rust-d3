@@ -9,6 +9,8 @@ pub mod interpolate;
 pub mod time;
 pub mod force;
 pub mod transition;
+pub use transition::Transition;
+pub use transition::Updatable;
 pub mod quadtree;
 pub mod voronoi;
 pub mod binning;
@@ -47,7 +49,6 @@ pub use hierarchy::Node;
 pub use interpolate::interpolate;
 pub use time::{TimeScale, format_time};
 pub use force::{ForceNode, ForceSimulation};
-pub use transition::Transition;
 pub use quadtree::{Point, Quadtree};
 pub use voronoi::{VoronoiCell, VoronoiDiagram};
 pub use binning::histogram;
@@ -73,3 +74,4 @@ pub use collection::{group as collection_group, rollup as collection_rollup, key
 pub use scale::{
     LinearScale, LogScale, PowScale, SqrtScale, OrdinalScale, BandScale
 };
+pub use transition::TextSet;
