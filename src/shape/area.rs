@@ -132,6 +132,9 @@ where
             if x0.is_nan() || y0.is_nan() { continue; }
             bottom.push((x0, y0));
         }
+        if top.is_empty() || bottom.is_empty() {
+            return String::new(); // D3 returns empty string for empty/all-NaN input
+        }
         // Top boundary
         curve.begin(&mut path);
         let mut first = true;

@@ -60,4 +60,25 @@ pub mod shape_symbol_tests {
         assert!(path.starts_with("M"));
         assert!(path.contains("L"));
     }
+
+    #[test]
+    fn test_symbol_zero_size() {
+        let sym = Symbol::new().symbol_type(SymbolType::Circle).size(0.0);
+        let path = sym.to_path();
+        assert!(path.is_empty() || path == "M");
+    }
+
+    #[test]
+    fn test_symbol_nan_size() {
+        let sym = Symbol::new().symbol_type(SymbolType::Square).size(f64::NAN);
+        let path = sym.to_path();
+        assert!(path.is_empty() || path == "M");
+    }
+
+    #[test]
+    fn test_symbol_negative_size() {
+        let sym = Symbol::new().symbol_type(SymbolType::Triangle).size(-100.0);
+        let path = sym.to_path();
+        assert!(path.is_empty() || path == "M");
+    }
 }

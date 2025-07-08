@@ -103,8 +103,9 @@ where
     pub fn generate(&self, data: &[T]) -> String {
         let mut path = String::new();
         let mut curve = self.curve.clone();
-        curve.begin(&mut path);
         let mut first = true;
+        let mut has_point = false;
+        curve.begin(&mut path);
         for (i, d) in data.iter().enumerate() {
             if !(self.defined)(d, i) {
                 first = true;
@@ -118,9 +119,14 @@ where
             }
             curve.line_to(&mut path, x, y, first);
             first = false;
+            has_point = true;
         }
-        curve.end(&mut path);
-        path
+        if has_point {
+            curve.end(&mut path);
+            path
+        } else {
+            String::new() // D3 returns empty string for all-NaN/undefined
+        }
     }
 }
 

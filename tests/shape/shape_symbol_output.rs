@@ -77,4 +77,28 @@ pub mod shape_symbol_output_tests {
         sym.to_custom(&mut points);
         assert_eq!(points.0.len(), 7); // 3 arms: move_to+line_to each, plus close
     }
+
+    #[test]
+    fn test_symbol_output_zero_size() {
+        let sym = Symbol::new().symbol_type(SymbolType::Circle).size(0.0);
+        let mut points = CollectPoints(vec![]);
+        sym.to_custom(&mut points);
+        assert!(points.0.is_empty() || points.0 == vec![] || points.0 == vec![(f64::NAN, f64::NAN)]);
+    }
+
+    #[test]
+    fn test_symbol_output_nan_size() {
+        let sym = Symbol::new().symbol_type(SymbolType::Square).size(f64::NAN);
+        let mut points = CollectPoints(vec![]);
+        sym.to_custom(&mut points);
+        assert!(points.0.is_empty() || points.0 == vec![] || points.0 == vec![(f64::NAN, f64::NAN)]);
+    }
+
+    #[test]
+    fn test_symbol_output_negative_size() {
+        let sym = Symbol::new().symbol_type(SymbolType::Triangle).size(-100.0);
+        let mut points = CollectPoints(vec![]);
+        sym.to_custom(&mut points);
+        assert!(points.0.is_empty() || points.0 == vec![] || points.0 == vec![(f64::NAN, f64::NAN)]);
+    }
 }

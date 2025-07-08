@@ -58,6 +58,9 @@ impl Curve for BasisCurve {
         self.points.push((x, y));
     }
     fn end(&mut self, path: &mut String) {
+        if self.points.is_empty() {
+            return;
+        }
         match self.points.len() {
             0 => return,
             1 => {
@@ -125,7 +128,6 @@ impl CardinalCurve {
 impl Curve for CardinalCurve {
     fn begin(&mut self, _path: &mut String) {
         self.points.clear();
-        // Clamp tension to [0,1] as in D3
         if self.tension < 0.0 { self.tension = 0.0; }
         if self.tension > 1.0 { self.tension = 1.0; }
     }
@@ -133,6 +135,9 @@ impl Curve for CardinalCurve {
         self.points.push((x, y));
     }
     fn end(&mut self, path: &mut String) {
+        if self.points.is_empty() {
+            return;
+        }
         let n = self.points.len();
         if n < 2 {
             for (i, &(x, y)) in self.points.iter().enumerate() {
@@ -175,6 +180,9 @@ impl Curve for MonotoneCurve {
         self.points.push((x, y));
     }
     fn end(&mut self, path: &mut String) {
+        if self.points.is_empty() {
+            return;
+        }
         let n = self.points.len();
         if n < 2 {
             for (i, &(x, y)) in self.points.iter().enumerate() {

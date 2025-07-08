@@ -45,6 +45,9 @@ impl Symbol {
         self
     }
     pub fn to_path(&self) -> String {
+        if !self.size.is_finite() || self.size <= 0.0 {
+            return String::new();
+        }
         match self.symbol_type {
             SymbolType::Circle => symbol_circle(self.size),
             SymbolType::Cross => symbol_cross(self.size),
@@ -142,6 +145,9 @@ impl SymbolOutput for String {
 
 impl Symbol {
     pub fn to_custom<O: SymbolOutput>(&self, out: &mut O) {
+        if !self.size.is_finite() || self.size <= 0.0 {
+            return;
+        }
         match self.symbol_type {
             SymbolType::Circle => {
                 let r = (self.size / PI).sqrt();
