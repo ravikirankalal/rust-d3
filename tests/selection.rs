@@ -39,8 +39,8 @@ fn test_selection_attr_and_style() {
 #[test]
 fn test_selection_append_and_children() {
     let mut sel = Selection::select("g");
-    sel.append("rect");
-    sel.append("circle");
+    let _rect = sel.append("rect");
+    let _circle = sel.append("circle");
     let children = sel.children();
     let tags: Vec<_> = children.nodes.iter().map(|n| n.tag.as_str()).collect();
     assert!(tags.contains(&"rect"));
@@ -217,6 +217,40 @@ fn test_selection_map_and_each_empty() {
     assert!(tags.is_empty());
     sel.each(|n| { n.attributes.insert("foo".to_string(), "bar".to_string()); });
     // Should not panic or insert anything
+}
+
+#[test]
+fn test_selection_raise_and_lower() {
+    let mut sel = Selection::select_all("rect");
+    sel.nodes[0].attributes.insert("id".to_string(), "a".to_string());
+    sel.nodes[1].attributes.insert("id".to_string(), "c".to_string());
+    sel.nodes[2].attributes.insert("id".to_string(), "b".to_string());
+    sel.raise();
+    let ids: Vec<_> = sel.nodes.iter().map(|n| n.attributes.get("id").unwrap().clone()).collect();
+    assert_eq!(ids, vec!["a", "b", "c"]); // Sorted ascending by tag (all rect, so order by id)
+    sel.lower();
+    let ids: Vec<_> = sel.nodes.iter().map(|n| n.attributes.get("id").unwrap().clone()).collect();
+    assert_eq!(ids, vec!["c", "b", "a"]); // Sorted descending by tag
+}
+
+#[test]
+fn test_selection_sort_by() {
+    let mut sel = Selection::select_all("rect");
+    sel.nodes[0].attributes.insert("id".to_string(), "b".to_string());
+    sel.nodes[1].attributes.insert("id".to_string(), "c".to_string());
+    sel.nodes[2].attributes.insert("id".to_string(), "a".to_string());
+    sel.sort_by(|a, b| a.attributes["id"].cmp(&b.attributes["id"]));
+    let ids: Vec<_> = sel.nodes.iter().map(|n| n.attributes.get("id").unwrap().clone()).collect();
+    assert_eq!(ids, vec!["a", "b", "c"]);
+}
+
+#[test]
+fn test_selection_order_noop() {
+    let mut sel = Selection::select_all("rect");
+    let before = sel.nodes.clone();
+    sel.order();
+    let after = sel.nodes.clone();
+    assert_eq!(before, after); // No-op
 }
 
 /*

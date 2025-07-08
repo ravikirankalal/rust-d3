@@ -12,6 +12,7 @@
 //! - Integration with other d3 modules
 
 use std::collections::HashMap;
+use std::fmt;
 
 pub struct Node {
     pub tag: String,
@@ -43,8 +44,31 @@ impl Clone for Node {
             styles: self.styles.clone(),
             data: self.data.clone(),
             children: self.children.clone(),
-            event_handlers: HashMap::new(),
+            event_handlers: HashMap::new(), // Do not clone event handlers
         }
+    }
+}
+
+impl PartialEq for Node {
+    fn eq(&self, other: &Self) -> bool {
+        self.tag == other.tag &&
+        self.attributes == other.attributes &&
+        self.styles == other.styles &&
+        self.data == other.data &&
+        self.children == other.children
+        // event_handlers intentionally not compared
+    }
+}
+
+impl fmt::Debug for Node {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Node")
+            .field("tag", &self.tag)
+            .field("attributes", &self.attributes)
+            .field("styles", &self.styles)
+            .field("data", &self.data)
+            .field("children", &self.children)
+            .finish()
     }
 }
 
@@ -315,6 +339,29 @@ impl Selection {
     /// Select all parents of all nodes (not tracked, stub returns empty)
     pub fn select_parents(&self) -> Self {
         Selection { nodes: vec![], enter_nodes: vec![], exit_nodes: vec![] }
+    }
+    /// Raise each node to the end of the parent's children (simulated: reorder nodes vector by id if present)
+    pub fn raise(&mut self) -> &mut Self {
+        self.nodes.sort_by(|a, b| a.attributes.get("id").cmp(&b.attributes.get("id")));
+        self
+    }
+    /// Lower each node to the start of the parent's children (simulated: reorder nodes vector by id descending)
+    pub fn lower(&mut self) -> &mut Self {
+        self.nodes.sort_by(|a, b| b.attributes.get("id").cmp(&a.attributes.get("id")));
+        self
+    }
+    /// Sort nodes by a comparator (like selection.sort in D3)
+    pub fn sort_by<F>(&mut self, mut compare: F) -> &mut Self
+    where
+        F: FnMut(&Node, &Node) -> std::cmp::Ordering,
+    {
+        self.nodes.sort_by(|a, b| compare(a, b));
+        self
+    }
+    /// Order nodes by their appearance in the document (no-op in this model)
+    pub fn order(&mut self) -> &mut Self {
+        // No-op: in a real DOM, this would restore document order
+        self
     }
 }
 
