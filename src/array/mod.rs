@@ -260,7 +260,7 @@ mod tests {
             assert!((a - b).abs() < 1e-10);
         }
         assert_eq!(range(5.0, 0.0, -1.0), vec![5.0, 4.0, 3.0, 2.0, 1.0]);
-        assert_eq!(range(0.0, 0.0, 1.0), vec![]);
+        assert_eq!(range(0.0, 0.0, 1.0), Vec::<f64>::new());
         assert_eq!(range(0.0, 0.0, 0.0), vec![0.0]);
         assert_eq!(range(1.0, 1.0, 0.0), vec![1.0]);
     }

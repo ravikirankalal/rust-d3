@@ -7,6 +7,8 @@ pub mod scale;
 pub mod axis;
 pub mod shape;
 pub mod hierarchy;
+pub mod scale_chromatic;
+pub mod interpolate;
 
 pub use axis::Axis;
 pub use shape::{Symbol, SymbolType};
