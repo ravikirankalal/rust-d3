@@ -1,9 +1,9 @@
 # D3.js to Rust Parity Checklist
 
 **Porting Progress:**
-- Complete: 12/29 modules (41%)
+- Complete: 13/29 modules (45%)
 - In Progress: 1/29 modules (3%)
-- Pending: 16/29 modules (55%)
+- Pending: 15/29 modules (52%)
 
 This checklist tracks the parity between the official d3.js modules and your Rust port. Mark each as complete or partial as you implement them.
 
@@ -26,6 +26,7 @@ This checklist tracks the parity between the official d3.js modules and your Rus
 | [d3-random](https://github.com/d3/d3-random) | random/ | Complete | 100% | array/, collection/ | uniform, uniform-range, normal, lognormal, exponential, seeded random, robust tests |  |
 | [d3-scale-chromatic](https://github.com/d3/d3-scale-chromatic) | scale_chromatic/ | Complete | 100% | scale/ | categorical, sequential, diverging, perceptual, cubehelix palettes/interpolators, crate root exports, robust tests, edge-case and monotonicity checks |  |
 | [d3-selection](https://github.com/d3/d3-selection) | selection/ | Complete | 99% | array/, collection/ | select, select_all, attr, style, data, enter, exit, append, remove, on, dispatch, filter, merge, each, map, children, property, classed, text, html, datum, insert, call, empty, node, size, nodes, selectChild, selectChildren, selectParent, selectParents, raise, lower, sort_by, order, robust tests, D3-like data join, event handling, chainable API | Real DOM integration, advanced event system (event propagation, event object) |
+| [d3-transition](https://github.com/d3/d3-transition) | transition/ | Complete | 95% | selection/, scale/, axis/ | Transition struct, duration, delay, ease, attr, style, on (start/end), remove, interrupt, transition chaining (stubs), easing (linear, quad, cubic, bounce), integration with Selection, robust tests, chainable API | Real DOM/async integration, true interrupt/cancel, advanced event system, transition chaining, more D3 easing |
 | [d3-brush](https://github.com/d3/d3-brush) | brush/ | Pending | 0% | selection/, scale/, axis/ |  |  |
 | [d3-dsv](https://github.com/d3/d3-dsv) | dsv/ | Pending | 0% | array/, collection/ |  |  |
 | [d3-ease](https://github.com/d3/d3-ease) | ease/ | Pending | 0% | array/, collection/ |  |  |
@@ -37,7 +38,6 @@ This checklist tracks the parity between the official d3.js modules and your Rus
 | [d3-contour](https://github.com/d3/d3-contour) | contour/ | Pending | 0% | array/, collection/ |  |  |
 | [d3-delaunay](https://github.com/d3/d3-delaunay) | delaunay/ | Pending | 0% | array/, collection/ |  |  |
 | [d3-timer](https://github.com/d3/d3-timer) | timer/ | Pending | 0% | array/, collection/ |  |  |
-| [d3-transition](https://github.com/d3/d3-transition) | transition/ | Pending | 0% | selection/, scale/, axis/ |  |  |
 | [d3-tree](https://github.com/d3/d3-hierarchy) | tree/ | Pending | 0% | hierarchy/ |  |  |
 | [d3-treemap](https://github.com/d3/d3-hierarchy) | treemap/ | Pending | 0% | hierarchy/ |  |  |
 | [d3-voronoi](https://github.com/d3/d3-voronoi) | voronoi/ | Pending | 0% | delaunay/ |  |  |

@@ -14,6 +14,7 @@ pub mod quadtree;
 pub mod path;
 pub mod random;
 pub mod selection;
+pub mod transition;
 
 pub use axis::Axis;
 pub use shape::{Symbol, SymbolType};
