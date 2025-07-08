@@ -126,6 +126,33 @@ mod tests {
     }
 }
 
+pub fn format_locale(value: f64, locale: &str) -> String {
+    // Minimal stub: support en-US and fr-FR for demo, fallback to en-US
+    match locale {
+        "fr-FR" => {
+            let s = format!("{:.6}", value).replace('.', ",");
+            // Add thin space for thousands
+            let parts: Vec<&str> = s.split(',').collect();
+            let int_part = parts[0];
+            let mut grouped = String::new();
+            let mut chars = int_part.chars().rev().collect::<Vec<_>>();
+            for (i, c) in chars.iter().enumerate() {
+                if i > 0 && i % 3 == 0 {
+                    grouped.push(' ');
+                }
+                grouped.push(*c);
+            }
+            let grouped = grouped.chars().rev().collect::<String>();
+            if parts.len() > 1 {
+                format!("{}", grouped + "," + parts[1])
+            } else {
+                grouped
+            }
+        }
+        _ => format!("{:.6}", value),
+    }
+}
+
 // d3-format: TODO stubs for alternate form (#) and type n
 // - Type n: locale-aware number formatting (not yet implemented)
 // - Alternate form (#): not fully tested for all types
