@@ -1,5 +1,6 @@
 use rust_d3::selection::Selection;
-use rust_d3::transition::{Transition, ease_linear, ease_quad};
+use rust_d3::transition::Transition;
+use rust_d3::ease::{ease_linear, ease_quad};
 use std::thread;
 use std::time::Duration;
 

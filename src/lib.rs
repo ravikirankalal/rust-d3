@@ -15,6 +15,7 @@ pub mod path;
 pub mod random;
 pub mod selection;
 pub mod transition;
+pub mod ease;
 
 pub use axis::Axis;
 pub use shape::{Symbol, SymbolType};

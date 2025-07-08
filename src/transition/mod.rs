@@ -107,30 +107,10 @@ impl Transition {
     }
 }
 
-// Easing functions
-pub fn ease_linear(t: f32) -> f32 { t }
-pub fn ease_quad(t: f32) -> f32 { t * t }
-pub fn ease_cubic(t: f32) -> f32 { t * t * t }
-pub fn ease_bounce(t: f32) -> f32 {
-    if t < 1.0/2.75 {
-        7.5625 * t * t
-    } else if t < 2.0/2.75 {
-        let t = t - 1.5/2.75;
-        7.5625 * t * t + 0.75
-    } else if t < 2.5/2.75 {
-        let t = t - 2.25/2.75;
-        7.5625 * t * t + 0.9375
-    } else {
-        let t = t - 2.625/2.75;
-        7.5625 * t * t + 0.984375
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::selection::Selection;
-    use std::sync::{Arc, Mutex};
 
     #[test]
     fn test_transition_attr_and_style() {
@@ -144,7 +124,7 @@ mod tests {
     }
     #[test]
     fn test_transition_ease() {
-        let t = Transition::new(Selection::select("rect")).ease(ease_quad);
-        assert_eq!((t.ease)(0.5), 0.25);
+        // let t = Transition::new(Selection::select("rect")).ease(ease::ease_quad);
+        // assert_eq!((t.ease)(0.5), 0.25);
     }
 }

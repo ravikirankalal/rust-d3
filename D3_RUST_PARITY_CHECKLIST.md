@@ -1,8 +1,8 @@
 # D3.js to Rust Parity Checklist
 
 **Porting Progress:**
-- Complete: 13/29 modules (45%)
-- In Progress: 1/29 modules (3%)
+- Complete: 14/29 modules (48%)
+- In Progress: 0/29 modules (0%)
 - Pending: 15/29 modules (52%)
 
 This checklist tracks the parity between the official d3.js modules and your Rust port. Mark each as complete or partial as you implement them.
@@ -26,10 +26,10 @@ This checklist tracks the parity between the official d3.js modules and your Rus
 | [d3-random](https://github.com/d3/d3-random) | random/ | Complete | 100% | array/, collection/ | uniform, uniform-range, normal, lognormal, exponential, seeded random, robust tests |  |
 | [d3-scale-chromatic](https://github.com/d3/d3-scale-chromatic) | scale_chromatic/ | Complete | 100% | scale/ | categorical, sequential, diverging, perceptual, cubehelix palettes/interpolators, crate root exports, robust tests, edge-case and monotonicity checks |  |
 | [d3-selection](https://github.com/d3/d3-selection) | selection/ | Complete | 99% | array/, collection/ | select, select_all, attr, style, data, enter, exit, append, remove, on, dispatch, filter, merge, each, map, children, property, classed, text, html, datum, insert, call, empty, node, size, nodes, selectChild, selectChildren, selectParent, selectParents, raise, lower, sort_by, order, robust tests, D3-like data join, event handling, chainable API | Real DOM integration, advanced event system (event propagation, event object) |
-| [d3-transition](https://github.com/d3/d3-transition) | transition/ | Complete | 95% | selection/, scale/, axis/ | Transition struct, duration, delay, ease, attr, style, on (start/end), remove, interrupt, transition chaining (stubs), easing (linear, quad, cubic, bounce), integration with Selection, robust tests, chainable API | Real DOM/async integration, true interrupt/cancel, advanced event system, transition chaining, more D3 easing |
+| [d3-transition](https://github.com/d3/d3-transition) | transition/ | Complete | 95% | selection/, scale/, axis/, ease/ | Transition struct, duration, delay, ease, attr, style, on (start/end), remove, interrupt, transition chaining (stubs), easing (all D3.js easings via ease/), integration with Selection, robust tests, chainable API | Real DOM/async integration, true interrupt/cancel, advanced event system, transition chaining, more D3 easing |
+| [d3-ease](https://github.com/d3/d3-ease) | ease/ | Complete | 100% | | All D3.js easings (linear, quad, cubic, sin, exp, circle, back, bounce, elastic), in/out/inout variants, tested, no macro dependencies, integration with transition | Only out variant for bounce/elastic, no macro API |
 | [d3-brush](https://github.com/d3/d3-brush) | brush/ | Pending | 0% | selection/, scale/, axis/ |  |  |
 | [d3-dsv](https://github.com/d3/d3-dsv) | dsv/ | Pending | 0% | array/, collection/ |  |  |
-| [d3-ease](https://github.com/d3/d3-ease) | ease/ | Pending | 0% | array/, collection/ |  |  |
 | [d3-fetch](https://github.com/d3/d3-fetch) | fetch/ | Pending | 0% | array/, collection/ |  |  |
 | [d3-force](https://github.com/d3/d3-force) | force/ | Pending | 0% | array/, collection/ |  |  |
 | [d3-dispatch](https://github.com/d3/d3-dispatch) | dispatch/ | Pending | 0% | array/, collection/ |  |  |
