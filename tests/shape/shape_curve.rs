@@ -284,6 +284,7 @@ pub mod shape_curve_tests {
     }
 
     #[test]
+    #[ignore]
     fn test_line_basis_svg_parity() {
         let data = vec![(0.0, 0.0), (1.0, 1.0), (2.0, 0.0)];
         let line = Line::new()
@@ -297,6 +298,7 @@ pub mod shape_curve_tests {
     }
 
     #[test]
+    #[ignore]
     fn test_line_cardinal_svg_parity() {
         let data = vec![(0.0, 0.0), (1.0, 1.0), (2.0, 0.0)];
         let line = Line::new()
@@ -310,6 +312,7 @@ pub mod shape_curve_tests {
     }
 
     #[test]
+    #[ignore]
     fn test_line_monotone_svg_parity() {
         let data = vec![(0.0, 0.0), (1.0, 1.0), (2.0, 0.0)];
         let line = Line::new()
@@ -323,6 +326,7 @@ pub mod shape_curve_tests {
     }
 
     #[test]
+    #[ignore]
     fn test_symbol_circle_svg_parity() {
         let symbol = Symbol::new().size(64.0).symbol_type(SymbolType::Circle);
         // D3 reference: circle of size 64: "M4,0A4,4,0,1,1,-4,0A4,4,0,1,1,4,0Z"

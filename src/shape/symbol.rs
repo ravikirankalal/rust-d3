@@ -65,7 +65,9 @@ use std::f64::consts::PI;
 
 fn symbol_circle(size: f64) -> String {
     let r = (size / PI).sqrt();
-    format!("M{},0A{},{} 0 1,1 {},0A{},{} 0 1,1 {},0Z", r, r, r, -r, r, r, r)
+    let path = format!("M{},0A{},{} 0 1,1 {},0A{},{} 0 1,1 {},0Z", r, r, r, -r, r, r, r);
+    println!("[symbol_circle] size: {} r: {} path: {}", size, r, path);
+    path
 }
 
 fn symbol_cross(size: f64) -> String {
