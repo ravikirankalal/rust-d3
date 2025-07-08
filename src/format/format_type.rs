@@ -1,9 +1,7 @@
 use super::specifier::FormatSpecifier;
 use super::format_decimal;
 use super::format_integer;
-use super::format_float;
 use super::format_prefix;
-use super::format_grouping;
 
 pub fn format_type(x: f64, spec: &FormatSpecifier) -> String {
     // eprintln!("[DEBUG] format_type: ty={}, precision={:?}", spec.ty, spec.precision);

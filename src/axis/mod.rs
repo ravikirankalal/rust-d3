@@ -135,7 +135,6 @@ impl Axis<crate::scale::ScaleLinear> {
 impl Axis<crate::scale::ScaleLog> {
     pub fn ticks(&self) -> Vec<Tick> {
         let domain = self.scale.domain;
-        let tick_count = self.tick_count;
         let base = self.scale.base;
         let (d0, d1) = (domain[0].min(domain[1]), domain[0].max(domain[1]));
         let log_base = |x: f64| x.log(base);
@@ -171,17 +170,18 @@ impl Axis<crate::scale::ScaleLog> {
 
 impl Axis<crate::scale::ScaleTime> {
     pub fn ticks(&self) -> Vec<Tick> {
-        use chrono::{Duration, NaiveDateTime};
         let domain = self.scale.domain;
         let tick_count = self.tick_count as i64;
         let start = domain[0];
         let end = domain[1];
-        let total_ms = end.timestamp_millis() - start.timestamp_millis();
+        let total_ms = end.and_utc().timestamp_millis() - start.and_utc().timestamp_millis();
         let step_ms = total_ms / (tick_count - 1).max(1);
         (0..tick_count)
             .map(|i| {
-                let ms = start.timestamp_millis() + i * step_ms;
-                let value = NaiveDateTime::from_timestamp_opt(ms / 1000, ((ms % 1000) * 1_000_000) as u32).unwrap();
+                let ms = start.and_utc().timestamp_millis() + i * step_ms;
+                let value = chrono::DateTime::<chrono::Utc>::from_timestamp((ms / 1000) as i64, ((ms % 1000) * 1_000_000) as u32)
+                    .map(|dt| dt.naive_utc())
+                    .unwrap_or_else(|| chrono::DateTime::<chrono::Utc>::from_timestamp(0, 0).unwrap().naive_utc());
                 let position = self.scale.scale(value);
                 let label = if let Some(fmt) = self.tick_format {
                     (fmt)(ms as f64)

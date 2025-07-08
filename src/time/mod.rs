@@ -6,7 +6,7 @@ pub use format::time_format;
 pub mod locale;
 pub use locale::TimeLocale;
 
-use chrono::{NaiveDateTime, Duration, Datelike, Timelike};
+use chrono::{NaiveDateTime, Datelike, Duration}; // re-add Duration for macro
 
 // Interval traits and stubs
 pub trait TimeInterval {
@@ -14,7 +14,7 @@ pub trait TimeInterval {
     fn ceil(&self, date: NaiveDateTime) -> NaiveDateTime;
     fn offset(&self, date: NaiveDateTime, step: i32) -> NaiveDateTime;
     fn range(&self, start: NaiveDateTime, stop: NaiveDateTime, step: i32) -> Vec<NaiveDateTime>;
-    fn count(&self, start: NaiveDateTime, stop: NaiveDateTime) -> i32 { 0 }
+    fn count(&self, _start: NaiveDateTime, _stop: NaiveDateTime) -> i32 { 0 }
     fn every(&self, _step: i32) -> Option<Self> where Self: Sized { None }
 }
 
@@ -22,7 +22,7 @@ macro_rules! interval_stub {
     ($name:ident, $duration:expr) => {
         pub struct $name;
         impl TimeInterval for $name {
-            fn floor(&self, date: NaiveDateTime) -> NaiveDateTime { date - Duration::nanoseconds(date.timestamp_subsec_nanos() as i64 % $duration) }
+            fn floor(&self, date: NaiveDateTime) -> NaiveDateTime { date - Duration::nanoseconds(date.and_utc().timestamp_subsec_nanos() as i64 % $duration) }
             fn ceil(&self, date: NaiveDateTime) -> NaiveDateTime { self.floor(date) + Duration::nanoseconds($duration) }
             fn offset(&self, date: NaiveDateTime, step: i32) -> NaiveDateTime { date + Duration::nanoseconds($duration * step as i64) }
             fn range(&self, start: NaiveDateTime, stop: NaiveDateTime, step: i32) -> Vec<NaiveDateTime> {

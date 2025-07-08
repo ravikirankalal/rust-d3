@@ -1,8 +1,6 @@
 // d3-collection: count_values implementation
 // Return a Vec<(K, usize)> of counts
 
-use std::collections::HashMap;
-
 pub fn count_values<K: Eq + std::hash::Hash, V, F>(values: &[V], key_fn: F) -> Vec<(K, usize)>
 where
     F: Fn(&V) -> K,

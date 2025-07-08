@@ -1,5 +1,5 @@
 // Tests for advanced d3-shape curve types
-use rust_d3::shape::{Line, Area, BasisCurve, CardinalCurve, MonotoneCurve, Symbol, SymbolType};
+use rust_d3::shape::{Line, Area, CardinalCurve, MonotoneCurve, Symbol, SymbolType};
 
 #[cfg(test)]
 pub mod shape_curve_tests {

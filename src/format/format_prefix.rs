@@ -60,8 +60,6 @@ pub fn format_prefix(x: f64, precision: usize) -> String {
             s = trimmed.to_string();
             // eprintln!("[DEBUG] after trimming: {s}");
         }
-        let sigdigs_after = s.chars().filter(|c| c.is_ascii_digit()).count();
-        // eprintln!("[DEBUG] sigdigs_after: {sigdigs_after}");
         let result = format!("{}{}", s, suffix);
         // eprintln!("[DEBUG] final result: {result}");
         result

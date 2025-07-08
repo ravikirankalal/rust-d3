@@ -1,7 +1,7 @@
 // d3-shape: area generator (SVG path string)
 // Supports x/x0/x1/y/y0/y1/defined/curve
 
-use crate::shape::curve::{Curve, LinearCurve, StepCurve, BasisCurve, CardinalCurve, MonotoneCurve};
+use crate::shape::curve::{Curve, LinearCurve, BasisCurve, CardinalCurve, MonotoneCurve};
 
 pub struct Area<X0, X1, Y0, Y1, D, T, C>
 where

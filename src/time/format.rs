@@ -2,7 +2,6 @@
 // Implements timeFormat and timeParse (strftime/strptime-like)
 
 use chrono::{NaiveDateTime, Datelike, Timelike};
-use super::locale::TimeLocale;
 
 pub fn time_format(spec: &str, date: &NaiveDateTime) -> String {
     let mut out = String::new();
@@ -20,7 +19,7 @@ pub fn time_format(spec: &str, date: &NaiveDateTime) -> String {
                     "%H" => format!("{:02}", date.hour()),
                     "%M" => format!("{:02}", date.minute()),
                     "%S" => format!("{:02}", date.second()),
-                    "%L" => format!("{:03}", date.timestamp_subsec_millis()),
+                    "%L" => format!("{:03}", date.and_utc().timestamp_subsec_millis()),
                     "%p" => if date.hour() < 12 { "AM".to_string() } else { "PM".to_string() },
                     "%a" => {
                         // Short weekday name
@@ -56,8 +55,8 @@ pub fn time_format(spec: &str, date: &NaiveDateTime) -> String {
                         let h = date.hour() % 12;
                         format!("{:02}", if h == 0 { 12 } else { h })
                     },
-                    "%f" => format!("{:06}", date.timestamp_subsec_micros()),
-                    "%s" => format!("{}", date.timestamp()),
+                    "%f" => format!("{:06}", date.and_utc().timestamp_subsec_micros()),
+                    "%s" => format!("{}", date.and_utc().timestamp()),
                     // Add more specifiers as needed
                     _ => "[time_format stub]".to_string(),
                 });

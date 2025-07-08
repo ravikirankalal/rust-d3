@@ -135,7 +135,7 @@ pub fn format_locale(value: f64, locale: &str) -> String {
             let parts: Vec<&str> = s.split(',').collect();
             let int_part = parts[0];
             let mut grouped = String::new();
-            let mut chars = int_part.chars().rev().collect::<Vec<_>>();
+            let chars = int_part.chars().rev().collect::<Vec<_>>();
             for (i, c) in chars.iter().enumerate() {
                 if i > 0 && i % 3 == 0 {
                     grouped.push(' ');
