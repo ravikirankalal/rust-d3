@@ -5,5 +5,7 @@ pub mod format;
 pub mod time;
 pub mod scale;
 pub mod axis;
+pub mod shape;
 
 pub use axis::Axis;
+pub use shape::{Symbol, SymbolType};

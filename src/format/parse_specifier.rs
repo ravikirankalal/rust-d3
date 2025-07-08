@@ -2,7 +2,7 @@ use super::specifier::FormatSpecifier;
 
 pub fn parse_specifier(spec: &str) -> FormatSpecifier {
     let mut fs = FormatSpecifier::default();
-    eprintln!("[DEBUG] parse_specifier: spec='{}'", spec);
+    // eprintln!("[DEBUG] parse_specifier: spec='{}'", spec);
     let mut chars = spec.chars().peekable();
     let mut grouping_found = false;
     let mut comma_found = false;
@@ -136,7 +136,7 @@ pub fn parse_specifier(spec: &str) -> FormatSpecifier {
     if let Some(&t) = chars.peek() {
         fs.ty = t;
     }
-    eprintln!("[DEBUG] parse_specifier: parsed precision={:?} ty={:?}", fs.precision, fs.ty);
+    // eprintln!("[DEBUG] parse_specifier: parsed precision={:?} ty={:?}", fs.precision, fs.ty);
     // Locale and currency are not parsed from the spec string directly, but can be set by higher-level logic.
     fs
 }

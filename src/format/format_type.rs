@@ -6,7 +6,7 @@ use super::format_prefix;
 use super::format_grouping;
 
 pub fn format_type(x: f64, spec: &FormatSpecifier) -> String {
-    eprintln!("[DEBUG] format_type: ty={}, precision={:?}", spec.ty, spec.precision);
+    // eprintln!("[DEBUG] format_type: ty={}, precision={:?}", spec.ty, spec.precision);
     match spec.ty {
         'f' => format_decimal(x, spec.precision.unwrap_or(6)),
         'd' => format_integer(x as i64),

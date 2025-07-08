@@ -17,10 +17,10 @@ fn apply_fill_align_width(s: &str, fs: &super::specifier::FormatSpecifier, _is_n
     let fill = fs.fill.unwrap_or(' ');
     let align = fs.align.unwrap_or('>');
     let len = s.chars().count();
-    eprintln!("[DEBUG] apply_fill_align_width: s='{}', width={}, len={}, fill='{}', align='{}'", s, width, len, fill, align);
+    // eprintln!("[DEBUG] apply_fill_align_width: s='{}', width={}, len={}, fill='{}', align='{}'", s, width, len, fill, align);
     if width > len {
         let pad = width - len;
-        eprintln!("[DEBUG] padding needed: pad={}", pad);
+        // eprintln!("[DEBUG] padding needed: pad={}", pad);
         match align {
             '<' => s = format!("{}{}", s, fill.to_string().repeat(pad)),
             '>' => s = format!("{}{}", fill.to_string().repeat(pad), s),
@@ -41,7 +41,7 @@ fn apply_fill_align_width(s: &str, fs: &super::specifier::FormatSpecifier, _is_n
             },
             _ => s = format!("{}{}", fill.to_string().repeat(pad), s),
         }
-        eprintln!("[DEBUG] after padding: s='{}', len={}", s, s.chars().count());
+        // eprintln!("[DEBUG] after padding: s='{}', len={}", s, s.chars().count());
     }
     s
 }

@@ -271,7 +271,7 @@ mod tests {
         assert_eq!(merge(&arr1), vec![1, 2, 3, 4]);
 
         let arr2: Vec<Vec<i32>> = vec![];
-        assert_eq!(merge(&arr2), vec![]);
+        assert_eq!(merge(&arr2), Vec::<i32>::new());
 
         let arr3 = vec![vec![1], vec![2, 3], vec![4, 5, 6]];
         assert_eq!(merge(&arr3), vec![1, 2, 3, 4, 5, 6]);
