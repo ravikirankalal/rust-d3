@@ -1,9 +1,9 @@
 # D3.js to Rust Parity Checklist
 
 **Porting Progress:**
-- Complete: 8/29 modules (28%)
+- Complete: 9/29 modules (31%)
 - In Progress: 1/29 modules (3%)
-- Pending: 20/29 modules (69%)
+- Pending: 19/29 modules (66%)
 
 This checklist tracks the parity between the official d3.js modules and your Rust port. Mark each as complete or partial as you implement them.
 
@@ -19,12 +19,12 @@ This checklist tracks the parity between the official d3.js modules and your Rus
 | d3-shape               | shape/           | In Progress | 80%        | array/, collection/, scale/                   | All generators (line, area, arc, pie, stack, symbol) now support robust, type-safe custom output traits and NaN/None handling. Advanced curve types (basis, cardinal, monotone, etc.) are present but need full D3-like interpolation for pixel-perfect parity. Some edge-case and output tests are being updated for new output traits. |
 | d3-geo                 | geo/             | Pending  | 0%         | array/, collection/, shape/, path/            |                        |
 | d3-hierarchy           | hierarchy/       | Complete | 100%       | array/, collection/                           | Node, TreeLayout, ClusterLayout, TreemapLayout, PartitionLayout, traversal, sum, parent pointers, x/y layout, integration with shape, full tests and documentation. |
-| d3-interpolate         | interpolate/     | Pending  | 0%         | array/, collection/                           |                        |
+| d3-interpolate         | interpolate/     | Complete | 100%       | array/, collection/                           | All major interpolators (number, array, string, rgb, hsl), piecewise, edge-case and advanced tests, crate root exports, robust parity with D3.js. |
 | d3-path                | path/            | Pending  | 0%         | array/, collection/                           |                        |
 | d3-polygon             | polygon/         | Pending  | 0%         | array/, collection/                           |                        |
 | d3-quadtree            | quadtree/        | Pending  | 0%         | array/, collection/                           |                        |
 | d3-random              | random/          | Pending  | 0%         | array/, collection/                           |                        |
-| d3-scale-chromatic     | scale_chromatic/ | Pending  | 0%         | scale/                                        |                        |
+| d3-scale-chromatic     | scale_chromatic/ | Complete | 100%       | scale/                                        | All categorical, sequential, diverging, perceptual, and cubehelix palettes/interpolators. Exposed at crate root, robust tests, edge-case and monotonicity checks. |
 | d3-selection           | selection/       | Pending  | 0%         | array/, collection/                           |                        |
 | d3-brush               | brush/           | Pending  | 0%         | selection/, scale/, axis/                     |                        |
 | d3-dsv                 | dsv/             | Pending  | 0%         | array/, collection/                           |                        |
