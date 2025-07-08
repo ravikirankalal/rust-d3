@@ -73,9 +73,13 @@ impl Timer {
         let delay = self.delay;
         let id = self.id;
         self.handle = Some(thread::spawn(move || {
+            // D3 behavior: always wait the full delay before the first tick
+            thread::sleep(Duration::from_millis(delay));
             while running.load(Ordering::SeqCst) {
+                if running.load(Ordering::SeqCst) {
+                    let _ = callback.lock().map(|mut cb| cb());
+                }
                 thread::sleep(Duration::from_millis(delay));
-                let _ = callback.lock().map(|mut cb| cb());
             }
             GLOBAL_TIMERS.lock().unwrap().remove(&id);
         }));
@@ -130,6 +134,56 @@ impl Timer {
         thread::spawn(move || {
             thread::sleep(Duration::from_millis(delay_ms));
             callback();
+        });
+    }
+}
+
+#[cfg(feature = "async-timer")]
+pub struct AsyncTimer {
+    pub running: Arc<AtomicBool>,
+    pub handle: Option<tokio::task::JoinHandle<()>>,
+    pub id: usize,
+}
+
+#[cfg(feature = "async-timer")]
+impl AsyncTimer {
+    pub fn new_async<F, Fut>(mut callback: F, delay_ms: u64) -> Self
+    where
+        F: FnMut() -> Fut + Send + 'static,
+        Fut: std::future::Future<Output = ()> + Send + 'static,
+    {
+        let mut id_lock = TIMER_ID.lock().unwrap();
+        let id = *id_lock;
+        *id_lock += 1;
+        let running = Arc::new(AtomicBool::new(true));
+        let running_clone = running.clone();
+        let handle = tokio::spawn(async move {
+            while running_clone.load(Ordering::SeqCst) {
+                tokio::time::sleep(std::time::Duration::from_millis(delay_ms)).await;
+                callback().await;
+            }
+            GLOBAL_TIMERS.lock().unwrap().remove(&id);
+        });
+        AsyncTimer { running, handle: Some(handle), id }
+    }
+    pub async fn stop(&mut self) {
+        self.running.store(false, Ordering::SeqCst);
+        if let Some(handle) = self.handle.take() {
+            let _ = handle.await;
+        }
+        GLOBAL_TIMERS.lock().unwrap().remove(&self.id);
+    }
+    pub fn is_running(&self) -> bool {
+        self.running.load(Ordering::SeqCst)
+    }
+    pub async fn schedule_async<F, Fut>(mut callback: F, delay_ms: u64)
+    where
+        F: FnOnce() -> Fut + Send + 'static,
+        Fut: std::future::Future<Output = ()> + Send + 'static,
+    {
+        tokio::spawn(async move {
+            tokio::time::sleep(std::time::Duration::from_millis(delay_ms)).await;
+            callback().await;
         });
     }
 }

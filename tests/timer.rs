@@ -157,3 +157,91 @@ fn test_timer_global_registry() {
     let timers = rust_d3::timer::GLOBAL_TIMERS.lock().unwrap();
     assert!(!timers.values().any(|t| t.id == timer.id));
 }
+
+#[test]
+fn test_timer_long_delay_no_early_tick() {
+    let count = Arc::new(AtomicUsize::new(0));
+    let count_clone = count.clone();
+    let mut timer = Timer::new(move || {
+        count_clone.fetch_add(1, Ordering::SeqCst);
+    }, 200); // Increase delay to 200ms
+    timer.start();
+    thread::sleep(Duration::from_millis(10)); // Decrease sleep to 10ms
+    timer.stop();
+    assert_eq!(count.load(Ordering::SeqCst), 0, "Timer should not tick before delay");
+}
+
+#[test]
+fn test_timer_restart_after_stop() {
+    let count = Arc::new(AtomicUsize::new(0));
+    let count_clone = count.clone();
+    let mut timer = Timer::new(move || {
+        count_clone.fetch_add(1, Ordering::SeqCst);
+    }, 2);
+    timer.start();
+    thread::sleep(Duration::from_millis(5));
+    timer.stop();
+    let after = count.load(Ordering::SeqCst);
+    timer.start();
+    thread::sleep(Duration::from_millis(5));
+    timer.stop();
+    assert!(count.load(Ordering::SeqCst) > after, "Timer should tick again after restart");
+}
+
+#[test]
+fn test_multiple_timers_independent() {
+    let a = Arc::new(AtomicUsize::new(0));
+    let b = Arc::new(AtomicUsize::new(0));
+    let mut t1 = Timer::new({ let a = a.clone(); move || { a.fetch_add(1, Ordering::SeqCst); } }, 2);
+    let mut t2 = Timer::new({ let b = b.clone(); move || { b.fetch_add(1, Ordering::SeqCst); } }, 2);
+    t1.start();
+    t2.start();
+    thread::sleep(Duration::from_millis(10));
+    t1.stop();
+    t2.stop();
+    assert!(a.load(Ordering::SeqCst) > 0 && b.load(Ordering::SeqCst) > 0, "Both timers should tick independently");
+}
+
+#[test]
+fn test_timer_schedule_one_shot() {
+    let count = Arc::new(AtomicUsize::new(0));
+    let count_clone = count.clone();
+    Timer::schedule(move || {
+        count_clone.fetch_add(1, Ordering::SeqCst);
+    }, 5);
+    thread::sleep(Duration::from_millis(20));
+    assert_eq!(count.load(Ordering::SeqCst), 1, "Schedule should only tick once");
+}
+
+#[test]
+fn test_timer_tick_once_does_not_start() {
+    let count = Arc::new(AtomicUsize::new(0));
+    let count_clone = count.clone();
+    let timer = Timer::new(move || {
+        count_clone.fetch_add(1, Ordering::SeqCst);
+    }, 1000);
+    timer.tick_once();
+    thread::sleep(Duration::from_millis(10));
+    assert_eq!(count.load(Ordering::SeqCst), 1, "tick_once should only tick once and not start timer");
+    assert!(!timer.is_running());
+}
+
+// Optionally, add async timer test if feature enabled
+#[cfg(feature = "async-timer")]
+#[tokio::test]
+async fn test_async_timer_tick() {
+    use rust_d3::timer::AsyncTimer;
+    use std::sync::atomic::AtomicUsize;
+    use std::sync::Arc;
+    let count = Arc::new(AtomicUsize::new(0));
+    let count_clone = count.clone();
+    let mut timer = AsyncTimer::new_async(move || {
+        let count_clone = count_clone.clone();
+        async move {
+            count_clone.fetch_add(1, Ordering::SeqCst);
+        }
+    }, 2);
+    tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+    timer.stop().await;
+    assert!(count.load(Ordering::SeqCst) > 1);
+}

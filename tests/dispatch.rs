@@ -1,6 +1,9 @@
-use rust_d3::dispatch::{Dispatch, HandlerHandle, Event};
 use std::sync::{Arc, Mutex};
 use std::any::Any;
+use std::time::Duration;
+use std::future::Future;
+use std::pin::Pin;
+use rust_d3::dispatch::{Dispatch, HandlerHandle, Event};
 
 #[test]
 fn test_dispatch_event() {
@@ -54,7 +57,7 @@ fn test_dispatch_event_object() {
     let called_clone = called.clone();
     let mut d = Dispatch::new();
     d.on_with_handle("foo", move |evt| {
-        if let Some(data) = evt.data {
+        if let Some(data) = evt.data.as_ref() {
             if let Some(val) = data.downcast_ref::<i32>() {
                 let mut flag = called_clone.lock().unwrap();
                 *flag += *val;
@@ -172,4 +175,48 @@ fn test_dispatch_integration_selection() {
     // In a real integration, you might call dispatcher.call("custom") inside a transition or selection event
     dispatcher.call("custom");
     assert!(*called.lock().unwrap());
+}
+
+#[tokio::test]
+async fn test_dispatch_async_event() {
+    let called = Arc::new(Mutex::new(false));
+    let called_clone = called.clone();
+    let mut d = Dispatch::new();
+    d.on_async("foo", move |_| {
+        let called_clone = called_clone.clone();
+        async move {
+            let mut flag = called_clone.lock().unwrap();
+            *flag = true;
+        }
+    });
+    d.call_async("foo").await;
+    assert!(*called.lock().unwrap());
+}
+
+#[tokio::test]
+async fn test_dispatch_async_event_object() {
+    let called = Arc::new(Mutex::new(0));
+    let called_clone = called.clone();
+    let mut d = Dispatch::new();
+    d.on_async("foo", move |evt| {
+        let called_clone = called_clone.clone();
+        async move {
+            if let Some(data) = evt.data.as_ref() {
+                if let Some(val) = data.downcast_ref::<i32>() {
+                    let mut flag = called_clone.lock().unwrap();
+                    *flag += *val;
+                }
+            }
+        }
+    });
+    let evt = std::sync::Arc::new(rust_d3::dispatch::Event {
+        event_type: std::borrow::Cow::Owned("foo".to_string()),
+        data: Some(std::sync::Arc::new(7)),
+        timestamp: std::time::Instant::now(),
+        source: None,
+        propagation_stopped: std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false)),
+        default_prevented: std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false)),
+    });
+    d.call_async_with("foo", evt).await;
+    assert_eq!(*called.lock().unwrap(), 7);
 }

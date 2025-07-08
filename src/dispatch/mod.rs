@@ -44,6 +44,10 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::any::Any;
 use std::fmt;
+use std::future::Future;
+use std::pin::Pin;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::borrow::Cow;
 
 /// A handle for a registered event handler, for ergonomic removal.
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -57,31 +61,32 @@ impl fmt::Debug for HandlerHandle {
 
 /// Event object passed to handlers (optional, for advanced usage)
 pub struct Event<'a> {
-    pub event_type: &'a str,
-    pub data: Option<&'a dyn Any>,
+    pub event_type: Cow<'a, str>,
+    pub data: Option<Arc<dyn Any + Send + Sync>>,
     pub timestamp: std::time::Instant,
-    pub source: Option<&'a str>,
-    pub propagation_stopped: std::cell::Cell<bool>,
-    pub default_prevented: std::cell::Cell<bool>,
+    pub source: Option<Cow<'a, str>>,
+    pub propagation_stopped: Arc<AtomicBool>,
+    pub default_prevented: Arc<AtomicBool>,
 }
 
 impl<'a> Event<'a> {
     pub fn stop_propagation(&self) {
-        self.propagation_stopped.set(true);
+        self.propagation_stopped.store(true, Ordering::SeqCst);
     }
     pub fn is_propagation_stopped(&self) -> bool {
-        self.propagation_stopped.get()
+        self.propagation_stopped.load(Ordering::SeqCst)
     }
     pub fn prevent_default(&self) {
-        self.default_prevented.set(true);
+        self.default_prevented.store(true, Ordering::SeqCst);
     }
     pub fn is_default_prevented(&self) -> bool {
-        self.default_prevented.get()
+        self.default_prevented.load(Ordering::SeqCst)
     }
 }
 
 pub struct Dispatch {
     listeners: Arc<Mutex<HashMap<String, Vec<(Arc<dyn Fn(&Event) + Send + Sync>, HandlerHandle)>>>>,
+    async_listeners: Arc<Mutex<HashMap<String, Vec<(Arc<dyn Fn(Arc<Event<'static>>) -> Pin<Box<dyn Future<Output = ()> + Send + Sync>> + Send + Sync>, HandlerHandle)>>>>,
     next_id: Arc<Mutex<u64>>,
 }
 
@@ -89,6 +94,7 @@ impl Dispatch {
     pub fn new() -> Self {
         Dispatch {
             listeners: Arc::new(Mutex::new(HashMap::new())),
+            async_listeners: Arc::new(Mutex::new(HashMap::new())),
             next_id: Arc::new(Mutex::new(1)),
         }
     }
@@ -145,12 +151,12 @@ impl Dispatch {
     /// Call all handlers for an event (no event object, with propagation)
     pub fn call(&self, event: &str) {
         let evt = Event {
-            event_type: event,
+            event_type: Cow::Borrowed(event),
             data: None,
             timestamp: std::time::Instant::now(),
             source: None,
-            propagation_stopped: std::cell::Cell::new(false),
-            default_prevented: std::cell::Cell::new(false),
+            propagation_stopped: Arc::new(AtomicBool::new(false)),
+            default_prevented: Arc::new(AtomicBool::new(false)),
         };
         self.call_event(event, &evt);
     }
@@ -160,12 +166,12 @@ impl Dispatch {
         T: Clone,
     {
         let evt = Event {
-            event_type: event,
-            data: Some(&arg as &dyn Any),
+            event_type: Cow::Borrowed(event),
+            data: Some(Arc::new(arg)),
             timestamp: std::time::Instant::now(),
             source: None,
-            propagation_stopped: std::cell::Cell::new(false),
-            default_prevented: std::cell::Cell::new(false),
+            propagation_stopped: Arc::new(AtomicBool::new(false)),
+            default_prevented: Arc::new(AtomicBool::new(false)),
         };
         self.call_event(event, &evt);
     }
@@ -207,27 +213,50 @@ impl Dispatch {
     pub fn handlers(&self, event: &str) -> Vec<HandlerHandle> {
         self.listeners.lock().unwrap().get(event).map(|v| v.iter().map(|(_, h)| h.clone()).collect()).unwrap_or_default()
     }
-    /// Async call: call all handlers for an event in a background thread
-    pub fn call_async(&self, event: &str) {
-        let listeners = self.listeners.clone();
-        let event_name = event.to_string();
-        std::thread::spawn(move || {
-            let evt = Event {
-                event_type: &event_name,
-                data: None,
-                timestamp: std::time::Instant::now(),
-                source: None,
-                propagation_stopped: std::cell::Cell::new(false),
-                default_prevented: std::cell::Cell::new(false),
-            };
-            if let Some(list) = listeners.lock().unwrap().get(&event_name) {
-                for (handler, _) in list {
-                    handler(&evt);
-                    if evt.is_propagation_stopped() {
-                        break;
-                    }
+    /// Register an async handler and return a handle for ergonomic removal
+    pub fn on_async_with_handle<F, Fut>(&mut self, event: &str, handler: F) -> HandlerHandle
+    where
+        F: Fn(Arc<Event<'static>>) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = ()> + Send + Sync + 'static,
+    {
+        let mut map = self.async_listeners.lock().unwrap();
+        let mut id = self.next_id.lock().unwrap();
+        let handle = HandlerHandle(*id);
+        *id += 1;
+        map.entry(event.to_string())
+            .or_default()
+            .push((Arc::new(move |evt| Box::pin(handler(evt))), handle.clone()));
+        handle
+    }
+    /// Register an async handler (no handle returned, for simple use)
+    pub fn on_async<F, Fut>(&mut self, event: &str, handler: F)
+    where
+        F: Fn(Arc<Event<'static>>) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = ()> + Send + Sync + 'static,
+    {
+        self.on_async_with_handle(event, handler);
+    }
+    /// Call all async handlers for an event (returns a future)
+    pub async fn call_async_with(&self, event: &str, evt: Arc<Event<'static>>) {
+        if let Some(list) = self.async_listeners.lock().unwrap().get(event) {
+            for (handler, _) in list {
+                handler(evt.clone()).await;
+                if evt.is_propagation_stopped() {
+                    break;
                 }
             }
+        }
+    }
+    /// Call all async handlers for an event (no event object)
+    pub async fn call_async(&self, event: &str) {
+        let evt = Arc::new(Event {
+            event_type: Cow::Owned(event.to_string()),
+            data: None,
+            timestamp: std::time::Instant::now(),
+            source: None,
+            propagation_stopped: Arc::new(AtomicBool::new(false)),
+            default_prevented: Arc::new(AtomicBool::new(false)),
         });
+        self.call_async_with(event, evt).await;
     }
 }
