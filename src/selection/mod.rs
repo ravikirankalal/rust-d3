@@ -128,12 +128,20 @@ impl Selection {
             exit_nodes: vec![],
         }
     }
-    /// Append a child node to all nodes
-    pub fn append(&mut self, element: &str) -> &mut Self {
+    /// Append a child node to all nodes and return a selection of the new children (D3-like, no borrow)
+    pub fn append(&mut self, element: &str) -> Selection {
+        let mut new_children = vec![];
         for node in &mut self.nodes {
-            node.children.push(Node::new(element));
+            let child = Node::new(element);
+            node.children.push(child.clone());
+            new_children.push(child);
         }
-        self
+        // Return a selection with cloned children (no borrow)
+        Selection {
+            nodes: new_children,
+            enter_nodes: vec![],
+            exit_nodes: vec![],
+        }
     }
     /// Remove all nodes from the selection
     pub fn remove(&mut self) -> &mut Self {
