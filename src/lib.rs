@@ -13,11 +13,13 @@ pub mod polygon;
 pub mod quadtree;
 pub mod path;
 pub mod random;
+pub mod selection;
 
 pub use axis::Axis;
 pub use shape::{Symbol, SymbolType};
 pub use polygon::*;
 pub use quadtree::*;
+pub use selection::Selection;
 
 // Example integration: use hierarchy with shape for tree visualization
 // use crate::hierarchy::{Node, TreeLayout};
