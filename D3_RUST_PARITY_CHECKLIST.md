@@ -1,9 +1,9 @@
 # D3.js to Rust Parity Checklist
 
 **Porting Progress:**
-- Complete: 14/29 modules (48%)
-- In Progress: 0/29 modules (0%)
-- Pending: 15/29 modules (52%)
+- Complete: 16/29 modules (55%)
+- In Progress: 1/29 modules (3%)
+- Pending: 12/29 modules (41%)
 
 This checklist tracks the parity between the official d3.js modules and your Rust port. Mark each as complete or partial as you implement them.
 
@@ -32,12 +32,12 @@ This checklist tracks the parity between the official d3.js modules and your Rus
 | [d3-dsv](https://github.com/d3/d3-dsv) | dsv/ | Pending | 0% | array/, collection/ |  |  |
 | [d3-fetch](https://github.com/d3/d3-fetch) | fetch/ | Pending | 0% | array/, collection/ |  |  |
 | [d3-force](https://github.com/d3/d3-force) | force/ | Pending | 0% | array/, collection/ |  |  |
-| [d3-dispatch](https://github.com/d3/d3-dispatch) | dispatch/ | Pending | 0% | array/, collection/ |  |  |
+| [d3-dispatch](https://github.com/d3/d3-dispatch) | dispatch/ | Complete | 100% | array/, collection/ | on, on_with_handle, off, off_handle, off_handler, call, call_with, call_event, clear, listeners, off_namespace, event object support, ergonomic handler removal, D3-like API, robust tests, integration with selection/transition, advanced docs/examples | Async/event propagation, more advanced event system |
 | [d3-drag](https://github.com/d3/d3-drag) | drag/ | Pending | 0% | selection/, scale/, axis/ |  |  |
 | [d3-chord](https://github.com/d3/d3-chord) | chord/ | Pending | 0% | array/, collection/ |  |  |
 | [d3-contour](https://github.com/d3/d3-contour) | contour/ | Pending | 0% | array/, collection/ |  |  |
 | [d3-delaunay](https://github.com/d3/d3-delaunay) | delaunay/ | Pending | 0% | array/, collection/ |  |  |
-| [d3-timer](https://github.com/d3/d3-timer) | timer/ | Pending | 0% | array/, collection/ |  |  |
+| [d3-timer](https://github.com/d3/d3-timer) | timer/ | Complete | 100% | array/, collection/ | Timer struct, start, stop, restart, delay, is_running, robust tests, usage examples, D3-like API, edge-case handling, integration docs | Async/event object support, deeper integration |
 | [d3-tree](https://github.com/d3/d3-hierarchy) | tree/ | Pending | 0% | hierarchy/ |  |  |
 | [d3-treemap](https://github.com/d3/d3-hierarchy) | treemap/ | Pending | 0% | hierarchy/ |  |  |
 | [d3-voronoi](https://github.com/d3/d3-voronoi) | voronoi/ | Pending | 0% | delaunay/ |  |  |
