@@ -103,3 +103,57 @@ fn test_timer_zero_delay() {
     timer.stop();
     assert!(count.load(Ordering::SeqCst) > 1);
 }
+
+#[test]
+fn test_timer_active_and_now() {
+    let mut timer = Timer::new(|| {}, 1);
+    assert!(!timer.active());
+    timer.start();
+    assert!(timer.active());
+    timer.stop();
+    assert!(!timer.active());
+    let t1 = rust_d3::timer::now();
+    std::thread::sleep(std::time::Duration::from_millis(1));
+    let t2 = rust_d3::timer::now();
+    assert!(t2 > t1);
+}
+
+#[test]
+fn test_timer_flush_tick_once() {
+    let count = Arc::new(AtomicUsize::new(0));
+    let count_clone = count.clone();
+    let mut timer = Timer::new(move || {
+        count_clone.fetch_add(1, Ordering::SeqCst);
+    }, 1000);
+    timer.start();
+    // Should not tick yet
+    assert_eq!(count.load(Ordering::SeqCst), 0);
+    timer.tick_once();
+    assert_eq!(count.load(Ordering::SeqCst), 1);
+    rust_d3::timer::flush(); // Should tick again
+    assert!(count.load(Ordering::SeqCst) >= 2);
+    timer.stop();
+}
+
+#[test]
+fn test_timer_schedule() {
+    let count = Arc::new(AtomicUsize::new(0));
+    let count_clone = count.clone();
+    Timer::schedule(move || {
+        count_clone.fetch_add(1, Ordering::SeqCst);
+    }, 5);
+    std::thread::sleep(std::time::Duration::from_millis(10));
+    assert_eq!(count.load(Ordering::SeqCst), 1);
+}
+
+#[test]
+fn test_timer_global_registry() {
+    let mut timer = Timer::new(|| {}, 1);
+    timer.start();
+    let timers = rust_d3::timer::GLOBAL_TIMERS.lock().unwrap();
+    assert!(timers.values().any(|t| t.id == timer.id));
+    drop(timers);
+    timer.stop();
+    let timers = rust_d3::timer::GLOBAL_TIMERS.lock().unwrap();
+    assert!(!timers.values().any(|t| t.id == timer.id));
+}
