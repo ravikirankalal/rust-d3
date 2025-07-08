@@ -150,6 +150,77 @@ mod tests {
     fn test_elastic_out() {
         assert!((elastic_out(0.5) - 1.0).abs() < 0.1);
     }
+    #[test]
+    fn test_linear_edges() {
+        assert_eq!(linear(0.0), 0.0);
+        assert_eq!(linear(1.0), 1.0);
+        assert_eq!(ease_linear(0.5), 0.5);
+    }
+    #[test]
+    fn test_quad_edges() {
+        assert_eq!(quad_in(0.0), 0.0);
+        assert_eq!(quad_in(1.0), 1.0);
+        assert_eq!(ease_quad(0.5), 0.25);
+        assert_eq!(quad_out(0.0), 0.0);
+        assert_eq!(quad_out(1.0), 1.0);
+        assert_eq!(quad_inout(0.0), 0.0);
+        assert_eq!(quad_inout(1.0), 1.0);
+    }
+    #[test]
+    fn test_cubic_edges() {
+        assert_eq!(cubic_in(0.0), 0.0);
+        assert_eq!(cubic_in(1.0), 1.0);
+        assert_eq!(cubic_out(0.0), 0.0);
+        assert_eq!(cubic_out(1.0), 1.0);
+        assert_eq!(cubic_inout(0.0), 0.0);
+        assert_eq!(cubic_inout(1.0), 1.0);
+    }
+    #[test]
+    fn test_sin_edges() {
+        assert_eq!(sin_in(0.0), 0.0);
+        assert!((sin_in(1.0) - 1.0).abs() < 1e-6);
+        assert_eq!(sin_out(0.0), 0.0);
+        assert!((sin_out(1.0) - 1.0).abs() < 1e-6);
+        assert_eq!(sin_inout(0.0), 0.0);
+        assert!((sin_inout(1.0) - 1.0).abs() < 1e-6);
+    }
+    #[test]
+    fn test_exp_edges() {
+        assert_eq!(exp_in(0.0), 0.0);
+        assert_eq!(exp_in(1.0), 1.0);
+        assert_eq!(exp_out(0.0), 0.0);
+        assert_eq!(exp_out(1.0), 1.0);
+        assert_eq!(exp_inout(0.0), 0.0);
+        assert_eq!(exp_inout(1.0), 1.0);
+    }
+    #[test]
+    fn test_circle_edges() {
+        assert_eq!(circle_in(0.0), 0.0);
+        assert!((circle_in(1.0) - 1.0).abs() < 1e-6);
+        assert_eq!(circle_out(0.0), 0.0);
+        assert!((circle_out(1.0) - 1.0).abs() < 1e-6);
+        assert_eq!(circle_inout(0.0), 0.0);
+        assert!((circle_inout(1.0) - 1.0).abs() < 1e-6);
+    }
+    #[test]
+    fn test_back_edges() {
+        assert_eq!(back_in(0.0), 0.0);
+        assert!((back_in(1.0) - 1.0).abs() < 1e-6);
+        assert_eq!(back_out(0.0), 0.0);
+        assert!((back_out(1.0) - 1.0).abs() < 1e-6);
+        assert_eq!(back_inout(0.0), 0.0);
+        assert!((back_inout(1.0) - 1.0).abs() < 1e-6);
+    }
+    #[test]
+    fn test_bounce_out_edges() {
+        assert_eq!(bounce_out(0.0), 0.0);
+        assert!((bounce_out(1.0) - 1.0).abs() < 1e-6);
+    }
+    #[test]
+    fn test_elastic_out_edges() {
+        assert_eq!(elastic_out(0.0), 0.0);
+        assert!((elastic_out(1.0) - 1.0).abs() < 1e-6);
+    }
 }
 
 pub use linear as ease_linear;
