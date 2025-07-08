@@ -8,6 +8,19 @@ pub use locale::TimeLocale;
 
 use chrono::{NaiveDateTime, Datelike, Duration}; // re-add Duration for macro
 
+// Stubs for D3 time formatting and intervals
+pub fn time_format_stub(_specifier: &str) -> impl Fn(&str) -> String {
+    |_x| String::from("[time_format stub]")
+}
+
+pub struct TimeIntervalStub;
+impl TimeIntervalStub {
+    pub fn floor(&self, _date: &str) -> String { String::from("[floor stub]") }
+    pub fn ceil(&self, _date: &str) -> String { String::from("[ceil stub]") }
+    pub fn offset(&self, _date: &str, _step: i32) -> String { String::from("[offset stub]") }
+    pub fn range(&self, _start: &str, _stop: &str, _step: i32) -> Vec<String> { vec![String::from("[range stub]")] }
+}
+
 // Interval traits and stubs
 pub trait TimeInterval {
     fn floor(&self, date: NaiveDateTime) -> NaiveDateTime;
@@ -178,5 +191,18 @@ mod tests {
         let year = Year;
         let d = NaiveDate::from_ymd_opt(2025, 7, 8).unwrap().and_hms_opt(15, 30, 0).unwrap();
         assert_eq!(year.floor(d), NaiveDate::from_ymd_opt(2025, 1, 1).unwrap().and_hms_opt(0, 0, 0).unwrap());
+    }
+    #[test]
+    fn test_time_format_stub() {
+        let f = time_format_stub("%Y-%m-%d");
+        assert_eq!(f("2025-07-08"), "[time_format stub]");
+    }
+    #[test]
+    fn test_time_interval_stub() {
+        let interval = TimeIntervalStub;
+        assert_eq!(interval.floor("2025-07-08"), "[floor stub]");
+        assert_eq!(interval.ceil("2025-07-08"), "[ceil stub]");
+        assert_eq!(interval.offset("2025-07-08", 1), "[offset stub]");
+        assert_eq!(interval.range("2025-07-08", "2025-07-09", 1), vec!["[range stub]".to_string()]);
     }
 }

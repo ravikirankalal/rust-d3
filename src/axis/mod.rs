@@ -106,7 +106,7 @@ impl Axis<crate::scale::ScaleLinear> {
                 let label = if let Some(fmt) = self.tick_format {
                     (fmt)(value)
                 } else if let Some(ref locale) = self.locale {
-                    crate::format::format_locale(value, locale)
+                    crate::format::format_locale(value, locale, true)
                 } else {
                     format!("{:.6}", value)
                 };
@@ -122,7 +122,7 @@ impl Axis<crate::scale::ScaleLinear> {
                 let label = if let Some(fmt) = self.tick_format {
                     (fmt)(value)
                 } else if let Some(ref locale) = self.locale {
-                    crate::format::format_locale(value, locale)
+                    crate::format::format_locale(value, locale, true)
                 } else {
                     format!("{:.6}", value)
                 };

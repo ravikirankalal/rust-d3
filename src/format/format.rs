@@ -48,7 +48,7 @@ fn apply_fill_align_width(s: &str, fs: &super::specifier::FormatSpecifier, _is_n
 
 pub fn format(spec: &str, x: f64) -> String {
     let fs = parse_specifier(spec);
-    let locale = fs.locale.as_ref().map(|_| Locale::default()).unwrap_or(Locale::default());
+    let locale = fs.locale.as_ref().map(|tag| Locale::from_tag(tag)).unwrap_or(Locale::default());
     let mut s = format_type(x, &fs);
     // Grouping: comma or underscore
     if fs.comma {
