@@ -9,9 +9,15 @@ pub mod shape;
 pub mod hierarchy;
 pub mod scale_chromatic;
 pub mod interpolate;
+pub mod polygon;
+pub mod quadtree;
+pub mod path;
+pub mod random;
 
 pub use axis::Axis;
 pub use shape::{Symbol, SymbolType};
+pub use polygon::*;
+pub use quadtree::*;
 
 // Example integration: use hierarchy with shape for tree visualization
 // use crate::hierarchy::{Node, TreeLayout};
