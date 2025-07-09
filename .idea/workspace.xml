@@ -11,9 +11,10 @@
     </cargoProject>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="eff26258-86d6-4780-a761-15d435444507" name="Changes" comment="shape 6">
-      <change beforePath="$PROJECT_DIR$/src/transition/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/transition/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/transition.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/transition.rs" afterDir="false" />
+    <list default="true" id="eff26258-86d6-4780-a761-15d435444507" name="Changes" comment="transition more tests">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/D3_RUST_PARITY_CHECKLIST.md" beforeDir="false" afterPath="$PROJECT_DIR$/D3_RUST_PARITY_CHECKLIST.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,6 +65,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Cargo.Build `Test color`.executor": "Run",
     "Cargo.Build `Tests in 'tests'`.executor": "Run",
     "Cargo.Install cargo-llvm-cov.executor": "Run",
     "Cargo.Test array.executor": "Coverage",
@@ -73,6 +75,8 @@
     "Cargo.Test array::tests::test_range.executor": "Run",
     "Cargo.Test array::tests::test_ticks.executor": "Run",
     "Cargo.Test array::tests::test_zip.executor": "Run",
+    "Cargo.Test color.executor": "Run",
+    "Cargo.Test color::tests.executor": "Run",
     "Cargo.Test fetch.executor": "Profiler",
     "Cargo.Test integration_tests.executor": "Run",
     "Cargo.Test multiple selected files (1).executor": "Run",
@@ -107,7 +111,7 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager" selected="Cargo.Tests in 'tests'">
+  <component name="RunManager" selected="Cargo.Test color::tests">
     <configuration name="Run rust-d3-examples" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="buildProfileId" value="dev" />
       <option name="command" value="run --package rust-d3 --bin rust-d3-examples" />
@@ -126,8 +130,25 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test array::tests::test_ticks" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
-      <option name="command" value="test --package rust-d3 --lib array::tests::test_ticks -- --exact" />
+    <configuration name="Test color" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package rust-d3 --lib color" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <option name="emulateTerminal" value="true" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test color::tests" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package rust-d3 --lib color::tests" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <envs />
       <option name="emulateTerminal" value="true" />
@@ -211,30 +232,13 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="test" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
-      <option name="command" value="test" />
-      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
-      <envs />
-      <option name="emulateTerminal" value="true" />
-      <option name="channel" value="DEFAULT" />
-      <option name="requiredFeatures" value="true" />
-      <option name="allFeatures" value="false" />
-      <option name="withSudo" value="false" />
-      <option name="buildTarget" value="REMOTE" />
-      <option name="backtrace" value="SHORT" />
-      <option name="isRedirectInput" value="false" />
-      <option name="redirectInputPath" value="" />
-      <method v="2">
-        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
-      </method>
-    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Cargo.Test color" />
+        <item itemvalue="Cargo.Test color::tests" />
         <item itemvalue="Cargo.Tests in 'tests'" />
         <item itemvalue="Cargo.Test transition" />
         <item itemvalue="Cargo.Test transition::tests" />
-        <item itemvalue="Cargo.test" />
-        <item itemvalue="Cargo.Test array::tests::test_ticks" />
       </list>
     </recent_temporary>
   </component>
@@ -251,7 +255,7 @@
       <workItem from="1751861156333" duration="1262000" />
       <workItem from="1751862762874" duration="2094000" />
       <workItem from="1751864878746" duration="140000" />
-      <workItem from="1751880947310" duration="53231000" />
+      <workItem from="1751880947310" duration="57857000" />
     </task>
     <task id="LOCAL-00001" summary="Porting version v0.0.2">
       <option name="closed" value="true" />
@@ -301,7 +305,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751966472119</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="transition more tests">
+      <option name="closed" value="true" />
+      <created>1752062702332</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1752062702332</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -322,7 +334,8 @@
     <MESSAGE value="Porting version v0.0.2" />
     <MESSAGE value="Porting version v0.0.2 force.rs" />
     <MESSAGE value="shape 6" />
-    <option name="LAST_COMMIT_MESSAGE" value="shape 6" />
+    <MESSAGE value="transition more tests" />
+    <option name="LAST_COMMIT_MESSAGE" value="transition more tests" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

@@ -24,7 +24,7 @@
 | d3-time-format | [link](https://github.com/d3/d3-time-format) | 80 | timeFormat, timeParse, utcFormat, utcParse, isoFormat, isoParse | formatLocale, formatDefaultLocale | d3-time |
 | d3-brush | [link](https://github.com/d3/d3-brush) | 0 |  | All | d3-selection |
 | d3-chord | [link](https://github.com/d3/d3-chord) | 0 |  | All | d3-array |
-| d3-color | [link](https://github.com/d3/d3-color) | 0 |  | All | - |
+| d3-color | [link](https://github.com/d3/d3-color) | 50 | Color Parsing, Color Models (RGB, HSL), Color Conversion (Lab), Color Interpolation, Formatting | Advanced color spaces, color blending, cubehelix, color manipulation utilities | - |
 | d3-contour | [link](https://github.com/d3/d3-contour) | 0 |  | All | d3-array |
 | d3-delaunay | [link](https://github.com/d3/d3-delaunay) | 0 |  | All | d3-array |
 | d3-drag | [link](https://github.com/d3/d3-drag) | 0 |  | All | d3-selection, d3-dispatch |
