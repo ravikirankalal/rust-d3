@@ -11,15 +11,7 @@
     </cargoProject>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="eff26258-86d6-4780-a761-15d435444507" name="Changes" comment="color module 2">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/D3_RUST_PARITY_CHECKLIST.md" beforeDir="false" afterPath="$PROJECT_DIR$/D3_RUST_PARITY_CHECKLIST.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/color/hsl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/color/hsl.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/color/lab.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/color/lab.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/color/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/color/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/color/rgb.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/color/rgb.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
-    </list>
+    <list default="true" id="eff26258-86d6-4780-a761-15d435444507" name="Changes" comment="color module 2" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -261,7 +253,7 @@
       <workItem from="1751861156333" duration="1262000" />
       <workItem from="1751862762874" duration="2094000" />
       <workItem from="1751864878746" duration="140000" />
-      <workItem from="1751880947310" duration="62664000" />
+      <workItem from="1751880947310" duration="62973000" />
     </task>
     <task id="LOCAL-00001" summary="Porting version v0.0.2">
       <option name="closed" value="true" />

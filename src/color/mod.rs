@@ -8,18 +8,21 @@ pub mod rgb;
 pub mod hsl;
 pub mod lab;
 pub mod convert;
+pub mod hcl;
 
 use std::str::FromStr;
 
 use rgb::Rgb;
 use hsl::Hsl;
 use lab::Lab;
+use hcl::Hcl;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Color {
     Rgb(Rgb),
     Hsl(Hsl),
     Lab(Lab),
+    Hcl(Hcl),
     // Add other color models as needed
 }
 
@@ -134,6 +137,21 @@ impl Color {
                     lab.opacity,
                 )
             }
+            Color::Hcl(hcl) => {
+                // Convert HCL to Lab
+                let a = hcl.c * hcl.h.to_radians().cos();
+                let b = hcl.c * hcl.h.to_radians().sin();
+                let lab_color = Lab::new(hcl.l, a, b, hcl.opacity);
+                // Convert Lab to RGB
+                let (x, y, z) = convert::lab_to_xyz(lab_color.l, lab_color.a, lab_color.b);
+                let (r, g, b) = convert::xyz_to_rgb(x, y, z);
+                Rgb::new(
+                    (r * 255.0).round() as u8,
+                    (g * 255.0).round() as u8,
+                    (b * 255.0).round() as u8,
+                    lab_color.opacity,
+                )
+            }
         }
     }
 
@@ -178,6 +196,10 @@ impl Color {
                 let rgb_color = Color::Lab(lab.clone()).rgb();
                 Color::Rgb(rgb_color).hsl()
             }
+            Color::Hcl(hcl) => {
+                let rgb_color = Color::Hcl(hcl.clone()).rgb();
+                Color::Rgb(rgb_color).hsl()
+            }
         }
     }
 
@@ -192,6 +214,11 @@ impl Color {
             Color::Hsl(hsl) => {
                 let rgb_color = Color::Hsl(hsl.clone()).rgb();
                 Color::Rgb(rgb_color).lab()
+            }
+            Color::Hcl(hcl) => {
+                let a = hcl.c * hcl.h.to_radians().cos();
+                let b = hcl.c * hcl.h.to_radians().sin();
+                Lab::new(hcl.l, a, b, hcl.opacity)
             }
         }
     }
@@ -229,6 +256,7 @@ impl Color {
             Color::Rgb(rgb) => Color::Rgb(Rgb::new(rgb.r, rgb.g, rgb.b, value)),
             Color::Hsl(hsl) => Color::Hsl(Hsl::new(hsl.h, hsl.s, hsl.l, value)),
             Color::Lab(lab) => Color::Lab(Lab::new(lab.l, lab.a, lab.b, value)),
+            Color::Hcl(hcl) => Color::Hcl(Hcl::new(hcl.h, hcl.c, hcl.l, value)),
         }
     }
 
@@ -265,6 +293,12 @@ impl Color {
                 lab.b,
                 lab.opacity.max(0.0).min(1.0),
             )),
+            Color::Hcl(hcl) => Color::Hcl(Hcl::new(
+                hcl.h.rem_euclid(360.0),
+                hcl.c.max(0.0),
+                hcl.l.max(0.0).min(100.0),
+                hcl.opacity.max(0.0).min(1.0),
+            )),
         }
     }
 
@@ -288,8 +322,26 @@ impl Color {
         lab.to_string()
     }
 
+    pub fn format_hcl(&self) -> String {
+        let hcl = self.hcl();
+        hcl.to_string()
+    }
+
     pub fn copy(&self) -> Color {
         self.clone()
+    }
+
+    pub fn hcl(&self) -> Hcl {
+        match self {
+            Color::Hcl(hcl) => hcl.clone(),
+            _ => {
+                let lab_color = self.lab();
+                // Convert Lab to HCL
+                let h = (lab_color.b).atan2(lab_color.a).to_degrees();
+                let c = (lab_color.a.powi(2) + lab_color.b.powi(2)).sqrt();
+                Hcl::new(h, c, lab_color.l, lab_color.opacity)
+            }
+        }
     }
 }
 
