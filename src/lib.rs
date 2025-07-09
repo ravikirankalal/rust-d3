@@ -24,6 +24,9 @@ pub use shape::{Symbol, SymbolType};
 pub use polygon::*;
 pub use quadtree::*;
 pub use selection::Selection;
+pub use array::transpose::transpose;
+pub use array::bisector::bisector;
+pub use array::quickselect::quickselect;
 
 // Example integration: use hierarchy with shape for tree visualization
 // use crate::hierarchy::{Node, TreeLayout};

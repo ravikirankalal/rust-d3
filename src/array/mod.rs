@@ -47,6 +47,9 @@ pub use summarize::summarize;
 pub use transform::transform;
 pub mod intern;
 pub use intern::{intern_set, intern_map};
+pub mod transpose;
+pub mod bisector;
+pub mod quickselect;
 
 #[cfg(test)]
 mod tests {
