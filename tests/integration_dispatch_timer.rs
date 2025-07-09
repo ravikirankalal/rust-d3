@@ -276,3 +276,87 @@ async fn integration_dispatch_async_event_bubbling() {
     let result2 = log.lock().await.clone();
     assert_eq!(result2, vec!["child"]);
 }
+
+#[tokio::test]
+async fn integration_multiple_timers_shared_dispatch() {
+    let count = Arc::new(AtomicUsize::new(0));
+    let count_clone1 = count.clone();
+    let _count_clone2 = count.clone(); // Silence unused variable warning
+    let dispatcher = Dispatch::new();
+    dispatcher.on("tick", move || {
+        count_clone1.fetch_add(1, Ordering::SeqCst);
+    }).await;
+    let dispatcher = Arc::new(Mutex::new(dispatcher));
+    let dispatcher_clone1 = dispatcher.clone();
+    let dispatcher_clone2 = dispatcher.clone();
+    let handle1 = tokio::spawn(async move {
+        let mut timer = Timer::new(move || {
+            let dispatcher_clone = dispatcher_clone1.clone();
+            let (tx, rx) = std::sync::mpsc::channel();
+            let rt = tokio::runtime::Runtime::new().unwrap();
+            rt.block_on(async {
+                let d = dispatcher_clone.lock().await;
+                d.call("tick").await;
+                let _ = tx.send(());
+            });
+            let _ = rx.recv();
+        }, 5);
+        timer.start();
+        tokio::time::sleep(Duration::from_millis(30)).await;
+        timer.stop();
+    });
+    let handle2 = tokio::spawn(async move {
+        let mut timer = Timer::new(move || {
+            let dispatcher_clone = dispatcher_clone2.clone();
+            let (tx, rx) = std::sync::mpsc::channel();
+            let rt = tokio::runtime::Runtime::new().unwrap();
+            rt.block_on(async {
+                let d = dispatcher_clone.lock().await;
+                d.call("tick").await;
+                let _ = tx.send(());
+            });
+            let _ = rx.recv();
+        }, 7);
+        timer.start();
+        tokio::time::sleep(Duration::from_millis(30)).await;
+        timer.stop();
+    });
+    handle1.await.unwrap();
+    handle2.await.unwrap();
+    assert!(count.load(Ordering::SeqCst) >= 6); // Both timers should have fired at least 3 times each
+}
+
+#[tokio::test]
+async fn integration_timer_dispatch_async_handler() {
+    let count = Arc::new(AtomicUsize::new(0));
+    let count_clone = count.clone();
+    let dispatcher = Dispatch::new();
+    dispatcher.on_async("tick", move |_evt| {
+        let count_clone = count_clone.clone();
+        Box::pin(async move {
+            count_clone.fetch_add(1, Ordering::SeqCst);
+        })
+    }).await;
+    let dispatcher = Arc::new(Mutex::new(dispatcher));
+    let dispatcher_clone = dispatcher.clone();
+    let handle = tokio::spawn(async move {
+        let mut timer = Timer::new(move || {
+            let dispatcher_clone = dispatcher_clone.clone();
+            let (tx, rx) = std::sync::mpsc::channel();
+            let rt = tokio::runtime::Runtime::new().unwrap();
+            rt.block_on(async {
+                let d = dispatcher_clone.lock().await;
+                d.call_async("tick").await;
+                let _ = tx.send(());
+            });
+            let _ = rx.recv();
+        }, 5);
+        timer.start();
+        tokio::time::sleep(Duration::from_millis(60)).await;
+        timer.stop();
+    });
+    handle.await.unwrap();
+    tokio::time::sleep(Duration::from_millis(20)).await;
+    let final_count = count.load(Ordering::SeqCst);
+    assert!(final_count >= 1);
+}
