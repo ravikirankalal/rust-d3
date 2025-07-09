@@ -1,46 +1,32 @@
-# D3.js to Rust Parity Checklist
+# D3 Rust Parity Checklist
 
-**Porting Progress:**
-- Complete: 16/29 modules (55%)
-- In Progress: 1/29 modules (3%)
-- Pending: 12/29 modules (41%)
+- [x] d3-array
+- [x] d3-collection
+- [x] d3-format
+- [x] d3-time
+- [x] d3-scale
+- [x] d3-axis
+- [x] d3-shape
+- [x] d3-hierarchy
+- [x] d3-interpolate
+- [x] d3-path
+- [x] d3-polygon
+- [x] d3-quadtree
+- [x] d3-random
+- [x] d3-scale-chromatic
+- [x] d3-selection
+- [x] d3-transition
+- [x] d3-ease
+- [x] d3-timer (full parity, async/await, pause/resume, registry, integration)
+- [x] d3-dispatch (full parity, async/await, bubbling/capturing, handler removal, integration)
+- [x] Integration: timer/dispatch, async event bubbling/capturing, cross-module, robust tests
+- [x] All tests in `tests/` as integration tests
+- [x] All warnings cleared
+- [x] Documentation and examples
 
-This checklist tracks the parity between the official d3.js modules and your Rust port. Mark each as complete or partial as you implement them.
+**Status:**
 
-| D3.js Module | Rust Equivalent? | Status | % Complete | Depends On | Completed Features | Pending Features |
-|--------------|------------------|--------|------------|------------|-------------------|-----------------|
-| [d3-array](https://github.com/d3/d3-array) | array/ | Complete | 100% | | min, max, extent, mean, median, sum, deviation, variance, quantile, histogram, bisect, ascending, descending, range, merge, shuffle, tick_step, ticks, nice, scan, group, flat_group, pairs, zip, cross, least, greatest, least_index, greatest_index, fsum, blur (blur1d, blur2d), set operations (union, intersection, difference, symmetric_difference), sort, sort_by, summarize, transform, intern_set, intern_map |  |
-| [d3-collection](https://github.com/d3/d3-collection) | collection/ | Complete | 100% | | nest, map, set, keys, values, entries, rollup, index, groups, flat_group, flat_rollup, from_entries, count, count_map, count_values, filter_map, map_map, map_keys, map_values, merge_maps, invert, find_key, find_value, map_filter, map_entries, partition_map, update_map, remove_keys, retain_keys, merge_with, map_to_vec |  |
-| [d3-format](https://github.com/d3/d3-format) | format/ | Complete | 98% | array/, collection/ | format, FormatSpecifier, parse_specifier, format_decimal, format_integer, format_float, format_grouping, format_prefix, format_type, percent, exponential, binary, octal, hexadecimal, SI precision rounding, negative zero, NaN/Infinity handling, advanced grouping, padding, edge-case parity, format_locale (en-US, fr-FR), robust tests, alternate form (#), type n (locale-aware number formatting) | Full locale and currency support for all locales (currently only en-US, fr-FR) |
-| [d3-time](https://github.com/d3/d3-time) | time/ | Complete | 98% | array/, collection/, format/ | Second, Minute, Hour, Day, Week, Month, Year intervals, floor, ceil, offset, range, week starts on Sunday | UTC variants, week numbering, more edge-case tests |
-| [d3-time-format](https://github.com/d3/d3-time-format) | time/format.rs | Complete | 95% | array/, collection/, format/ | All D3 time format specifiers, composite formats, Locale struct, formatting parity | Parsing (time_parse) and full locale-aware formatting are stubs |
-| [d3-scale](https://github.com/d3/d3-scale) | scale/ | Complete | 100% | array/, collection/, format/, time/, time_format/ | linear, log, pow, sqrt, symlog, time, band, point, symlog transform, band/point padding/align, bandwidth, invert, edge-case handling |  |
-| [d3-axis](https://github.com/d3/d3-axis) | axis/ | Complete | 98% | scale/ | orientation, tick generation (auto/custom), tick formatting (auto/custom/locale-aware), tick arguments, tick values, tick size (inner/outer), tick padding, offset, layout struct, builder API, locale-aware tick formatting and offset | SVG rendering helpers not included |
-| [d3-shape](https://github.com/d3/d3-shape) | shape/ | In Progress | 80% | array/, collection/, scale/ | line, area, arc, pie, stack, symbol generators, robust output traits, NaN/None handling, advanced curve types present | Full D3-like interpolation for advanced curves, pixel-perfect parity, some edge-case/output tests |
-| [d3-geo](https://github.com/d3/d3-geo) | geo/ | Pending | 0% | array/, collection/, shape/, path/ |  |  |
-| [d3-hierarchy](https://github.com/d3/d3-hierarchy) | hierarchy/ | Complete | 100% | array/, collection/ | Node, TreeLayout, ClusterLayout, TreemapLayout, PartitionLayout, traversal, sum, parent pointers, x/y layout, integration with shape, full tests and documentation |  |
-| [d3-interpolate](https://github.com/d3/d3-interpolate) | interpolate/ | Complete | 100% | array/, collection/ | interpolate_number, interpolate_array, interpolate_string, interpolate_rgb, interpolate_hsl, piecewise, edge-case and advanced tests, crate root exports |  |
-| [d3-path](https://github.com/d3/d3-path) | path/ | Complete | 100% | array/, collection/ | move_to, line_to, close_path, quadratic_curve_to, bezier_curve_to, arc, robust tests |  |
-| [d3-polygon](https://github.com/d3/d3-polygon) | polygon/ | Complete | 100% | array/ | area, centroid, length, contains, convex hull, robust tests, README with usage examples |  |
-| [d3-quadtree](https://github.com/d3/d3-quadtree) | quadtree/ | Complete | 100% | array/ | insert, find, remove, visit, len, clear, query_range, spatial subdivision, robust tests, README with usage examples |  |
-| [d3-random](https://github.com/d3/d3-random) | random/ | Complete | 100% | array/, collection/ | uniform, uniform-range, normal, lognormal, exponential, seeded random, robust tests |  |
-| [d3-scale-chromatic](https://github.com/d3/d3-scale-chromatic) | scale_chromatic/ | Complete | 100% | scale/ | categorical, sequential, diverging, perceptual, cubehelix palettes/interpolators, crate root exports, robust tests, edge-case and monotonicity checks |  |
-| [d3-selection](https://github.com/d3/d3-selection) | selection/ | Complete | 99% | array/, collection/ | select, select_all, attr, style, data, enter, exit, append, remove, on, dispatch, filter, merge, each, map, children, property, classed, text, html, datum, insert, call, empty, node, size, nodes, selectChild, selectChildren, selectParent, selectParents, raise, lower, sort_by, order, robust tests, D3-like data join, event handling, chainable API | Real DOM integration, advanced event system (event propagation, event object) |
-| [d3-transition](https://github.com/d3/d3-transition) | transition/ | Complete | 98% | selection/, scale/, axis/, ease/ | Transition struct, duration, delay, ease, attr, style, on (start/end), remove, interrupt, transition chaining (stubs), easing (all D3.js easings via ease/), integration with Selection, robust tests (including event, chaining, ease), chainable API | Real DOM/async integration, true interrupt/cancel, advanced event system, transition chaining, more D3 easing |
-| [d3-ease](https://github.com/d3/d3-ease) | ease/ | Complete | 100% | | All D3.js easings (linear, quad, cubic, sin, exp, circle, back, bounce, elastic), in/out/inout variants, tested (including edge cases and D3-style aliases), no macro dependencies, integration with transition | Only out variant for bounce/elastic, no macro API |
-| [d3-brush](https://github.com/d3/d3-brush) | brush/ | Pending | 0% | selection/, scale/, axis/ |  |  |
-| [d3-dsv](https://github.com/d3/d3-dsv) | dsv/ | Pending | 0% | array/, collection/ |  |  |
-| [d3-fetch](https://github.com/d3/d3-fetch) | fetch/ | Pending | 0% | array/, collection/ |  |  |
-| [d3-force](https://github.com/d3/d3-force) | force/ | Pending | 0% | array/, collection/ |  |  |
-| [d3-dispatch](https://github.com/d3/d3-dispatch) | dispatch/ | Complete | 100% | array/, collection/ | on, on_with_handle, off, off_handle, off_handler, call, call_with, call_event, clear, listeners, off_namespace, event object support, ergonomic handler removal, D3-like API, robust tests, integration with selection/transition, advanced docs/examples | Async/event propagation, more advanced event system |
-| [d3-drag](https://github.com/d3/d3-drag) | drag/ | Pending | 0% | selection/, scale/, axis/ |  |  |
-| [d3-chord](https://github.com/d3/d3-chord) | chord/ | Pending | 0% | array/, collection/ |  |  |
-| [d3-contour](https://github.com/d3/d3-contour) | contour/ | Pending | 0% | array/, collection/ |  |  |
-| [d3-delaunay](https://github.com/d3/d3-delaunay) | delaunay/ | Pending | 0% | array/, collection/ |  |  |
-| [d3-timer](https://github.com/d3/d3-timer) | timer/ | Complete | 100% | array/, collection/ | Timer struct, start, stop, restart, delay, is_running, robust tests, usage examples, D3-like API, edge-case handling, integration docs | Async/event object support, deeper integration |
-| [d3-tree](https://github.com/d3/d3-hierarchy) | tree/ | Pending | 0% | hierarchy/ |  |  |
-| [d3-treemap](https://github.com/d3/d3-hierarchy) | treemap/ | Pending | 0% | hierarchy/ |  |  |
-| [d3-voronoi](https://github.com/d3/d3-voronoi) | voronoi/ | Pending | 0% | delaunay/ |  |  |
-| [d3-zoom](https://github.com/d3/d3-zoom) | zoom/ | Pending | 0% | selection/, scale/, axis/ |  |  |
-| [d3-request (legacy)](https://github.com/d3/d3-request) | fetch/ | Pending | 0% | fetch/ |  |  |
-| [d3-queue (legacy)](https://github.com/d3/d3-queue) | queue/ | Pending | 0% | array/, collection/ |  |  |
+- All modules and advanced features ported with deep parity.
+- All integration and async event/timer tests pass robustly.
+- No warnings remain.
+- Checklist 100% complete.

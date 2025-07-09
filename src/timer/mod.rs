@@ -12,8 +12,7 @@
 //!
 
 use std::sync::{Arc, Mutex, atomic::{AtomicBool, Ordering}};
-use std::thread;
-use std::time::{Duration, Instant};
+use std::time::{Duration};
 use std::collections::HashMap;
 
 lazy_static::lazy_static! {
@@ -38,6 +37,7 @@ pub struct Timer {
     pub callback: Arc<Mutex<dyn FnMut() + Send + 'static>>,
     pub delay: u64,
     pub running: Arc<AtomicBool>,
+    pub paused: Arc<AtomicBool>,
     pub handle: Option<thread::JoinHandle<()>>,
     pub id: usize,
 }
@@ -51,6 +51,7 @@ impl Timer {
             callback: Arc::new(Mutex::new(callback)),
             delay: delay_ms,
             running: Arc::new(AtomicBool::new(false)),
+            paused: Arc::new(AtomicBool::new(false)),
             handle: None,
             id,
         };
@@ -62,12 +63,14 @@ impl Timer {
             callback: self.callback.clone(),
             delay: self.delay,
             running: self.running.clone(),
+            paused: self.paused.clone(),
             handle: None,
             id: self.id,
         }
     }
     pub fn start(&mut self) {
         let running = self.running.clone();
+        let paused = self.paused.clone();
         running.store(true, Ordering::SeqCst);
         let callback = self.callback.clone();
         let delay = self.delay;
@@ -76,6 +79,10 @@ impl Timer {
             // D3 behavior: always wait the full delay before the first tick
             thread::sleep(Duration::from_millis(delay));
             while running.load(Ordering::SeqCst) {
+                if paused.load(Ordering::SeqCst) {
+                    thread::sleep(Duration::from_millis(1));
+                    continue;
+                }
                 if running.load(Ordering::SeqCst) {
                     let _ = callback.lock().map(|mut cb| cb());
                 }
@@ -90,6 +97,18 @@ impl Timer {
             let _ = handle.join();
         }
         GLOBAL_TIMERS.lock().unwrap().remove(&self.id);
+    }
+    /// Pause the timer (D3 parity)
+    pub fn pause(&mut self) {
+        self.paused.store(true, Ordering::SeqCst);
+    }
+    /// Resume the timer (D3 parity)
+    pub fn resume(&mut self) {
+        self.paused.store(false, Ordering::SeqCst);
+    }
+    /// Returns true if the timer is paused
+    pub fn is_paused(&self) -> bool {
+        self.paused.load(Ordering::SeqCst)
     }
     /// Restart the timer (stop and start again)
     ///
@@ -113,12 +132,27 @@ impl Timer {
     /// let t = Timer::new(|| println!("tick"), 10);
     /// assert!(t.is_running() || !t.is_running());
     /// ```
+    /// Example: Pause and resume a timer
+    /// ```rust
+    /// use rust_d3::timer::Timer;
+    /// let mut t = Timer::new(|| println!("tick"), 10);
+    /// t.start();
+    /// t.pause();
+    /// // ...
+    /// t.resume();
+    /// t.stop();
+    /// ```
     pub fn restart(&mut self) {
         self.stop();
         self.start();
     }
     pub fn delay(&mut self, delay_ms: u64) {
         self.delay = delay_ms;
+        // If running, restart the timer to apply new delay immediately (D3 parity)
+        if self.is_running() {
+            self.stop();
+            self.start();
+        }
     }
     pub fn is_running(&self) -> bool {
         self.running.load(Ordering::SeqCst)
@@ -135,6 +169,14 @@ impl Timer {
             thread::sleep(Duration::from_millis(delay_ms));
             callback();
         });
+    }
+    /// Returns the next scheduled tick time (if running)
+    pub fn next_tick(&self) -> Option<std::time::Instant> {
+        if self.is_running() {
+            Some(std::time::Instant::now() + std::time::Duration::from_millis(self.delay))
+        } else {
+            None
+        }
     }
 }
 

@@ -4,8 +4,7 @@
 //! It enables animated transitions for selections, attributes, and styles.
 //! Timing is simulated (no real DOM or animation frames).
 
-use std::time::{Duration, Instant};
-use std::thread;
+use std::time::{Duration};
 use std::collections::HashMap;
 use std::sync::Arc;
 use crate::selection::Selection;
@@ -47,11 +46,11 @@ impl Transition {
         let delay = self.delay;
         let duration = self.duration;
         let handlers = self.event_handlers.clone();
-        thread::spawn(move || {
+        std::thread::spawn(move || {
             if let Some(hs) = handlers.get("start") {
                 for h in hs { h(); }
             }
-            thread::sleep(delay + duration);
+            std::thread::sleep(delay + duration);
             sel.attr(&name, &to);
             if let Some(hs) = handlers.get("end") {
                 for h in hs { h(); }
@@ -66,11 +65,11 @@ impl Transition {
         let delay = self.delay;
         let duration = self.duration;
         let handlers = self.event_handlers.clone();
-        thread::spawn(move || {
+        std::thread::spawn(move || {
             if let Some(hs) = handlers.get("start") {
                 for h in hs { h(); }
             }
-            thread::sleep(delay + duration);
+            std::thread::sleep(delay + duration);
             sel.style(&name, &to);
             if let Some(hs) = handlers.get("end") {
                 for h in hs { h(); }
@@ -94,8 +93,8 @@ impl Transition {
         let mut sel = self.selection.clone();
         let delay = self.delay;
         let duration = self.duration;
-        thread::spawn(move || {
-            thread::sleep(delay + duration);
+        std::thread::spawn(move || {
+            std::thread::sleep(delay + duration);
             sel.remove();
         });
         self
@@ -116,7 +115,7 @@ mod tests {
     fn test_transition_attr_and_style() {
         let sel = Selection::select_all("rect");
         let _t = Transition::new(sel.clone()).duration(10).attr("fill", "red").style("stroke", "blue");
-        thread::sleep(Duration::from_millis(30));
+        std::thread::sleep(Duration::from_millis(30));
         // The original selection is unchanged, but the transition's selection is updated
         // (in real D3, the DOM is updated; here, we simulate by updating a clone)
         // This is a stub: in a real system, you would have a shared reference or callback

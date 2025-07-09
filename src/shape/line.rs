@@ -133,7 +133,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::shape::curve::{StepCurve}; // removed unused LinearCurve
+    use crate::shape::curve::StepCurve;
     #[test]
     fn test_line_basic() {
         let data = vec![(0.0, 0.0), (1.0, 1.0), (2.0, 0.0)];
