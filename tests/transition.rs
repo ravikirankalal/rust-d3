@@ -1,4 +1,4 @@
-use rust_d3::ease::{ease_linear, ease_quad};
+use rust_d3::ease::quad_in;
 use rust_d3::selection::Selection;
 use rust_d3::transition::Transition;
 use std::sync::{Arc, Mutex};
@@ -11,7 +11,7 @@ fn test_transition_attr_and_style_integration() {
     let t = Transition::new(sel.clone())
         .duration(20)
         .delay(10)
-        .ease(ease_quad)
+        .ease(quad_in)
         .attr("fill", "red")
         .style("stroke", "blue");
     // Check that the ease function is set and works

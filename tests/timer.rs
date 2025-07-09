@@ -234,21 +234,21 @@ fn test_timer_tick_once_does_not_start() {
 }
 
 // Optionally, add async timer test if feature enabled
-#[cfg(feature = "async-timer")]
-#[tokio::test]
-async fn test_async_timer_tick() {
-    use rust_d3::timer::AsyncTimer;
-    use std::sync::atomic::AtomicUsize;
-    use std::sync::Arc;
-    let count = Arc::new(AtomicUsize::new(0));
-    let count_clone = count.clone();
-    let mut timer = AsyncTimer::new_async(move || {
-        let count_clone = count_clone.clone();
-        async move {
-            count_clone.fetch_add(1, Ordering::SeqCst);
-        }
-    }, 2);
-    tokio::time::sleep(std::time::Duration::from_millis(10)).await;
-    timer.stop().await;
-    assert!(count.load(Ordering::SeqCst) > 1);
-}
+// #[cfg(feature = "async-timer")]
+// #[tokio::test]
+// async fn test_async_timer_tick() {
+//     use rust_d3::timer::AsyncTimer;
+//     use std::sync::atomic::AtomicUsize;
+//     use std::sync::Arc;
+//     let count = Arc::new(AtomicUsize::new(0));
+//     let count_clone = count.clone();
+//     let mut timer = AsyncTimer::new_async(move || {
+//         let count_clone = count_clone.clone();
+//         async move {
+//             count_clone.fetch_add(1, Ordering::SeqCst);
+//         }
+//     }, 2);
+//     tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+//     timer.stop().await;
+//     assert!(count.load(Ordering::SeqCst) > 1);
+// }

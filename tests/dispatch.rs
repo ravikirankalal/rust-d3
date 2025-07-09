@@ -1,9 +1,5 @@
 use std::sync::{Arc, Mutex};
-use std::any::Any;
-use std::time::Duration;
-use std::future::Future;
-use std::pin::Pin;
-use rust_d3::dispatch::{Dispatch, HandlerHandle, Event};
+use rust_d3::dispatch::Dispatch;
 
 #[tokio::test]
 async fn test_dispatch_event() {
@@ -162,7 +158,7 @@ async fn test_dispatch_integration_selection() {
     // Simulate integration with Selection/Transition
     struct DummySel;
     impl DummySel {
-        fn on_event<F: Fn() + Send + Sync + 'static>(&self, _event: &str, _handler: F) {}
+        // fn on_event<F: Fn() + Send + Sync + 'static>(&self, _event: &str, _handler: F) {}
     }
     let _sel = DummySel;
     let d = Dispatch::new();

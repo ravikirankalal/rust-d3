@@ -12,7 +12,8 @@
 //!
 
 use std::sync::{Arc, Mutex, atomic::{AtomicBool, Ordering}};
-use std::time::{Duration};
+use std::time::{Duration, Instant};
+use std::thread;
 use std::collections::HashMap;
 
 lazy_static::lazy_static! {
@@ -180,14 +181,14 @@ impl Timer {
     }
 }
 
-#[cfg(feature = "async-timer")]
+// #[cfg(feature = "async-timer")]
 pub struct AsyncTimer {
     pub running: Arc<AtomicBool>,
     pub handle: Option<tokio::task::JoinHandle<()>>,
     pub id: usize,
 }
 
-#[cfg(feature = "async-timer")]
+// #[cfg(feature = "async-timer")]
 impl AsyncTimer {
     pub fn new_async<F, Fut>(mut callback: F, delay_ms: u64) -> Self
     where
@@ -218,7 +219,7 @@ impl AsyncTimer {
     pub fn is_running(&self) -> bool {
         self.running.load(Ordering::SeqCst)
     }
-    pub async fn schedule_async<F, Fut>(mut callback: F, delay_ms: u64)
+    pub async fn schedule_async<F, Fut>(callback: F, delay_ms: u64)
     where
         F: FnOnce() -> Fut + Send + 'static,
         Fut: std::future::Future<Output = ()> + Send + 'static,

@@ -3,7 +3,6 @@
 use rust_d3::dispatch::Dispatch;
 use rust_d3::timer::Timer;
 use std::sync::{Arc, atomic::{AtomicUsize, Ordering}};
-use std::thread;
 use std::time::Duration;
 use tokio::sync::Mutex;
 
@@ -23,7 +22,7 @@ async fn integration_dispatch_timer_event() {
             let (tx, rx) = std::sync::mpsc::channel();
             let rt = tokio::runtime::Runtime::new().unwrap();
             rt.block_on(async {
-                let mut d = dispatcher_clone.lock().await;
+                let d = dispatcher_clone.lock().await;
                 d.call("tick").await;
                 let _ = tx.send(());
             });
@@ -53,7 +52,7 @@ async fn integration_timer_pause_resume_dispatch() {
             let (tx, rx) = std::sync::mpsc::channel();
             let rt = tokio::runtime::Runtime::new().unwrap();
             rt.block_on(async {
-                let mut d = dispatcher_clone.lock().await;
+                let d = dispatcher_clone.lock().await;
                 d.call("tick").await;
                 let _ = tx.send(());
             });
@@ -91,7 +90,7 @@ async fn integration_dispatch_remove_handler_mid_tick() {
             let (tx, rx) = std::sync::mpsc::channel();
             let rt = tokio::runtime::Runtime::new().unwrap();
             rt.block_on(async {
-                let mut d = dispatcher_clone.lock().await;
+                let d = dispatcher_clone.lock().await;
                 d.call("tick").await;
                 d.off_handle("tick", &handle_clone).await;
                 let _ = tx.send(());
@@ -222,8 +221,8 @@ async fn integration_dispatch_async_event_bubbling() {
     let log = Arc::new(TokioMutex::new(Vec::new()));
     let log_parent = log.clone();
     let log_child = log.clone();
-    let mut parent = Dispatch::new();
-    let mut child = Dispatch::new();
+    let parent = Dispatch::new();
+    let child = Dispatch::new();
     parent.on_async("custom", move |_evt| {
         let log_parent = log_parent.clone();
         Box::pin(async move {
