@@ -17,6 +17,18 @@ pub struct Transition {
     pub event_handlers: Arc<HashMap<String, Vec<Arc<dyn Fn() + Send + Sync>>>>,
 }
 
+impl Clone for Transition {
+    fn clone(&self) -> Self {
+        Transition {
+            selection: self.selection.clone(),
+            duration: self.duration,
+            delay: self.delay,
+            ease: self.ease,
+            event_handlers: self.event_handlers.clone(),
+        }
+    }
+}
+
 impl Transition {
     pub fn new(selection: Selection) -> Self {
         Transition {
@@ -99,7 +111,114 @@ impl Transition {
         });
         self
     }
-        /// Returns the selection that the transition is operating on.
+        /// Returns the active transition on a given node (stub).
+    pub fn active(_node: &crate::selection::Node) -> Option<Self> {
+        None // Not implemented
+    }
+
+    /// Transitions the value of the specified attribute using the specified tween function (stub).
+    pub fn attr_tween<F>(self, _name: &str, _tween: F) -> Self
+    where
+        F: Fn() -> Box<dyn Fn(f64) -> String> + 'static,
+    {
+        self // Not implemented
+    }
+
+    /// Transitions the value of the specified style property using the specified tween function (stub).
+    pub fn style_tween<F>(self, _name: &str, _tween: F) -> Self
+    where
+        F: Fn() -> Box<dyn Fn(f64) -> String> + 'static,
+    {
+        self // Not implemented
+    }
+
+    /// Transitions the text content using the specified tween function (stub).
+    pub fn text_tween<F>(self, _tween: F) -> Self
+    where
+        F: Fn() -> Box<dyn Fn(f64) -> String> + 'static,
+    {
+        self // Not implemented
+    }
+
+    /// Specifies a different easing function for each element (stub).
+    pub fn ease_varying<F>(self, _factory: F) -> Self
+    where
+        F: Fn(&crate::selection::Node) -> fn(f32) -> f32 + 'static,
+    {
+        self // Not implemented
+    }
+
+    /// Returns a promise that resolves when all transitions in the group have finished (stub).
+    pub fn end(self) -> bool {
+        false // Not implemented
+    }
+
+    /// Invokes the specified function for each selected element in the transition.
+    pub fn each<F>(mut self, f: F) -> Self
+    where
+        F: Fn(&mut crate::selection::Node) + 'static,
+    {
+        for node in &mut self.selection.nodes {
+            f(node);
+        }
+        self
+    }
+
+    /// Invokes the specified function once, passing in the transition along with any optional arguments.
+    pub fn call<F>(self, f: F) -> Self
+    where
+        F: FnOnce(Self) -> Self,
+    {
+        f(self)
+    }
+
+    /// For each selected element, selects the first child element that matches the specified selector string.
+    /// If no selector is provided, selects the first child.
+    pub fn select_child(&self) -> Self {
+        Self {
+            selection: self.selection.select_child(),
+            ..self.clone()
+        }
+    }
+
+    /// For each selected element, selects all children elements that match the specified selector string.
+    /// If no selector is provided, selects all children.
+    pub fn select_children(&self) -> Self {
+        Self {
+            selection: self.selection.select_children(),
+            ..self.clone()
+        }
+    }
+
+    /// Merges this transition with the specified other transition.
+    pub fn merge(&self, other: &Self) -> Self {
+        Self {
+            selection: self.selection.merge(&other.selection),
+            ..self.clone()
+        }
+    }
+
+    /// Returns true if the transition is empty.
+    pub fn empty(&self) -> bool {
+        self.selection.empty()
+    }
+
+    /// Returns the number of elements in the transition.
+    pub fn size(&self) -> usize {
+        self.selection.size()
+    }
+
+    /// Returns a vector of all nodes in the transition.
+    pub fn nodes(&self) -> &Vec<crate::selection::Node> {
+        self.selection.nodes()
+    }
+
+    /// Returns the first non-null node in the transition.
+    pub fn node(&self) -> Option<&crate::selection::Node> {
+        self.selection.node()
+    }
+
+    /// Returns the selection that the transition is operating on.
     pub fn selection(&self) -> &Selection {
         &self.selection
     }

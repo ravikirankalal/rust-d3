@@ -12,8 +12,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="eff26258-86d6-4780-a761-15d435444507" name="Changes" comment="shape 6">
-      <change beforePath="$PROJECT_DIR$/D3_RUST_PARITY_CHECKLIST.md" beforeDir="false" afterPath="$PROJECT_DIR$/D3_RUST_PARITY_CHECKLIST.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/transition/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/src/transition/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/transition/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/transition/mod.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/transition.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/transition.rs" afterDir="false" />
     </list>
@@ -85,7 +83,7 @@
     "Cargo.Test transition.executor": "Run",
     "Cargo.Test transition::tests.executor": "Run",
     "Cargo.Tests in 'tests' (1).executor": "Run",
-    "Cargo.Tests in 'tests'.executor": "Coverage",
+    "Cargo.Tests in 'tests'.executor": "Run",
     "Cargo.test.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -253,7 +251,7 @@
       <workItem from="1751861156333" duration="1262000" />
       <workItem from="1751862762874" duration="2094000" />
       <workItem from="1751864878746" duration="140000" />
-      <workItem from="1751880947310" duration="52805000" />
+      <workItem from="1751880947310" duration="53231000" />
     </task>
     <task id="LOCAL-00001" summary="Porting version v0.0.2">
       <option name="closed" value="true" />
