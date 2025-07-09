@@ -231,6 +231,57 @@ impl Color {
             Color::Lab(lab) => Color::Lab(Lab::new(lab.l, lab.a, lab.b, value)),
         }
     }
+
+    pub fn gamma(&self, k: f32) -> Color {
+        let r = self.rgb();
+        let k_inv = 1.0 / k;
+        Color::Rgb(
+            Rgb::new(
+                ((r.r as f32 / 255.0).powf(k_inv) * 255.0).round() as u8,
+                ((r.g as f32 / 255.0).powf(k_inv) * 255.0).round() as u8,
+                ((r.b as f32 / 255.0).powf(k_inv) * 255.0).round() as u8,
+                r.opacity,
+            )
+        )
+    }
+
+    pub fn clamp(&self) -> Color {
+        match self {
+            Color::Rgb(rgb) => Color::Rgb(Rgb::new(
+                rgb.r.max(0).min(255),
+                rgb.g.max(0).min(255),
+                rgb.b.max(0).min(255),
+                rgb.opacity.max(0.0).min(1.0),
+            )),
+            Color::Hsl(hsl) => Color::Hsl(Hsl::new(
+                hsl.h.rem_euclid(360.0),
+                hsl.s.max(0.0).min(100.0),
+                hsl.l.max(0.0).min(100.0),
+                hsl.opacity.max(0.0).min(1.0),
+            )),
+            Color::Lab(lab) => Color::Lab(Lab::new(
+                lab.l.max(0.0).min(100.0),
+                lab.a,
+                lab.b,
+                lab.opacity.max(0.0).min(1.0),
+            )),
+        }
+    }
+
+    pub fn format_hex(&self) -> String {
+        let rgb = self.rgb();
+        format!("#{:02x}{:02x}{:02x}", rgb.r, rgb.g, rgb.b)
+    }
+
+    pub fn format_rgb(&self) -> String {
+        let rgb = self.rgb();
+        rgb.to_string()
+    }
+
+    pub fn format_hsl(&self) -> String {
+        let hsl = self.hsl();
+        hsl.to_string()
+    }
 }
 
 #[cfg(test)]
@@ -431,5 +482,64 @@ mod tests {
         assert!((gray_hsl.s - 0.0).abs() < 0.1);
         assert!((gray_hsl.l - 50.2).abs() < 0.1);
         assert!((gray_hsl.opacity - 1.0).abs() < 0.1);
+    }
+
+    #[test]
+    fn test_gamma() {
+        let color = Color::Rgb(Rgb::new(128, 128, 128, 1.0));
+        let gamma_color = color.gamma(2.2);
+        // Expected values for 128,128,128 gamma 2.2 are approximately 55,55,55
+        assert!((gamma_color.rgb().r as f32 - 186.0).abs() < 1.0);
+        assert!((gamma_color.rgb().g as f32 - 186.0).abs() < 1.0);
+        assert!((gamma_color.rgb().b as f32 - 186.0).abs() < 1.0);
+    }
+
+    #[test]
+    fn test_clamp_rgb() {
+        let color = Color::Rgb(Rgb::new(u8::MAX, u8::MIN, 128, 2.0)); // Test with max, min, and out-of-range opacity
+        let clamped_color = color.clamp();
+        assert_eq!(clamped_color, Color::Rgb(Rgb::new(255, 0, 128, 1.0)));
+
+        let color_overflow = Color::Rgb(Rgb::new(200, 200, 200, -0.5)); // Test with negative opacity
+        let clamped_color_overflow = color_overflow.clamp();
+        assert_eq!(clamped_color_overflow, Color::Rgb(Rgb::new(200, 200, 200, 0.0)));
+    }
+
+    #[test]
+    fn test_clamp_hsl() {
+        let color = Color::Hsl(Hsl::new(400.0, -10.0, 120.0, 2.0));
+        let clamped_color = color.clamp();
+        assert_eq!(clamped_color, Color::Hsl(Hsl::new(40.0, 0.0, 100.0, 1.0)));
+    }
+
+    #[test]
+    fn test_clamp_lab() {
+        let color = Color::Lab(Lab::new(120.0, -200.0, 200.0, 2.0));
+        let clamped_color = color.clamp();
+        assert_eq!(clamped_color, Color::Lab(Lab::new(100.0, -200.0, 200.0, 1.0)));
+    }
+
+    #[test]
+    fn test_format_hex() {
+        let color = Color::Rgb(Rgb::new(255, 0, 128, 1.0));
+        assert_eq!(color.format_hex(), "#ff0080");
+    }
+
+    #[test]
+    fn test_format_rgb() {
+        let color_rgb = Color::Rgb(Rgb::new(255, 0, 128, 1.0));
+        assert_eq!(color_rgb.format_rgb(), "rgb(255,0,128)");
+
+        let color_rgba = Color::Rgb(Rgb::new(255, 0, 128, 0.5));
+        assert_eq!(color_rgba.format_rgb(), "rgba(255,0,128,0.5)");
+    }
+
+    #[test]
+    fn test_format_hsl() {
+        let color_hsl = Color::Hsl(Hsl::new(120.0, 50.0, 75.0, 1.0));
+        assert_eq!(color_hsl.format_hsl(), "hsl(120,50%,75%)");
+
+        let color_hsla = Color::Hsl(Hsl::new(120.0, 50.0, 75.0, 0.5));
+        assert_eq!(color_hsla.format_hsl(), "hsla(120,50%,75%,0.5)");
     }
 }

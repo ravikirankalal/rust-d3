@@ -1,5 +1,4 @@
-
-// src/color/rgb.rs
+use std::fmt;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Rgb {
@@ -13,6 +12,14 @@ impl Rgb {
     pub fn new(r: u8, g: u8, b: u8, opacity: f32) -> Self {
         Rgb { r, g, b, opacity }
     }
+}
 
-    // Add methods specific to Rgb here, e.g., to_hex(), to_string()
+impl fmt::Display for Rgb {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.opacity == 1.0 {
+            write!(f, "rgb({},{},{})", self.r, self.g, self.b)
+        } else {
+            write!(f, "rgba({},{},{},{})", self.r, self.g, self.b, self.opacity)
+        }
+    }
 }

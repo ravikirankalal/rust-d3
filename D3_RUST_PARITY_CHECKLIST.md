@@ -24,7 +24,7 @@
 | d3-time-format | [link](https://github.com/d3/d3-time-format) | 80 | timeFormat, timeParse, utcFormat, utcParse, isoFormat, isoParse | formatLocale, formatDefaultLocale | d3-time |
 | d3-brush | [link](https://github.com/d3/d3-brush) | 0 |  | All | d3-selection |
 | d3-chord | [link](https://github.com/d3/d3-chord) | 0 |  | All | d3-array |
-| d3-color | [link](https://github.com/d3/d3-color) | 50 | Color Parsing, Color Models (RGB, HSL), Color Conversion (Lab), Color Interpolation, Formatting | Advanced color spaces, color blending, cubehelix, color manipulation utilities | - |
+| d3-color | [link](https://github.com/d3/d3-color) | 75 | Color Parsing, Color Models (RGB, HSL, Lab), Color Conversion (RGB<->HSL, RGB<->Lab, HSL<->Lab), brighter(), darker(), opacity(), gamma(), clamp(), formatHex(), formatRgb(), formatHsl() | Advanced color spaces (HCL, Cubehelix), color blending, more specific color manipulation utilities (e.g., rgb.displayable()), color interpolation for other color spaces (Lab, HCL, Cubehelix) | - |
 | d3-contour | [link](https://github.com/d3/d3-contour) | 0 |  | All | d3-array |
 | d3-delaunay | [link](https://github.com/d3/d3-delaunay) | 0 |  | All | d3-array |
 | d3-drag | [link](https://github.com/d3/d3-drag) | 0 |  | All | d3-selection, d3-dispatch |
@@ -41,4 +41,4 @@
 - All modules and advanced features ported with deep parity.
 - All integration and async event/timer tests pass robustly.
 - No warnings remain.
-- Checklist 100% complete.
+- Checklist is not 100% complete. See individual module completion percentages.
