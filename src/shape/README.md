@@ -11,6 +11,10 @@ The `shape` module provides Rust implementations of the core shape generators fr
 - **Stack Layout**: Computes stacked series for area/bar charts.
 - **Symbol Generator**: Renders common point symbols (circle, cross, diamond, etc).
 - **Curve Interpolators**: Linear, step, basis, cardinal, monotone, and more.
+- `linkRadial`: Generate radial link paths.
+- `radialArea`/`areaRadial`: Generate radial area paths.
+- `radialLine`/`lineRadial`: Generate radial line paths.
+- `symbolType`, `symbolAsterisk`, `symbolWye`: Symbol types and path generation.
 
 ---
 
@@ -119,6 +123,47 @@ let symbol = Symbol::new()
 
 let path = symbol.generate();
 println!("SVG Path: {}", path);
+```
+
+### 7. Radial Link
+
+```rust
+use rust_d3::shape::link_radial::LinkRadial;
+
+let link = LinkRadial::new();
+let d = link.path((10.0, 0.0), (10.0, std::f64::consts::FRAC_PI_2));
+println!("Link Path: {}", d);
+```
+
+### 8. Radial Area
+
+```rust
+use rust_d3::shape::radial_area::RadialArea;
+
+let area = RadialArea::new();
+let pts = vec![(10.0, 0.0), (10.0, std::f64::consts::FRAC_PI_2)];
+let area_path = area.path(&pts);
+println!("Radial Area Path: {}", area_path);
+```
+
+### 9. Radial Line
+
+```rust
+use rust_d3::shape::radial_line::RadialLine;
+
+let radial_line = RadialLine::new();
+let d = radial_line.path((10.0, 0.0), (10.0, std::f64::consts::FRAC_PI_2));
+println!("Radial Line Path: {}", d);
+```
+
+### 10. Symbol Types
+
+```rust
+use rust_d3::shape::symbol_type::SymbolType;
+
+let symbol = SymbolType::Asterisk;
+let symbol_path = symbol.path(10.0);
+println!("Symbol Path: {}", symbol_path);
 ```
 
 ---

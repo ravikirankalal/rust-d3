@@ -143,8 +143,8 @@ fn test_selection_empty_node_size_nodes() {
 #[test]
 fn test_selection_select_child_and_children() {
     let mut sel = Selection::select("g");
-    let rect = sel.append("rect");
-    let circle = sel.append("circle");
+    let _rect = sel.append("rect");
+    let _circle = sel.append("circle");
     let child = sel.select_child();
     // Only the first appended child is selected
     assert_eq!(child.nodes.len(), 1);
@@ -251,6 +251,23 @@ fn test_selection_order_noop() {
     sel.order();
     let after = sel.nodes.clone();
     assert_eq!(before, after); // No-op
+}
+
+#[test]
+fn test_selection_filter() {
+    let mut sel = Selection::select_all("rect");
+    sel.attr("data-id", "even");
+    sel.nodes[1].attributes.insert("data-id".to_string(), "odd".to_string());
+    let filtered = sel.filter(|n| n.attributes.get("data-id").map(|v| v == "even").unwrap_or(false));
+    assert_eq!(filtered.size(), 2);
+}
+
+#[test]
+fn test_selection_interrupt_and_clone() {
+    let sel = Selection::select_all("circle");
+    let _ = sel.clone_selection();
+    let mut sel2 = Selection::select_all("rect");
+    sel2.interrupt(); // Should be chainable and not panic
 }
 
 /*

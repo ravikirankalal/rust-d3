@@ -363,6 +363,15 @@ impl Selection {
         // No-op: in a real DOM, this would restore document order
         self
     }
+    /// Interrupts any ongoing transitions on the selection (stub for parity).
+    pub fn interrupt(&mut self) -> &mut Self {
+        // In D3, this would stop transitions. Here, it's a no-op or can be extended for animation support.
+        self
+    }
+    /// Returns a deep copy of the selection.
+    pub fn clone_selection(&self) -> Self {
+        self.clone()
+    }
 }
 
 impl Clone for Selection {

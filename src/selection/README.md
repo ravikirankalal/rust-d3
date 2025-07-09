@@ -1,36 +1,47 @@
-# d3-selection (Rust)
+# d3-selection Parity (Rust)
 
-This module provides a D3.js-like selection API for Rust, enabling DOM-like data binding, manipulation, and event handling. It is designed for deep parity with D3.js, supporting robust, chainable, and testable workflows for SVG, data visualization, and more.
+This module provides a Rust port of D3.js's d3-selection API, supporting DOM-like selection, data binding, and manipulation.
 
 ## Features
-- `select`, `select_all`: Create selections by tag.
-- `attr`, `style`, `property`, `classed`: Set attributes, styles, properties, and classes.
-- `data`, `datum`, `enter`, `exit`: Data binding and data join.
-- `append`, `insert`, `remove`: Manipulate children.
-- `on`, `dispatch`: Event system (simulated).
-- `filter`, `merge`, `each`, `map`, `children`, `select_child`, `select_children`, `select_parent`, `select_parents`.
-- `raise`, `lower`, `sort_by`, `order`: Simulated DOM order manipulation.
-- Chainable API, robust edge-case and integration tests.
+- `select`, `select_all`: Select nodes by tag.
+- `attr`, `style`, `property`, `classed`, `text`, `html`, `datum`: Set/get attributes, styles, properties, classes, text, HTML, and data.
+- `data`, `enter`, `exit`: Data binding and join.
+- `append`, `insert`, `remove`: DOM-like node manipulation.
+- `filter`, `merge`, `order`, `sort_by`, `call`, `each`, `map`, `empty`, `node`, `size`, `nodes`, `children`, `select_child`, `select_children`, `select_parent`, `select_parents`, `raise`, `lower`: Selection utilities.
+- `on`, `dispatch`: Event handling.
+- `interrupt`: Interrupt transitions (stub).
+- `clone_selection`: Deep copy of selection.
 
-## Usage Example
+## Usage Examples
+
+### 1. Basic Selection and Attribute Manipulation
 ```rust
 use rust_d3::Selection;
-
-// Create a root selection and append SVG elements
 let mut svg = Selection::select("svg");
 svg.attr("width", "400").attr("height", "300");
 let mut rect = svg.append("rect");
 rect.attr("x", "10").attr("y", "10").attr("width", "100").attr("height", "50");
 let mut circle = svg.append("circle");
 circle.attr("cx", "200").attr("cy", "150").attr("r", "40");
+```
 
-// Data join
+### 2. Data Join, Enter, Exit
+```rust
 let mut sel = Selection::select_all("rect");
 sel.data(&[1, 2, 3]);
 let enter = sel.enter();
 let exit = sel.exit();
+```
 
-// Event handling
+### 3. Filtering and Merging
+```rust
+let mut sel = Selection::select_all("rect");
+let filtered = sel.filter(|n| n.tag == "rect");
+let merged = sel.merge(&filtered);
+```
+
+### 4. Event Handling
+```rust
 let mut sel = Selection::select("rect");
 let called = std::sync::Arc::new(std::sync::Mutex::new(0));
 let called2 = called.clone();
@@ -41,6 +52,47 @@ sel.on("click", move || {
 sel.dispatch("click");
 assert_eq!(*called.lock().unwrap(), 1);
 ```
+
+### 5. Class, Style, and Property
+```rust
+let mut sel = Selection::select("circle");
+sel.classed("highlight", true).style("fill", "red").property("checked", "true");
+```
+
+### 6. Text, HTML, and Datum
+```rust
+let mut sel = Selection::select("text");
+sel.text("Hello").html("<b>Bold</b>").datum("42");
+```
+
+### 7. Children, Parent, and Node Utilities
+```rust
+let mut sel = Selection::select("g");
+let _rect = sel.append("rect");
+let _circle = sel.append("circle");
+let child = sel.select_child();
+let children = sel.children();
+let parent = sel.select_parent();
+let is_empty = sel.empty();
+let size = sel.size();
+let first_node = sel.node();
+```
+
+### 8. Sorting, Ordering, and Cloning
+```rust
+let mut sel = Selection::select_all("rect");
+sel.sort_by(|a, b| a.tag.cmp(&b.tag));
+sel.order();
+let clone = sel.clone_selection();
+```
+
+### 9. Interrupt (stub)
+```rust
+let mut sel = Selection::select("rect");
+sel.interrupt();
+```
+
+See the [tests/selection.rs](../../tests/selection.rs) for more examples.
 
 ## Integration
 - Works seamlessly with other rust-d3 modules (array, collection, format, scale, axis, shape, etc.).

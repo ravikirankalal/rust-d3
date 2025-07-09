@@ -8,6 +8,10 @@ pub mod arc;
 pub mod pie;
 pub mod stack;
 pub mod symbol;
+pub mod link_radial;
+pub mod radial_area;
+pub mod radial_line;
+pub mod symbol_type;
 
 pub use line::Line;
 pub use curve::{Curve, LinearCurve, StepCurve, BasisCurve, CardinalCurve, MonotoneCurve};
