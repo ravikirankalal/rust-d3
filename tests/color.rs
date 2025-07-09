@@ -281,3 +281,27 @@ fn test_color_copy() {
     let copied_lab = original_lab.copy();
     assert_eq!(original_lab, copied_lab);
 }
+
+#[test]
+fn test_lab_interpolate() {
+    let lab1 = Lab::new(10.0, 20.0, 30.0, 1.0);
+    let lab2 = Lab::new(30.0, 40.0, 50.0, 0.5);
+
+    let interpolated_lab = lab1.interpolate(&lab2, 0.5);
+    assert!((interpolated_lab.l - 20.0).abs() < 1e-6);
+    assert!((interpolated_lab.a - 30.0).abs() < 1e-6);
+    assert!((interpolated_lab.b - 40.0).abs() < 1e-6);
+    assert!((interpolated_lab.opacity - 0.75).abs() < 1e-6);
+
+    let interpolated_lab_t0 = lab1.interpolate(&lab2, 0.0);
+    assert!((interpolated_lab_t0.l - lab1.l).abs() < 1e-6);
+    assert!((interpolated_lab_t0.a - lab1.a).abs() < 1e-6);
+    assert!((interpolated_lab_t0.b - lab1.b).abs() < 1e-6);
+    assert!((interpolated_lab_t0.opacity - lab1.opacity).abs() < 1e-6);
+
+    let interpolated_lab_t1 = lab1.interpolate(&lab2, 1.0);
+    assert!((interpolated_lab_t1.l - lab2.l).abs() < 1e-6);
+    assert!((interpolated_lab_t1.a - lab2.a).abs() < 1e-6);
+    assert!((interpolated_lab_t1.b - lab2.b).abs() < 1e-6);
+    assert!((interpolated_lab_t1.opacity - lab2.opacity).abs() < 1e-6);
+}

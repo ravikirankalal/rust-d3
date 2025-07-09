@@ -184,3 +184,55 @@ fn test_ribbon_generator_path() {
     assert!(path.contains("Q"));
     assert!(path.ends_with("Z"));
 }
+
+#[test]
+fn test_arc_generator_functional_radius() {
+    let group = Group {
+        start_angle: 0.0,
+        end_angle: std::f64::consts::PI / 2.0,
+        value: 10.0,
+        index: 0,
+    };
+    let arc_gen = ArcGenerator::new()
+        .inner_radius_fn(Box::new(|_| 15.0))
+        .outer_radius_fn(Box::new(|g| 25.0 + g.value)); // Example: outer radius depends on group value
+    let path = arc_gen.path(&group);
+
+    assert!(!path.is_empty());
+    assert!(path.starts_with("M"));
+    assert!(path.contains("A"));
+    assert!(path.contains("L"));
+    assert!(path.ends_with("Z"));
+}
+
+#[test]
+fn test_ribbon_generator_functional_radius() {
+    let source_subgroup = Subgroup {
+        start_angle: 0.0,
+        end_angle: std::f64::consts::PI / 4.0,
+        value: 5.0,
+        index: 0,
+        subindex: 0,
+    };
+    let target_subgroup = Subgroup {
+        start_angle: std::f64::consts::PI / 2.0,
+        end_angle: 3.0 * std::f64::consts::PI / 4.0,
+        value: 5.0,
+        index: 1,
+        subindex: 0,
+    };
+    let chord = Chord {
+        source: source_subgroup,
+        target: target_subgroup,
+    };
+
+    let ribbon_gen = RibbonGenerator::new()
+        .radius_fn(Box::new(|c| 100.0 + c.source.value + c.target.value)); // Example: radius depends on chord values
+    let path = ribbon_gen.path(&chord);
+
+    assert!(!path.is_empty());
+    assert!(path.starts_with("M"));
+    assert!(path.contains("A"));
+    assert!(path.contains("Q"));
+    assert!(path.ends_with("Z"));
+}

@@ -19,6 +19,7 @@ pub mod transition;
 pub mod ease;
 pub mod timer;
 pub mod dispatch;
+pub mod chord;
 
 pub use axis::Axis;
 pub use shape::{Symbol, SymbolType};

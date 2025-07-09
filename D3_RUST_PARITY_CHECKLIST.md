@@ -23,8 +23,8 @@
 | d3-interpolate | [link](https://github.com/d3/d3-interpolate) | 90 | interpolate, interpolateArray, interpolateNumber, interpolateObject, interpolateRound, interpolateString, interpolateZoom, interpolateRgb, interpolateHsl, interpolateLab, interpolateCubehelix | interpolateDate, interpolateTransformCss, interpolateTransformSvg | - |
 | d3-time-format | [link](https://github.com/d3/d3-time-format) | 80 | timeFormat, timeParse, utcFormat, utcParse, isoFormat, isoParse | formatLocale, formatDefaultLocale | d3-time |
 | d3-brush | [link](https://github.com/d3/d3-brush) | 0 |  | All | d3-selection |
-| d3-chord | [link](https://github.com/d3/d3-chord) | 0 |  | All | d3-array |
-| d3-color | [link](https://github.com/d3/d3-color) | 75 | Color Parsing, Color Models (RGB, HSL, Lab), Color Conversion (RGB<->HSL, RGB<->Lab, HSL<->Lab), brighter(), darker(), opacity(), gamma(), clamp(), formatHex(), formatRgb(), formatHsl() | Advanced color spaces (HCL, Cubehelix), color blending, more specific color manipulation utilities (e.g., rgb.displayable()), color interpolation for other color spaces (Lab, HCL, Cubehelix) | - |
+| d3-chord | [link](https://github.com/d3/d3-chord) | 100 | Chord layout generation, pad_angle, sort_groups, sort_subgroups, sort_chords, Arc and ribbon path generation (rendering), functional radius for arc and ribbon, advanced sorting options | None | d3-array |
+| d3-color | [link](https://github.com/d3/d3-color) | 90 | Color Parsing, Color Models (RGB, HSL, Lab), Color Conversion (RGB<->HSL, RGB<->Lab, HSL<->Lab), brighter(), darker(), opacity(), gamma(), clamp(), formatHex(), formatRgb(), formatHsl(), rgb.displayable(), copy(), Lab interpolation | Advanced color spaces (HCL, Cubehelix), color blending | - |
 | d3-contour | [link](https://github.com/d3/d3-contour) | 0 |  | All | d3-array |
 | d3-delaunay | [link](https://github.com/d3/d3-delaunay) | 0 |  | All | d3-array |
 | d3-drag | [link](https://github.com/d3/d3-drag) | 0 |  | All | d3-selection, d3-dispatch |
