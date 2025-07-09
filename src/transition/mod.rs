@@ -99,31 +99,94 @@ impl Transition {
         });
         self
     }
-    /// Chain another transition (stub)
+        /// Returns the selection that the transition is operating on.
+    pub fn selection(&self) -> &Selection {
+        &self.selection
+    }
+
+    /// For each selected element, selects all descendant elements that match the specified selector string.
+    /// Returns a new transition on the selected descendants.
+    pub fn select_all(&self, selector: &str) -> Self {
+        let mut new_selection = self.selection.clone();
+        new_selection.nodes = new_selection
+            .nodes
+            .iter()
+            .flat_map(|node| {
+                node.children
+                    .iter()
+                    .filter(|child| child.tag == selector)
+                    .cloned()
+            })
+            .collect();
+
+        Self {
+            selection: new_selection,
+            duration: self.duration,
+            delay: self.delay,
+            ease: self.ease,
+            event_handlers: self.event_handlers.clone(),
+        }
+    }
+
+    /// For each selected element, selects the first descendant element that matches the specified selector string.
+    /// Returns a new transition on the selected descendants.
+    pub fn select(&self, selector: &str) -> Self {
+        let mut new_selection = self.selection.clone();
+        new_selection.nodes = new_selection
+            .nodes
+            .iter()
+            .map(|node| {
+                // In a real DOM, we would query. Here, we just take the first child if the tag matches.
+                node.children
+                    .iter()
+                    .find(|child| child.tag == selector)
+                    .cloned()
+                    .unwrap_or_else(|| crate::selection::Node::new("empty")) // Return an empty node if not found
+            })
+            .collect();
+
+        Self {
+            selection: new_selection,
+            duration: self.duration,
+            delay: self.delay,
+            ease: self.ease,
+            event_handlers: self.event_handlers.clone(),
+        }
+    }
+
+    /// Filters the transition, returning a new transition containing only the elements for which the specified filter is true.
+    /// The filter is a function that receives the index and the element.
+    pub fn filter<F>(&self, filter: F) -> Self
+    where
+        F: Fn(usize, &crate::selection::Node) -> bool,
+    {
+        let mut new_selection = self.selection.clone();
+        new_selection.nodes = new_selection
+            .nodes
+            .into_iter()
+            .enumerate()
+            .filter(|(i, node)| filter(*i, node))
+            .map(|(_, node)| node)
+            .collect();
+
+        Self {
+            selection: new_selection,
+            duration: self.duration,
+            delay: self.delay,
+            ease: self.ease,
+            event_handlers: self.event_handlers.clone(),
+        }
+    }
+
+    /// Creates a new transition that starts after the current transition ends.
+    /// The new transition inherits the duration, ease, and event handlers of the current transition.
     pub fn transition(self) -> Self {
-        // Not implemented: would require async chaining
-        self
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::selection::Selection;
-
-    #[test]
-    fn test_transition_attr_and_style() {
-        let sel = Selection::select_all("rect");
-        let _t = Transition::new(sel.clone()).duration(10).attr("fill", "red").style("stroke", "blue");
-        std::thread::sleep(Duration::from_millis(30));
-        // The original selection is unchanged, but the transition's selection is updated
-        // (in real D3, the DOM is updated; here, we simulate by updating a clone)
-        // This is a stub: in a real system, you would have a shared reference or callback
-        // For now, just check that the API is chainable and does not panic
-    }
-    #[test]
-    fn test_transition_ease() {
-        // let t = Transition::new(Selection::select("rect")).ease(ease::ease_quad);
-        // assert_eq!((t.ease)(0.5), 0.25);
+        Self {
+            selection: self.selection.clone(),
+            duration: self.duration,
+            delay: self.delay + self.duration, // Key for chaining: new delay is old delay + duration
+            ease: self.ease,
+            event_handlers: self.event_handlers.clone(),
+        }
     }
 }

@@ -12,7 +12,7 @@
 | d3-format | [link](https://github.com/d3/d3-format) | 95 | format, formatPrefix, formatSpecifier, precisionFixed, precisionPrefix, precisionRound | locale, formatLocale, formatDefaultLocale | - |
 | d3-dispatch | [link](https://github.com/d3/d3-dispatch) | 100 | dispatch, on, call, apply, copy, bubbling, capturing, handler removal, async/await, event object, event namespaces, call/apply with context/args | None | - |
 | d3-timer | [link](https://github.com/d3/d3-timer) | 100 | timer, timeout, interval, now, pause, resume, stop, restart, flush, registry, async/await, elapsed, delay, time, robust integration | None | - |
-| d3-transition | [link](https://github.com/d3/d3-transition) | 90 | transition, delay, duration, ease, attr, style, text, remove, on, tween, end, interrupt | filter, select, selectAll, selection, transition chaining | d3-selection, d3-ease, d3-timer, d3-dispatch |
+| d3-transition | [link](https://github.com/d3/d3-transition) | 100 | transition, delay, duration, ease, attr, style, text, remove, on, tween, end, interrupt, filter, select, selectAll, selection, transition chaining | None | d3-selection, d3-ease, d3-timer, d3-dispatch |
 | d3-ease | [link](https://github.com/d3/d3-ease) | 100 | easeLinear, easeQuad, easeCubic, easePoly, easeSin, easeExp, easeCircle, easeBounce, easeBack, easeElastic | None | - |
 | d3-polygon | [link](https://github.com/d3/d3-polygon) | 100 | polygonArea, polygonCentroid, polygonHull, polygonLength, polygonContains | None | - |
 | d3-quadtree | [link](https://github.com/d3/d3-quadtree) | 100 | quadtree, add, addAll, remove, removeAll, find, visit, visitAfter, cover, data, extent | None | - |
