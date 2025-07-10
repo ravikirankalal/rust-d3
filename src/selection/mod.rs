@@ -86,9 +86,17 @@ impl Selection {
         self
     }
     /// Select multiple nodes by tag (D3-style: returns &mut self for chaining)
-    pub fn select_all(&mut self, selector: &str) -> &mut Self {
-        // For simplicity, just replace the nodes with three new nodes of the given tag
-        self.nodes = vec![Node::new(selector), Node::new(selector), Node::new(selector)];
+    /// If no tag is provided, selects all children (D3.js parity)
+    pub fn select_all(&mut self, selector: Option<&str>) -> &mut Self {
+        let mut selected = Vec::new();
+        for node in &self.nodes {
+            for child in &node.children {
+                if selector.map_or(true, |s| child.tag == s) {
+                    selected.push(child.clone());
+                }
+            }
+        }
+        self.nodes = selected;
         self
     }
     /// Creates a new detached node as the root of a new selection, like d3.create(tag).
@@ -101,8 +109,25 @@ impl Selection {
         }
     }
     /// Join: replaces the current nodes with the enter selection, like D3's join
-    pub fn join(&mut self) -> &mut Self {
-        self.nodes = self.enter_nodes.clone();
+    /// If a tag is provided, creates new nodes of that tag for enter selection (D3-style)
+    pub fn join(&mut self, tag: &str) -> &mut Self {
+        // The number of data items is the number of nodes after data join
+        let data_len = self.nodes.len().max(self.enter_nodes.len());
+        let mut joined_nodes = Vec::with_capacity(data_len);
+        let mut node_iter = self.nodes.iter();
+        let mut enter_iter = self.enter_nodes.iter();
+        for _ in 0..data_len {
+            if let Some(node) = node_iter.next() {
+                let mut n = node.clone();
+                n.tag = tag.to_string();
+                joined_nodes.push(n);
+            } else if let Some(enter_node) = enter_iter.next() {
+                let mut n = Node::new(tag);
+                n.data = enter_node.data.clone();
+                joined_nodes.push(n);
+            }
+        }
+        self.nodes = joined_nodes;
         self.enter_nodes.clear();
         self.exit_nodes.clear();
         self

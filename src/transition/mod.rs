@@ -225,7 +225,7 @@ impl Transition {
 
     /// For each selected element, selects all descendant elements that match the specified selector string.
     /// Returns a new transition on the selected descendants.
-    pub fn select_all(&self, selector: &str) -> Self {
+    pub fn select_all(&self, selector: Option<&str>) -> Self {
         let mut new_selection = self.selection.clone();
         new_selection.nodes = new_selection
             .nodes
@@ -233,7 +233,7 @@ impl Transition {
             .flat_map(|node| {
                 node.children
                     .iter()
-                    .filter(|child| child.tag == selector)
+                    .filter(|child| selector.map_or(true, |s| child.tag == s))
                     .cloned()
             })
             .collect();

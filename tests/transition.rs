@@ -8,7 +8,7 @@ use std::time::Duration;
 #[test]
 fn test_transition_attr_and_style_integration() {
     let mut root = Selection::create("root");
-    let sel = root.select_all("rect");
+    let sel = root.select_all(Some("rect"));
     let t = Transition::new(sel.clone())
         .duration(20)
         .delay(10)
@@ -216,7 +216,7 @@ fn test_transition_select_all() {
     };
 
     let t = Transition::new(sel);
-    let selected_t = t.select_all("b");
+    let selected_t = t.select_all(Some("b"));
 
     assert_eq!(selected_t.selection.nodes.len(), 2);
     assert_eq!(selected_t.selection.nodes[0].tag, "b");

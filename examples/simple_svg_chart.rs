@@ -20,16 +20,16 @@ fn main() {
     .attr("style", "max-width: 100%; height: auto;");
 
 
-    svg.append("g")
-            .attr("fill", "steelblue");
-            svg.select_all()
-            .data(&data)
-            .join("rect")
-            .attr("x", |_, i| (i * (bar_width + bar_gap)) as i32)
-            .attr("y", |d: &i32, _| (height - d) as i32)
-            .attr("width", bar_width)
-            .attr("height", |d: &i32, _| *d as i32)
-            .attr("fill", "steelblue");
+    // svg.append("g")
+    //         .attr("fill", "steelblue");
+    // svg.select_all(None)
+    //         .data(&data)
+    //         .join("rect")
+    //         .attr("x", |_, i| (i * (bar_width + bar_gap)) as i32)
+    //         .attr("y", |d: &i32, _| (height - d) as i32)
+    //         .attr("width", bar_width)
+    //         .attr("height", |d: &i32, _| *d as i32)
+    //         .attr("fill", "steelblue");
     // Add bars
     // for (i, value) in data.iter().enumerate() {
     //     let mut rect = Selection::create("rect");

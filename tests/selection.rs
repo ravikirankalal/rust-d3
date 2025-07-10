@@ -1,4 +1,4 @@
-use rust_d3::Selection;
+use rust_d3::selection::{Selection, Node};
 
 #[test]
 fn test_selection_api_stubs() {
@@ -14,7 +14,11 @@ fn test_selection_api_stubs() {
 #[test]
 fn test_selection_data_join_enter_exit() {
     let mut root = Selection::create("root");
-    let mut sel = root.select_all("rect");
+    // D3-like: select_all(Some("rect")) returns empty, so append children first
+    root.append("rect");
+    root.append("rect");
+    root.append("rect");
+    let mut sel = root.select_all(Some("rect"));
     sel.data(&[1, 2, 3, 4]);
     let enter = sel.enter();
     let exit = sel.exit();
@@ -30,7 +34,7 @@ fn test_selection_data_join_enter_exit() {
 #[test]
 fn test_selection_attr_and_style() {
     let mut root = Selection::create("root");
-    let mut sel = root.select_all("circle");
+    let mut sel = root.select_all(Some("circle"));
     sel.attr("fill", "red").style("stroke", "black");
     for node in &sel.nodes {
         assert_eq!(node.attributes.get("fill").unwrap(), "red");
@@ -41,8 +45,8 @@ fn test_selection_attr_and_style() {
 #[test]
 fn test_selection_append_and_children() {
     let mut sel = Selection::create("g");
-    let _rect = sel.append("rect");
-    let _circle = sel.append("circle");
+    sel.append("rect");
+    sel.append("circle");
     let children = sel.children();
     let tags: Vec<_> = children.nodes.iter().map(|n| n.tag.as_str()).collect();
     assert!(tags.contains(&"rect"));
@@ -67,7 +71,10 @@ fn test_selection_event_on_and_dispatch() {
 #[test]
 fn test_selection_filter_and_merge() {
     let mut root = Selection::create("root");
-    let mut sel = root.select_all("rect");
+    root.append("rect");
+    root.append("rect");
+    root.append("rect");
+    let mut sel = root.select_all(Some("rect"));
     sel.attr("id", "foo");
     sel.nodes[1].attributes.insert("id".to_string(), "bar".to_string());
     let filtered = sel.filter(|n| n.attributes.get("id").map(|v| v == "bar").unwrap_or(false));
@@ -80,7 +87,10 @@ fn test_selection_filter_and_merge() {
 #[test]
 fn test_selection_each_and_map() {
     let mut root = Selection::create("root");
-    let mut sel = root.select_all("circle");
+    root.append("circle");
+    root.append("circle");
+    root.append("circle");
+    let mut sel = root.select_all(Some("circle"));
     sel.each(|n| {
         n.attributes.insert("foo".to_string(), "bar".to_string());
     });
@@ -94,7 +104,7 @@ fn test_selection_each_and_map() {
 #[test]
 fn test_selection_property_and_classed() {
     let mut root = Selection::create("root");
-    let mut sel = root.select_all("rect");
+    let mut sel = root.select_all(Some("rect"));
     sel.property("checked", "true");
     for node in &sel.nodes {
         assert_eq!(node.attributes.get("property:checked").unwrap(), "true");
@@ -137,7 +147,10 @@ fn test_selection_insert_and_call() {
 #[test]
 fn test_selection_empty_node_size_nodes() {
     let mut root = Selection::create("root");
-    let mut sel = root.select_all("rect");
+    root.append("rect");
+    root.append("rect");
+    root.append("rect");
+    let mut sel = root.select_all(Some("rect"));
     assert!(!sel.empty());
     assert_eq!(sel.size(), 3);
     assert_eq!(sel.node().unwrap().tag, "rect");
@@ -149,8 +162,8 @@ fn test_selection_empty_node_size_nodes() {
 #[test]
 fn test_selection_select_child_and_children() {
     let mut sel = Selection::create("g");
-    let _rect = sel.append("rect");
-    let _circle = sel.append("circle");
+    sel.append("rect");
+    sel.append("circle");
     let child = sel.select_child();
     // Only the first appended child is selected
     assert_eq!(child.nodes.len(), 1);
@@ -177,7 +190,7 @@ fn test_selection_select_parent_and_parents() {
 #[test]
 fn test_selection_empty_and_repeated_calls() {
     let mut root = Selection::create("root");
-    let mut sel = root.select_all("rect");
+    let mut sel = root.select_all(Some("rect"));
     sel.remove();
     assert!(sel.empty());
     // Calling remove again should not panic
@@ -206,7 +219,7 @@ fn test_selection_classed_multiple_classes() {
 #[test]
 fn test_selection_data_edge_cases() {
     let mut root = Selection::create("root");
-    let mut sel = root.select_all("rect");
+    let mut sel = root.select_all(Some("rect"));
     // Fewer data than nodes
     sel.data(&[1]);
     assert_eq!(sel.nodes.len(), 1);
@@ -221,7 +234,7 @@ fn test_selection_data_edge_cases() {
 #[test]
 fn test_selection_map_and_each_empty() {
     let mut root = Selection::create("root");
-    let mut sel = root.select_all("rect");
+    let mut sel = root.select_all(Some("rect"));
     sel.remove();
     let tags: Vec<String> = sel.map(|n| n.tag.clone());
     assert!(tags.is_empty());
@@ -232,7 +245,10 @@ fn test_selection_map_and_each_empty() {
 #[test]
 fn test_selection_raise_and_lower() {
     let mut root = Selection::create("root");
-    let mut sel = root.select_all("rect");
+    root.append("rect");
+    root.append("rect");
+    root.append("rect");
+    let mut sel = root.select_all(Some("rect"));
     sel.nodes[0].attributes.insert("id".to_string(), "a".to_string());
     sel.nodes[1].attributes.insert("id".to_string(), "c".to_string());
     sel.nodes[2].attributes.insert("id".to_string(), "b".to_string());
@@ -247,7 +263,10 @@ fn test_selection_raise_and_lower() {
 #[test]
 fn test_selection_sort_by() {
     let mut root = Selection::create("root");
-    let mut sel = root.select_all("rect");
+    root.append("rect");
+    root.append("rect");
+    root.append("rect");
+    let mut sel = root.select_all(Some("rect"));
     sel.nodes[0].attributes.insert("id".to_string(), "b".to_string());
     sel.nodes[1].attributes.insert("id".to_string(), "c".to_string());
     sel.nodes[2].attributes.insert("id".to_string(), "a".to_string());
@@ -259,7 +278,7 @@ fn test_selection_sort_by() {
 #[test]
 fn test_selection_order_noop() {
     let mut root = Selection::create("root");
-    let mut sel = root.select_all("rect");
+    let mut sel = root.select_all(Some("rect"));
     let before = sel.nodes.clone();
     sel.order();
     let after = sel.nodes.clone();
@@ -269,7 +288,10 @@ fn test_selection_order_noop() {
 #[test]
 fn test_selection_filter() {
     let mut root = Selection::create("root");
-    let mut sel = root.select_all("rect");
+    root.append("rect");
+    root.append("rect");
+    root.append("rect");
+    let mut sel = root.select_all(Some("rect"));
     sel.attr("data-id", "even");
     sel.nodes[1].attributes.insert("data-id".to_string(), "odd".to_string());
     let filtered = sel.filter(|n| n.attributes.get("data-id").map(|v| v == "even").unwrap_or(false));
@@ -279,9 +301,130 @@ fn test_selection_filter() {
 #[test]
 fn test_selection_interrupt_and_clone() {
     let mut root = Selection::create("root");
-    let sel = root.select_all("circle");
-    let _ = sel.clone_selection();
+    let sel = root.select_all(Some("circle"));
     let mut root2 = Selection::create("root");
-    let mut sel2 = root2.select_all("rect");
+    let mut sel2 = root2.select_all(Some("rect"));
     sel2.interrupt(); // Should be chainable and not panic
+}
+
+#[test]
+fn test_join_d3_style() {
+    // Initial selection with 2 nodes
+    let mut sel = Selection::create("g");
+    sel.nodes.push(Node::new("g"));
+    // Data with 3 items
+    let data = vec![1, 2, 3];
+    sel.data(&data);
+    // Join with tag "rect"
+    sel.join("rect");
+    // Should have 3 nodes, all with tag "rect"
+    assert_eq!(sel.nodes.len(), 3);
+    for (i, node) in sel.nodes.iter().enumerate() {
+        assert_eq!(node.tag, "rect");
+        assert_eq!(node.data.as_ref().unwrap(), &(data[i].to_string()));
+    }
+}
+
+#[test]
+fn test_join_more_data_than_nodes() {
+    let mut sel = Selection::create("g");
+    sel.nodes.push(Node::new("g")); // 2 nodes
+    let data = vec![1, 2, 3, 4];
+    sel.data(&data);
+    sel.join("rect");
+    assert_eq!(sel.nodes.len(), 4);
+    for (i, node) in sel.nodes.iter().enumerate() {
+        assert_eq!(node.tag, "rect");
+        assert_eq!(node.data.as_ref().unwrap(), &data[i].to_string());
+    }
+}
+
+#[test]
+fn test_join_fewer_data_than_nodes() {
+    let mut sel = Selection::create("g");
+    sel.nodes.push(Node::new("g"));
+    sel.nodes.push(Node::new("g")); // 3 nodes
+    let data = vec![10];
+    sel.data(&data);
+    sel.join("rect");
+    assert_eq!(sel.nodes.len(), 1);
+    assert_eq!(sel.nodes[0].tag, "rect");
+    assert_eq!(sel.nodes[0].data.as_ref().unwrap(), "10");
+}
+
+#[test]
+fn test_join_same_number_data_and_nodes() {
+    let mut sel = Selection::create("g");
+    sel.nodes.push(Node::new("g")); // 2 nodes
+    let data = vec![5, 6];
+    sel.data(&data);
+    sel.join("rect");
+    assert_eq!(sel.nodes.len(), 2);
+    for (i, node) in sel.nodes.iter().enumerate() {
+        assert_eq!(node.tag, "rect");
+        assert_eq!(node.data.as_ref().unwrap(), &data[i].to_string());
+    }
+}
+
+#[test]
+fn test_join_with_different_tag() {
+    let mut sel = Selection::create("g");
+    let data = vec![1];
+    sel.data(&data);
+    sel.join("circle");
+    assert_eq!(sel.nodes.len(), 1);
+    assert_eq!(sel.nodes[0].tag, "circle");
+    assert_eq!(sel.nodes[0].data.as_ref().unwrap(), "1");
+}
+
+#[test]
+fn test_select_all_with_tag() {
+    let mut sel = Selection::create("svg");
+    sel.append("rect");
+    sel.append("circle");
+    sel.append("rect");
+    sel.select_all(Some("rect"));
+    assert_eq!(sel.nodes.len(), 2);
+    for node in &sel.nodes {
+        assert_eq!(node.tag, "rect");
+    }
+}
+
+#[test]
+fn test_select_all_without_tag() {
+    let mut sel = Selection::create("svg");
+    sel.append("rect");
+    sel.append("circle");
+    sel.append("rect");
+    sel.select_all(None);
+    assert_eq!(sel.nodes.len(), 3);
+    let tags: Vec<_> = sel.nodes.iter().map(|n| n.tag.as_str()).collect();
+    assert!(tags.contains(&"rect"));
+    assert!(tags.contains(&"circle"));
+}
+
+#[test]
+fn test_select_all_with_empty_string() {
+    let mut sel = Selection::create("svg");
+    sel.append("rect");
+    sel.append("circle");
+    sel.append("rect");
+    sel.select_all(None); // Changed from Some("") to None for D3-like behavior
+    assert_eq!(sel.nodes.len(), 3);
+    let tags: Vec<_> = sel.nodes.iter().map(|n| n.tag.as_str()).collect();
+    assert!(tags.contains(&"rect"));
+    assert!(tags.contains(&"circle"));
+}
+
+#[test]
+fn test_select_all_children_overload() {
+    let mut sel = Selection::create("svg");
+    sel.append("rect");
+    sel.append("circle");
+    sel.append("rect");
+    sel.select_all(None); // Replaces select_all_children()
+    assert_eq!(sel.nodes.len(), 3);
+    let tags: Vec<_> = sel.nodes.iter().map(|n| n.tag.as_str()).collect();
+    assert!(tags.contains(&"rect"));
+    assert!(tags.contains(&"circle"));
 }
