@@ -21,11 +21,11 @@
 | d3-path | [link](https://github.com/d3/d3-path) | 100 | path, moveTo, lineTo, arc, arcTo, closePath, bezierCurveTo, quadraticCurveTo, rect | None | - |
 | d3-hierarchy | [link](https://github.com/d3/d3-hierarchy) | 90 | hierarchy, tree, cluster, pack, partition, stratify, links, sum, sort, each, descendants, ancestors | treemap, treemapBinary, treemapDice, treemapSlice, treemapSliceDice, treemapSquarify, treemapResquarify | d3-array |
 | d3-interpolate | [link](https://github.com/d3/d3-interpolate) | 90 | interpolate, interpolateArray, interpolateNumber, interpolateObject, interpolateRound, interpolateString, interpolateZoom, interpolateRgb, interpolateHsl, interpolateLab, interpolateCubehelix | interpolateDate, interpolateTransformCss, interpolateTransformSvg | - |
-| d3-time-format | [link](https://github.com/d3/d3-time-format) | 80 | timeFormat, timeParse, utcFormat, utcParse, isoFormat, isoParse | formatLocale, formatDefaultLocale | d3-time |
+| d3-time-format | [link](https://github.com/d3/d3-time-format) | 95 | timeFormat, timeParse, utcFormat, utcParse, isoFormat, isoParse, locale-aware, padding, escaping, multi-format, robust tests | formatLocale, formatDefaultLocale | d3-time |
 | d3-brush | [link](https://github.com/d3/d3-brush) | 0 |  | All | d3-selection |
 | d3-chord | [link](https://github.com/d3/d3-chord) | 100 | Chord layout generation, pad_angle, sort_groups, sort_subgroups, sort_chords, Arc and ribbon path generation (rendering), functional radius for arc and ribbon, advanced sorting options | None | d3-array |
 | d3-color | [link](https://github.com/d3/d3-color) | 95 | Color Parsing, Color Models (RGB, HSL, Lab, HCL), Color Conversion (RGB<->HSL, RGB<->Lab, HSL<->Lab, HCL<->Lab), brighter(), darker(), opacity(), gamma(), clamp(), formatHex(), formatRgb(), formatHsl(), rgb.displayable(), copy(), Lab interpolation | Advanced color spaces (Cubehelix), color blending, precise HCL conversions | - |
-| d3-contour | [link](https://github.com/d3/d3-contour) | 10 | ContourGenerator struct, size(), thresholds() | All | d3-array |
+| d3-contour | [link](https://github.com/d3/d3-contour) | 40 | ContourGenerator struct, size(), thresholds() | smooth(), contours() generation | d3-array |
 | d3-delaunay | [link](https://github.com/d3/d3-delaunay) | 0 |  | All | d3-array |
 | d3-drag | [link](https://github.com/d3/d3-drag) | 0 |  | All | d3-selection, d3-dispatch |
 | d3-dsv | [link](https://github.com/d3/d3-dsv) | 0 |  | All | - |

@@ -1,35 +1,36 @@
 // Only export the array module for isolated testing
 pub mod array;
+pub mod axis;
+pub mod chord;
 pub mod collection;
 pub mod color;
-pub mod format; 
-pub mod time;
-pub mod scale;
-pub mod axis;
-pub mod shape;
+pub mod contour;
+pub mod dispatch;
+pub mod ease;
+pub mod format;
+pub mod geojson;
 pub mod hierarchy;
-pub mod scale_chromatic;
 pub mod interpolate;
+pub mod path;
 pub mod polygon;
 pub mod quadtree;
-pub mod path;
 pub mod random;
+pub mod scale;
+pub mod scale_chromatic;
 pub mod selection;
-pub mod transition;
-pub mod ease;
+pub mod shape;
+pub mod time;
 pub mod timer;
-pub mod dispatch;
-pub mod chord;
-pub mod contour;
+pub mod transition;
 
+pub use array::bisector::bisector;
+pub use array::quickselect::quickselect;
+pub use array::transpose::transpose;
 pub use axis::Axis;
-pub use shape::{Symbol, SymbolType};
 pub use polygon::*;
 pub use quadtree::*;
 pub use selection::Selection;
-pub use array::transpose::transpose;
-pub use array::bisector::bisector;
-pub use array::quickselect::quickselect;
+pub use shape::{Symbol, SymbolType};
 
 // Example integration: use hierarchy with shape for tree visualization
 // use crate::hierarchy::{Node, TreeLayout};

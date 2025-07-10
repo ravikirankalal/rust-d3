@@ -2,7 +2,9 @@
 // Re-export all submodules here as you implement them
 
 pub mod format;
-pub use format::time_format;
+pub use format::{
+    time_format_with_locale, time_parse_with_locale, iso_format, default_format, multi_format
+};
 pub mod locale;
 pub use locale::TimeLocale;
 
@@ -20,6 +22,15 @@ impl TimeIntervalStub {
     pub fn ceil(&self, _date: &str) -> String { String::from("[ceil stub]") }
     pub fn offset(&self, _date: &str, _step: i32) -> String { String::from("[offset stub]") }
     pub fn range(&self, _start: &str, _stop: &str, _step: i32) -> Vec<String> { vec![String::from("[range stub]")] }
+}
+
+// UTC and local formatters (stubs)
+pub fn utc_format(spec: &str, date: &chrono::NaiveDateTime) -> String {
+    format::time_format_with_locale::<chrono::Utc>(spec, date, &locale::TimeLocale::default(), true)
+}
+
+pub fn local_format(spec: &str, date: &chrono::NaiveDateTime) -> String {
+    format::time_format_with_locale::<chrono::Local>(spec, date, &locale::TimeLocale::default(), false)
 }
 
 // Interval traits and stubs

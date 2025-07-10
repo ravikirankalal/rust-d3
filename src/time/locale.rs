@@ -22,4 +22,11 @@ impl Default for TimeLocale {
     }
 }
 
+impl TimeLocale {
+    pub fn en_us() -> Self {
+        Self::default()
+    }
+    // Add more built-in locales as needed
+}
+
 // Allow custom locale injection in the future
