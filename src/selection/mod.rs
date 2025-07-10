@@ -23,6 +23,7 @@ pub struct Arena {
 pub struct Selection<'a> {
     arena: &'a mut Arena, // private
     keys: Vec<NodeKey>,  // private
+    pending_data: Option<Vec<String>>, // store pending data for join
 }
 
 impl Node {
@@ -40,7 +41,7 @@ impl Node {
 impl<'a> Selection<'a> {
     /// Create a new selection from arena and keys (usually root node)
     pub fn new(arena: &'a mut Arena, keys: Vec<NodeKey>) -> Self {
-        Selection { arena, keys }
+        Selection { arena, keys, pending_data: None }
     }
 
     /// Create a root node and return a root selection
@@ -53,7 +54,7 @@ impl<'a> Selection<'a> {
             parent: None,
         };
         let root_key = arena.nodes.insert(root);
-        Selection { arena, keys: vec![root_key] }
+        Selection { arena, keys: vec![root_key], pending_data: None }
     }
 
     /// Get the number of selected nodes
@@ -82,7 +83,7 @@ impl<'a> Selection<'a> {
             self.arena.nodes[key].children.push(child_key);
             new_keys.push(child_key);
         }
-        Selection { arena: self.arena, keys: new_keys }
+        Selection { arena: self.arena, keys: new_keys, pending_data: None }
     }
 
     pub fn attr(&mut self, name: &str, value: &str) -> &mut Self {
@@ -112,10 +113,12 @@ impl<'a> Selection<'a> {
                 }
             }
         }
-        Selection { arena: self.arena, keys: found }
+        Selection { arena: self.arena, keys: found, pending_data: None }
     }
 
     pub fn data<T: ToString>(&mut self, data: &[T]) -> &mut Self {
+        self.pending_data = Some(data.iter().map(|d| d.to_string()).collect());
+        // For compatibility, update existing nodes' data as before
         for (i, &key) in self.keys.iter().enumerate() {
             if let Some(d) = data.get(i) {
                 self.arena.nodes[key].data = Some(d.to_string());
@@ -125,12 +128,24 @@ impl<'a> Selection<'a> {
     }
 
     pub fn join(&mut self, tag: &str) -> &mut Self {
-        let mut new_keys = Vec::new();
-        let parent = self.keys.get(0).and_then(|k| self.arena.nodes[*k].parent);
+        // If no children, use the current selection's node as parent
+        let parent = if self.keys.is_empty() {
+            // Use the first key from the previous selection (the parent group)
+            // This assumes the selection is a single parent node
+            self.arena.nodes.keys().next()
+        } else {
+            self.keys.get(0).and_then(|k| self.arena.nodes[*k].parent)
+        };
         if let Some(parent_key) = parent {
+            // Use pending_data if present, else fallback to current node data
+            let data_vec: Vec<Option<String>> = if let Some(ref pd) = self.pending_data {
+                pd.iter().map(|d| Some(d.clone())).collect()
+            } else {
+                self.keys.iter().map(|k| self.arena.nodes[*k].data.clone()).collect()
+            };
             self.arena.nodes[parent_key].children.clear();
-            for &key in &self.keys {
-                let data = self.arena.nodes[key].data.clone();
+            let mut new_keys = Vec::new();
+            for data in data_vec {
                 let node = Node {
                     tag: tag.to_string(),
                     attributes: HashMap::new(),
@@ -143,6 +158,7 @@ impl<'a> Selection<'a> {
                 new_keys.push(new_key);
             }
             self.keys = new_keys;
+            self.pending_data = None;
         }
         self
     }
@@ -153,7 +169,7 @@ impl<'a> Selection<'a> {
         let arena = Box::leak(Box::new(Arena { nodes: SlotMap::with_key() }));
         let root = Node::new(tag);
         let root_key = arena.nodes.insert(root);
-        Selection { arena, keys: vec![root_key] }
+        Selection { arena, keys: vec![root_key], pending_data: None }
     }
 
     /// D3-like nodes accessor for tests
@@ -167,8 +183,8 @@ impl<'a> Selection<'a> {
     }
 
     // Stub D3-like methods for test compatibility
-    pub fn enter(&mut self) -> Selection<'_> { Selection { arena: self.arena, keys: vec![] } }
-    pub fn exit(&mut self) -> Selection<'_> { Selection { arena: self.arena, keys: vec![] } }
+    pub fn enter(&mut self) -> Selection<'_> { Selection { arena: self.arena, keys: vec![], pending_data: None } }
+    pub fn exit(&mut self) -> Selection<'_> { Selection { arena: self.arena, keys: vec![], pending_data: None } }
     pub fn remove(&mut self) -> &mut Self { self.keys.clear(); self }
     pub fn style(&mut self, _name: &str, _value: &str) -> &mut Self { self }
     pub fn property(&mut self, _name: &str, _value: &str) -> &mut Self { self }
@@ -203,13 +219,13 @@ impl<'a> Selection<'a> {
         F: FnMut(&Node) -> bool,
     {
         let filtered: Vec<NodeKey> = self.keys.iter().cloned().filter(|k| f(&self.arena.nodes[*k])).collect();
-        Selection { arena: self.arena, keys: filtered }
+        Selection { arena: self.arena, keys: filtered, pending_data: None }
     }
 
     pub fn merge(&mut self, other: &Selection) -> Selection<'_> {
         let mut merged = self.keys.clone();
         merged.extend(other.keys.iter().cloned());
-        Selection { arena: self.arena, keys: merged }
+        Selection { arena: self.arena, keys: merged, pending_data: None }
     }
 
     pub fn children(&mut self) -> Selection<'_> {
@@ -217,80 +233,52 @@ impl<'a> Selection<'a> {
         for &key in &self.keys {
             child_keys.extend(self.arena.nodes[key].children.iter().cloned());
         }
-        Selection { arena: self.arena, keys: child_keys }
+        Selection { arena: self.arena, keys: child_keys, pending_data: None }
     }
-
-    pub fn select_child(&mut self) -> Selection<'_> {
+    pub fn select_child(&mut self, tag: &str) -> Selection<'_> {
         let mut child_keys = Vec::new();
         for &key in &self.keys {
-            if let Some(&first_child) = self.arena.nodes[key].children.first() {
-                child_keys.push(first_child);
+            for &child_key in &self.arena.nodes[key].children {
+                if self.arena.nodes[child_key].tag == tag {
+                    child_keys.push(child_key);
+                }
             }
         }
-        Selection { arena: self.arena, keys: child_keys }
+        Selection { arena: self.arena, keys: child_keys, pending_data: None }
     }
-
-    pub fn select_parent(&mut self) -> Selection<'_> {
+    pub fn parent(&mut self) -> Selection<'_> {
         let mut parent_keys = Vec::new();
         for &key in &self.keys {
             if let Some(parent) = self.arena.nodes[key].parent {
                 parent_keys.push(parent);
             }
         }
-        Selection { arena: self.arena, keys: parent_keys }
+        Selection { arena: self.arena, keys: parent_keys, pending_data: None }
     }
-
-    pub fn select_parents(&mut self) -> Selection<'_> {
+    pub fn select_parent(&mut self, tag: &str) -> Selection<'_> {
         let mut parent_keys = Vec::new();
         for &key in &self.keys {
-            let mut current = self.arena.nodes[key].parent;
-            while let Some(parent) = current {
-                parent_keys.push(parent);
-                current = self.arena.nodes[parent].parent;
+            if let Some(parent) = self.arena.nodes[key].parent {
+                if self.arena.nodes[parent].tag == tag {
+                    parent_keys.push(parent);
+                }
             }
         }
-        Selection { arena: self.arena, keys: parent_keys }
+        Selection { arena: self.arena, keys: parent_keys, pending_data: None }
     }
-
-    pub fn datum<T: ToString>(&mut self, value: T) -> &mut Self {
-        for &key in &self.keys {
-            self.arena.nodes[key].data = Some(value.to_string());
-        }
-        self
-    }
-
-    pub fn on<F>(&mut self, _event: &str, _handler: F) -> &mut Self
-    where
-        F: Fn() + Send + Sync + 'static,
-    {
-        // Stub: no-op
-        self
-    }
-
-    pub fn dispatch(&mut self, _event: &str) -> &mut Self {
-        // Stub: no-op
-        self
-    }
-
-    pub fn raise(&mut self) -> &mut Self {
-        // Sort ascending by tag for test
-        self.keys.sort_by_key(|k| self.arena.nodes[*k].tag.clone());
-        self
-    }
-
-    pub fn lower(&mut self) -> &mut Self {
-        // Sort descending by tag for test
-        self.keys.sort_by_key(|k| std::cmp::Reverse(self.arena.nodes[*k].tag.clone()));
-        self
-    }
-
-    pub fn interrupt(&mut self) -> &mut Self {
-        // Stub: no-op
-        self
-    }
-
     pub fn clone_selection(&mut self) -> Selection<'_> {
-        Selection { arena: self.arena, keys: self.keys.clone() }
+        Selection { arena: self.arena, keys: self.keys.clone(), pending_data: None }
+    }
+    pub fn find_all(&mut self, tag: &str) -> Selection<'_> {
+        let mut found = Vec::new();
+        for &key in &self.keys {
+            for &child_key in &self.arena.nodes[key].children {
+                if self.arena.nodes[child_key].tag == tag {
+                    found.push(child_key);
+                }
+            }
+        }
+        Selection { arena: self.arena, keys: found, pending_data: None }
     }
 
     /// D3-like select: select the first child with the given tag
@@ -301,7 +289,7 @@ impl<'a> Selection<'a> {
                 found.push(child_key);
             }
         }
-        Selection { arena: self.arena, keys: found }
+        Selection { arena: self.arena, keys: found, pending_data: None }
     }
 
     /// D3-like sort_by: sort nodes by a comparator

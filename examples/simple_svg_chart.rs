@@ -18,9 +18,11 @@ fn main() {
         .attr("style", "max-width: 100%; height: auto;");
 
     // Add a rect for each bar.
-    let mut bars_group = svg.append("g");
-    let mut bars = bars_group.append("rect");
-    bars.data(&data)
+    svg.append("g")
+    .attr("fill", "steelblue")
+    .select_all(None)
+        .data(&data)
+        .join("rect")
         .attr_fn("x", |_, i| (i * (bar_width + bar_gap)).to_string())
         .attr_fn("y", |n, _| {
             let d = n.data.as_ref().and_then(|s| s.parse::<i32>().ok()).unwrap_or(0);
