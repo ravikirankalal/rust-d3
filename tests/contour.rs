@@ -26,9 +26,11 @@ fn test_contour_generator_thresholds() {
 #[test]
 fn test_contour_generator_contours_placeholder() {
     let contour_gen = ContourGenerator::new().size([2, 2]).thresholds(vec![0.5]);
-    let data = vec![0.0, 1.0, 1.0, 0.0]; // Simple 2x2 grid
+    let data = vec![0.0, 0.0, 0.0, 1.0]; // This will trigger case 1
     let contours = contour_gen.contours(&data);
 
-    // For now, just assert that it returns a vector (even if empty)
-    assert!(contours.is_empty());
+    assert_eq!(contours.len(), 1);
+    assert_eq!(contours[0].len(), 2);
+    assert_eq!(contours[0][0], [0.0, 0.5]);
+    assert_eq!(contours[0][1], [0.5, 0.0]);
 }
