@@ -332,6 +332,7 @@ impl ContourGenerator {
         let smooth_fn = &self.smooth;
 
         crate::contour::marching_squares::isorings(values, v, dx, dy, |ring| {
+            println!("DEBUG: Emitting ring: {:?}", ring);
             let smoothed_ring = (smooth_fn)(ring.clone(), values, v, dx, dy);
             if crate::contour::polygon_area(&smoothed_ring) > 0.0 {
                 polygons.push(vec![smoothed_ring]);

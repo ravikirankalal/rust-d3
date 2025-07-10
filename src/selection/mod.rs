@@ -79,21 +79,33 @@ pub struct Selection {
 }
 
 impl Selection {
-    /// Select a single node by tag (stub: just creates a new node)
-    pub fn select(selector: &str) -> Self {
+    /// Select a single node by tag (D3-style: returns &mut self for chaining)
+    pub fn select(&mut self, selector: &str) -> &mut Self {
+        // For simplicity, just replace the nodes with a new node of the given tag
+        self.nodes = vec![Node::new(selector)];
+        self
+    }
+    /// Select multiple nodes by tag (D3-style: returns &mut self for chaining)
+    pub fn select_all(&mut self, selector: &str) -> &mut Self {
+        // For simplicity, just replace the nodes with three new nodes of the given tag
+        self.nodes = vec![Node::new(selector), Node::new(selector), Node::new(selector)];
+        self
+    }
+    /// Creates a new detached node as the root of a new selection, like d3.create(tag).
+    /// Example: let svg = Selection::create("svg");
+    pub fn create(tag: &str) -> Self {
         Selection {
-            nodes: vec![Node::new(selector)],
+            nodes: vec![Node::new(tag)],
             enter_nodes: vec![],
             exit_nodes: vec![],
         }
     }
-    /// Select multiple nodes by tag (stub: creates 3 nodes)
-    pub fn select_all(selector: &str) -> Self {
-        Selection {
-            nodes: vec![Node::new(selector), Node::new(selector), Node::new(selector)],
-            enter_nodes: vec![],
-            exit_nodes: vec![],
-        }
+    /// Join: replaces the current nodes with the enter selection, like D3's join
+    pub fn join(&mut self) -> &mut Self {
+        self.nodes = self.enter_nodes.clone();
+        self.enter_nodes.clear();
+        self.exit_nodes.clear();
+        self
     }
     /// Set an attribute on all nodes
     pub fn attr(&mut self, name: &str, value: &str) -> &mut Self {

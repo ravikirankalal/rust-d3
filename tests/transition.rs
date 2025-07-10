@@ -7,7 +7,8 @@ use std::time::Duration;
 
 #[test]
 fn test_transition_attr_and_style_integration() {
-    let sel = Selection::select_all("rect");
+    let mut root = Selection::create("root");
+    let sel = root.select_all("rect");
     let t = Transition::new(sel.clone())
         .duration(20)
         .delay(10)
@@ -21,7 +22,8 @@ fn test_transition_attr_and_style_integration() {
 
 #[test]
 fn test_transition_on_event_stub() {
-    let sel = Selection::select("rect");
+    let mut root = Selection::create("root");
+    let sel = root.select("rect").clone();
     let called = Arc::new(Mutex::new(false));
     let called_clone = called.clone();
     let _t = Transition::new(sel).on("end", move || {
@@ -35,7 +37,8 @@ fn test_transition_on_event_stub() {
 
 #[test]
 fn test_transition_chaining() {
-    let sel = Selection::select("rect");
+    let mut root = Selection::create("root");
+    let sel = root.select("rect");
     let t1 = Transition::new(sel.clone())
         .duration(100)
         .delay(50);
