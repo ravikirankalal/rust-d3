@@ -20,6 +20,7 @@ pub mod ease;
 pub mod timer;
 pub mod dispatch;
 pub mod chord;
+pub mod contour;
 
 pub use axis::Axis;
 pub use shape::{Symbol, SymbolType};
