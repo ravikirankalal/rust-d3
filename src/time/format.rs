@@ -109,8 +109,7 @@ pub fn time_format(spec: &str, date: &NaiveDateTime) -> String {
 
 /// Parse a date/time string using a specifier and locale (stub)
 pub fn time_parse_with_locale(spec: &str, s: &str, locale: &TimeLocale, _is_utc: bool) -> Option<NaiveDateTime> {
-    use chrono::{NaiveDate, NaiveTime};
-    use std::collections::HashMap;
+    use chrono::NaiveDate;
     let mut year = None;
     let mut month = None;
     let mut day = None;
@@ -159,12 +158,14 @@ pub fn time_parse_with_locale(spec: &str, s: &str, locale: &TimeLocale, _is_utc:
                     if !found { return None; }
                 },
                 'B' => {
-                    // Full month name
+                    // Full month name, allow whitespace before/after
                     let mut found = false;
+                    let s_trim = s[idx..].trim_start();
+                    let offset = s[idx..].len() - s_trim.len();
                     for (i, &name) in locale.months.iter().enumerate() {
-                        if s[idx..].starts_with(name) {
+                        if s_trim.starts_with(name) {
                             month = Some(i as u32 + 1);
-                            idx += name.len();
+                            idx += offset + name.len();
                             found = true;
                             break;
                         }
@@ -172,9 +173,14 @@ pub fn time_parse_with_locale(spec: &str, s: &str, locale: &TimeLocale, _is_utc:
                     if !found { return None; }
                 },
                 'd' | 'e' => {
-                    if idx + 2 > chars.len() { return None; }
-                    day = s[idx..idx+2].trim().parse().ok();
-                    idx += 2;
+                    // Accept 1 or 2 digit day
+                    let mut len = 2;
+                    if idx + 2 > chars.len() || !s[idx..idx+2].chars().all(|c| c.is_ascii_digit()) {
+                        len = 1;
+                    }
+                    if idx + len > chars.len() { return None; }
+                    day = s[idx..idx+len].trim().parse().ok();
+                    idx += len;
                 },
                 'H' => {
                     if idx + 2 > chars.len() { return None; }
@@ -232,8 +238,8 @@ pub fn time_parse_with_locale(spec: &str, s: &str, locale: &TimeLocale, _is_utc:
                     let mut end = idx;
                     while end < chars.len() && chars[end].is_ascii_digit() { end += 1; }
                     let ts: i64 = s[idx..end].parse().ok()?;
-                    let ndt = NaiveDateTime::from_timestamp_opt(ts, 0)?;
-                    return Some(ndt);
+                    let ndt = chrono::Utc.timestamp_opt(ts, 0).single()?;
+                    return Some(ndt.naive_utc());
                 },
                 // Add more specifiers as needed
                 _ => return None,
@@ -388,7 +394,7 @@ mod tests {
         let s = "2025-07-08 15:30:00.123";
         let spec = "%Y-%m-%d %H:%M:%S.%L";
         let dt = time_parse(spec, s).unwrap();
-        assert_eq!(dt.timestamp_subsec_millis(), 123);
+        assert_eq!(dt.and_utc().timestamp_subsec_millis(), 123);
     }
     #[test]
     fn test_time_parse_unix_timestamp() {

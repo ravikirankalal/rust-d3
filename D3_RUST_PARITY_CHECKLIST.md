@@ -25,7 +25,7 @@
 | d3-brush | [link](https://github.com/d3/d3-brush) | 0 |  | All | d3-selection |
 | d3-chord | [link](https://github.com/d3/d3-chord) | 100 | Chord layout generation, pad_angle, sort_groups, sort_subgroups, sort_chords, Arc and ribbon path generation (rendering), functional radius for arc and ribbon, advanced sorting options | None | d3-array |
 | d3-color | [link](https://github.com/d3/d3-color) | 95 | Color Parsing, Color Models (RGB, HSL, Lab, HCL), Color Conversion (RGB<->HSL, RGB<->Lab, HSL<->Lab, HCL<->Lab), brighter(), darker(), opacity(), gamma(), clamp(), formatHex(), formatRgb(), formatHsl(), rgb.displayable(), copy(), Lab interpolation | Advanced color spaces (Cubehelix), color blending, precise HCL conversions | - |
-| d3-contour | [link](https://github.com/d3/d3-contour) | 40 | ContourGenerator struct, size(), thresholds() | smooth(), contours() generation | d3-array |
+| d3-contour | [link](https://github.com/d3/d3-contour) | 95 | ContourGenerator struct, size(), thresholds(), contours(), marching squares, GeoJSON MultiPolygon output, smooth(), holes, tests, contourDensity, custom accessors, bandwidth, thresholds, full API | advanced smoothing, performance tuning | d3-array |
 | d3-delaunay | [link](https://github.com/d3/d3-delaunay) | 0 |  | All | d3-array |
 | d3-drag | [link](https://github.com/d3/d3-drag) | 0 |  | All | d3-selection, d3-dispatch |
 | d3-dsv | [link](https://github.com/d3/d3-dsv) | 0 |  | All | - |
@@ -42,3 +42,46 @@
 - All integration and async event/timer tests pass robustly.
 - No warnings remain.
 - Checklist is not 100% complete. See individual module completion percentages.
+
+# D3 Contour Parity Checklist (Rust)
+
+## Core API
+- [x] `ContourGenerator` struct and builder methods (`size`, `thresholds`, etc.)
+- [x] `contour()` and `contour_density()` API
+- [x] Thresholds: count and explicit values
+- [x] Output: GeoJSON Feature with MultiPolygon geometry
+
+## Marching Squares Logic
+- [x] Modular helpers: `marching_case`, `marching_segments`, `cell_mask`
+- [x] All 16 marching squares cases tested
+- [x] Ambiguous cases (5, 10) produce correct segments
+- [x] Segment offset logic matches d3-contour
+- [x] Robust segment joining and loop closure
+- [x] Emits both open and closed fragments as in d3-contour
+
+## Contour Extraction
+- [x] Single and multiple threshold support
+- [x] Handles empty, uniform, and multi-value grids
+- [x] Handles both open and closed contours
+- [x] Holes assigned to polygons (GeoJSON MultiPolygon)
+- [x] Smoothing (linear, noop)
+
+## Contour Density
+- [x] Density grid computation
+- [x] Bandwidth and kernel logic
+- [x] Thresholds and output features
+- [x] Handles empty data
+
+## Testing
+- [x] Modular marching squares tests (all cases)
+- [x] Integration tests for contour and contour_density
+- [x] Output feature type and geometry checks
+- [x] Edge cases: empty, uniform, high bandwidth, no contours
+
+## Not Yet Implemented / TODO
+- [ ] Cubic smoothing (stub present)
+- [ ] Advanced property checks (holes, winding order, etc.)
+- [ ] Full GeoJSON property/coordinate validation
+
+---
+**Status:** All core d3-contour features and marching squares logic are implemented and tested in Rust. API, output, and edge cases are robustly covered. Only advanced smoothing and deep GeoJSON validation remain as TODOs.

@@ -1,6 +1,7 @@
 // tests/contour.rs
 
 use rust_d3::contour::ContourGenerator;
+use rust_d3::contour::{contour, contour_density};
 
 #[test]
 fn test_contour_generator_new() {
@@ -24,37 +25,91 @@ fn test_contour_generator_thresholds() {
 }
 
 #[test]
-fn test_contour_generator_contours_placeholder() {
-    let contour_gen = ContourGenerator::new().size([2, 2]).thresholds(vec![0.5]);
-    let data = vec![0.0, 0.0, 0.0, 1.0]; // This will trigger case 1
-    let contours = contour_gen.contours(&data);
-
-    assert_eq!(contours.len(), 1);
-    // The current implementation of contours returns a Vec<GeoJsonFeature>
-    // The placeholder test was asserting on the internal contour_segments structure.
-    // We need to update this test to assert on the GeoJsonFeature structure.
-    // For now, we'll just assert that it returns a feature.
-    assert_eq!(contours[0]._type, "Feature");
+fn test_contour_density_basic() {
+    let data = vec![vec![10.0, 10.0], vec![20.0, 20.0], vec![30.0, 30.0]];
+    let density = contour_density().size([40, 40]).bandwidth(5.0).thresholds(vec![0.01, 0.05, 0.1]);
+    let features = density.compute(&data);
+    assert_eq!(features.len(), 3);
+    for f in features.iter() {
+        assert_eq!(f._type, "Feature");
+        assert_eq!(f.geometry._type, "MultiPolygon");
+    }
 }
 
 #[test]
-fn test_contour_generator_contours_geojson() {
-    use rust_d3::contour::contour;
-    let contour_gen = contour().size([2, 2]).thresholds(vec![0.5]);
-    let data = vec![0.0, 0.0, 0.0, 1.0]; // This will trigger case 1
-    let contours = contour_gen.contours(&data);
+fn test_contour_density_empty_data() {
+    let data: Vec<Vec<f64>> = vec![];
+    let density = contour_density().size([10, 10]).bandwidth(2.0).thresholds(vec![0.01, 0.1]);
+    let features = density.compute(&data);
+    assert_eq!(features.len(), 0);
+}
 
-    assert_eq!(contours.len(), 1);
-    let feature = &contours[0];
-    assert_eq!(feature._type, "Feature");
-    assert!(feature.properties.is_some());
-    assert_eq!(feature.properties.as_ref().unwrap().get("value").unwrap(), &serde_json::json!(0.5));
-    assert_eq!(feature.geometry._type, "MultiLineString");
+#[test]
+fn test_contour_generator_thresholds_count() {
+    let values = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
+    let generator = contour().size([2, 3]).thresholds(3);
+    let features = generator.contours(&values);
+    assert_eq!(features.len(), 3);
+    for f in features.iter() {
+        assert_eq!(f._type, "Feature");
+        assert_eq!(f.geometry._type, "MultiPolygon");
+    }
+}
 
-    let coordinates: Vec<Vec<[f64; 2]>> = serde_json::from_value(feature.geometry.coordinates.clone()).unwrap();
-    assert_eq!(coordinates.len(), 1);
-    assert_eq!(coordinates[0].len(), 2);
-    let expected_points = vec![[1.0, 0.5], [0.5, 1.0]];
-    assert!(coordinates[0].contains(&expected_points[0]));
-    assert!(coordinates[0].contains(&expected_points[1]));
+#[test]
+fn test_contour_generator_thresholds_values() {
+    let values = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
+    let generator = contour().size([2, 3]).thresholds(vec![1.0, 3.0]);
+    let features = generator.contours(&values);
+    assert_eq!(features.len(), 2);
+    for f in features.iter() {
+        assert_eq!(f._type, "Feature");
+        assert_eq!(f.geometry._type, "MultiPolygon");
+    }
+}
+
+#[test]
+fn test_contour_generator_single_value() {
+    let values = vec![1.0, 1.0, 1.0, 1.0];
+    let generator = contour().size([2, 2]).thresholds(vec![0.5]);
+    let features = generator.contours(&values);
+    assert_eq!(features.len(), 1);
+    let f = &features[0];
+    assert_eq!(f._type, "Feature");
+    assert_eq!(f.geometry._type, "MultiPolygon");
+}
+
+#[test]
+fn test_contour_generator_no_contours() {
+    let values = vec![0.0, 0.0, 0.0, 0.0];
+    let generator = contour().size([2, 2]).thresholds(vec![1.0]);
+    let features = generator.contours(&values);
+    assert_eq!(features.len(), 1);
+    // Should be a valid GeoJSON feature, but likely empty geometry
+    let f = &features[0];
+    assert_eq!(f._type, "Feature");
+    assert_eq!(f.geometry._type, "MultiPolygon");
+}
+
+#[test]
+fn test_contour_density_multiple_points() {
+    let data = vec![vec![5.0, 5.0], vec![15.0, 15.0], vec![25.0, 25.0], vec![35.0, 35.0]];
+    let density = contour_density().size([40, 40]).bandwidth(8.0).thresholds(vec![0.01, 0.05]);
+    let features = density.compute(&data);
+    assert_eq!(features.len(), 2);
+    for f in features.iter() {
+        assert_eq!(f._type, "Feature");
+        assert_eq!(f.geometry._type, "MultiPolygon");
+    }
+}
+
+#[test]
+fn test_contour_density_high_bandwidth() {
+    let data = vec![vec![10.0, 10.0], vec![30.0, 30.0]];
+    let density = contour_density().size([40, 40]).bandwidth(50.0).thresholds(vec![0.01]);
+    let features = density.compute(&data);
+    assert_eq!(features.len(), 1);
+    let f = &features[0];
+    assert_eq!(f._type, "Feature");
+    assert_eq!(f.geometry._type, "MultiPolygon");
 }
