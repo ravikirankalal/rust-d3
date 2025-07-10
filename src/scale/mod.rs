@@ -17,6 +17,8 @@ pub mod band;
 pub use band::ScaleBand;
 pub mod point;
 pub use point::ScalePoint;
+pub mod utc;
+pub use utc::ScaleUtc;
 
 #[cfg(test)]
 mod tests {

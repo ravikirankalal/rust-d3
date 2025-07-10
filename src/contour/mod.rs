@@ -117,7 +117,7 @@ impl ContourDensity {
         let tz = match &self.thresholds {
             Thresholds::Count(count) => {
                 let e = extent(&grid).unwrap();
-                ticks(nice(e.0, e.1, *count).0, nice(e.0, e.1, *count).1, *count)
+                ticks(nice(e[0], e[1], *count).0, nice(e[0], e[1], *count).1, *count)
             },
             Thresholds::Values(v) => v.clone(),
         };
@@ -209,7 +209,7 @@ fn threshold_sturges(values: &[f64]) -> Vec<f64> {
         return Vec::new();
     }
     let k = (f64::log2(n as f64) + 1.0).ceil() as usize;
-    let (e0, e1) = extent(values).expect("Extent could not be calculated");
+    let [e0, e1] = extent(values).expect("Extent could not be calculated");
     ticks(nice(e0, e1, k).0, nice(e0, e1, k).1, k)
 }
 
@@ -288,16 +288,16 @@ impl ContourGenerator {
             crate::contour::Thresholds::Count(count) => {
                 self.threshold = Box::new(move |values: &[f64]| {
                     let e = crate::array::extent::extent(values).expect("Extent could not be calculated");
-                    let mut tz = crate::array::ticks::ticks(crate::array::nice::nice(e.0, e.1, count).0, crate::array::nice::nice(e.0, e.1, count).1, count);
+                    let mut tz = crate::array::ticks::ticks(crate::array::nice::nice(e[0], e[1], count).0, crate::array::nice::nice(e[0], e[1], count).1, count);
                     while let Some(&last) = tz.last() {
-                        if last >= e.1 {
+                        if last >= e[1] {
                             tz.pop();
                         } else {
                             break;
                         }
                     }
                     while let Some(&first) = tz.get(1) {
-                        if first < e.0 {
+                        if first < e[0] {
                             tz.remove(0);
                         } else {
                             break;

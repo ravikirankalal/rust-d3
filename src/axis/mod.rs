@@ -99,36 +99,64 @@ impl<S> Axis<S> {
 }
 
 impl Axis<crate::scale::ScaleLinear> {
+    /// Returns ticks for the axis. If `tick_values` is set, uses those. Otherwise, generates ticks.
+    /// Optionally accepts a custom tick count or tick values, like d3-axis.
     pub fn ticks(&self) -> Vec<Tick> {
-        if let Some(ref values) = self.tick_values {
-            return values.iter().map(|&value| {
-                let position = self.scale.scale(value);
-                let label = if let Some(fmt) = self.tick_format {
-                    (fmt)(value)
-                } else if let Some(ref locale) = self.locale {
-                    crate::format::format_locale(value, locale, true)
-                } else {
-                    format!("{:.6}", value)
-                };
-                Tick::new(value, label, position)
-            }).collect();
-        }
+        self.ticks_with(None)
+    }
+    /// Sets the tick count for the axis and returns self for chaining (d3-axis style).
+    pub fn ticks_count(mut self, count: usize) -> Self {
+        self.tick_count = count;
+        self
+    }
+    /// Returns ticks for the axis using the current configuration.
+    pub fn get_ticks(&self) -> Vec<Tick> {
+        self.ticks_with(None)
+    }
+    /// Returns ticks for the axis using a custom tick count (like d3-axis).
+    pub fn get_ticks_with_count(&self, count: usize) -> Vec<Tick> {
+        self.ticks_with_count(count)
+    }
+    pub fn ticks_with(&self, tick_input: Option<&[f64]>) -> Vec<Tick> {
+        let values: Vec<f64> = if let Some(input) = tick_input {
+            input.to_vec()
+        } else if let Some(ref values) = self.tick_values {
+            values.clone()
+        } else {
+            let domain = self.scale.domain;
+            let count = self.tick_count.max(2);
+            let step = (domain[1] - domain[0]) / (count as f64 - 1.0);
+            (0..count).map(|i| domain[0] + i as f64 * step).collect()
+        };
+        values.into_iter().map(|value| {
+            let position = self.scale.scale(value);
+            let label = if let Some(fmt) = self.tick_format {
+                (fmt)(value)
+            } else if let Some(ref locale) = self.locale {
+                crate::format::format_locale(value, locale, true)
+            } else {
+                format!("{:.6}", value)
+            };
+            Tick::new(value, label, position)
+        }).collect()
+    }
+    /// Returns ticks for the axis using a custom tick count (like d3-axis).
+    pub fn ticks_with_count(&self, count: usize) -> Vec<Tick> {
         let domain = self.scale.domain;
-        let step = (domain[1] - domain[0]) / (self.tick_count as f64 - 1.0);
-        (0..self.tick_count)
-            .map(|i| {
-                let value = domain[0] + i as f64 * step;
-                let position = self.scale.scale(value);
-                let label = if let Some(fmt) = self.tick_format {
-                    (fmt)(value)
-                } else if let Some(ref locale) = self.locale {
-                    crate::format::format_locale(value, locale, true)
-                } else {
-                    format!("{:.6}", value)
-                };
-                Tick::new(value, label, position)
-            })
-            .collect()
+        let count = count.max(2);
+        let step = (domain[1] - domain[0]) / (count as f64 - 1.0);
+        (0..count).map(|i| {
+            let value = domain[0] + i as f64 * step;
+            let position = self.scale.scale(value);
+            let label = if let Some(fmt) = self.tick_format {
+                (fmt)(value)
+            } else if let Some(ref locale) = self.locale {
+                crate::format::format_locale(value, locale, true)
+            } else {
+                format!("{:.6}", value)
+            };
+            Tick::new(value, label, position)
+        }).collect()
     }
 }
 
@@ -216,6 +244,10 @@ impl<T: Clone + PartialEq + ToString> Axis<crate::scale::ScalePoint<T>> {
             })
         }).collect()
     }
+}
+
+pub fn axis_bottom<S>(scale: S) -> Axis<S> {
+    Axis::new(scale, AxisOrientation::Bottom)
 }
 
 #[cfg(test)]

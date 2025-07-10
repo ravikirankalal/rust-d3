@@ -113,11 +113,11 @@ mod tests {
 
     #[test]
     fn test_extent() {
-        assert_eq!(extent(&[1, 2, 3, 4, 5]), Some((1, 5)));
-        assert_eq!(extent(&[5, 4, 3, 2, 1]), Some((1, 5)));
-        assert_eq!(extent(&[1]), Some((1, 1)));
+        assert_eq!(extent(&[1, 2, 3, 4, 5]), Some([1, 5]));
+        assert_eq!(extent(&[5, 4, 3, 2, 1]), Some([1, 5]));
+        assert_eq!(extent(&[1]), Some([1, 1]));
         assert_eq!(extent(&[] as &[i32]), None);
-        assert_eq!(extent(&[1.0, 2.5, 0.5]), Some((0.5, 2.5)));
+        assert_eq!(extent(&[1.0, 2.5, 0.5]), Some([0.5, 2.5]));
     }
 
     #[test]

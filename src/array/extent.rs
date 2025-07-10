@@ -1,4 +1,4 @@
-pub fn extent<T: PartialOrd + Copy>(array: &[T]) -> Option<(T, T)> {
+pub fn extent<T: PartialOrd + Copy>(array: &[T]) -> Option<[T; 2]> {
     if array.is_empty() {
         return None;
     }
@@ -14,5 +14,5 @@ pub fn extent<T: PartialOrd + Copy>(array: &[T]) -> Option<(T, T)> {
             max_val = item;
         }
     }
-    Some((min_val, max_val))
+    Some([min_val, max_val])
 }
