@@ -11,7 +11,9 @@
     </cargoProject>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="eff26258-86d6-4780-a761-15d435444507" name="Changes" comment="color module 2" />
+    <list default="true" id="eff26258-86d6-4780-a761-15d435444507" name="Changes" comment="color module 2">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -253,7 +255,7 @@
       <workItem from="1751861156333" duration="1262000" />
       <workItem from="1751862762874" duration="2094000" />
       <workItem from="1751864878746" duration="140000" />
-      <workItem from="1751880947310" duration="63651000" />
+      <workItem from="1751880947310" duration="63790000" />
     </task>
     <task id="LOCAL-00001" summary="Porting version v0.0.2">
       <option name="closed" value="true" />

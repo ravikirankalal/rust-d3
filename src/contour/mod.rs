@@ -25,7 +25,7 @@ impl ContourGenerator {
         self
     }
 
-    pub fn contours(&self, data: &[f64]) -> Vec<Vec<[f64; 2]>> {
+    pub fn contours(&self, _data: &[f64]) -> Vec<Vec<[f64; 2]>> {
         // Core marching squares algorithm will go here
         // For now, return an empty vector
         Vec::new()
