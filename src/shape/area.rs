@@ -150,6 +150,30 @@ where
         path.push_str("Z");
         path
     }
+    pub fn x<Xb>(self, x: Xb) -> Area<Xb, Xb, Y0, Y1, D, T, C>
+    where Xb: Fn(&T, usize) -> f64 + Clone {
+        Area {
+            x0: x.clone(),
+            x1: x,
+            y0: self.y0,
+            y1: self.y1,
+            defined: self.defined,
+            curve: self.curve.clone(),
+            _phantom: std::marker::PhantomData,
+        }
+    }
+    pub fn y<Yb>(self, y: Yb) -> Area<X0, X1, Yb, Yb, D, T, C>
+    where Yb: Fn(&T, usize) -> f64 + Clone {
+        Area {
+            x0: self.x0,
+            x1: self.x1,
+            y0: y.clone(),
+            y1: y,
+            defined: self.defined,
+            curve: self.curve.clone(),
+            _phantom: std::marker::PhantomData,
+        }
+    }
 }
 
 #[cfg(test)]
