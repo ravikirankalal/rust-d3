@@ -21,7 +21,6 @@ pub mod selection;
 pub mod shape;
 pub mod time;
 pub mod timer;
-pub mod transition;
 
 pub use array::bisector::bisector;
 pub use array::quickselect::quickselect;

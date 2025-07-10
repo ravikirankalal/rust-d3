@@ -774,6 +774,7 @@ dependencies = [
  "resvg",
  "serde",
  "serde_json",
+ "slotmap",
  "tiny-skia",
  "tokio",
  "ureq",
