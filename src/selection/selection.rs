@@ -242,6 +242,46 @@ impl Selection {
         }
         self
     }
+    /// Set style using a function (D3 .style with function)
+    pub fn style_fn<F>(&mut self, name: &str, mut f: F) -> &mut Self
+    where F: FnMut(&Node, usize) -> String {
+        {
+            let mut arena = self.arena.borrow_mut();
+            for (i, &key) in self.keys.iter().enumerate() {
+                let value = f(&arena.nodes[key], i);
+                let node = &mut arena.nodes[key];
+                let style_attr = node.attributes.entry("style".to_string()).or_insert_with(String::new);
+                let mut styles: HashMap<String, String> = if style_attr.is_empty() {
+                    HashMap::new()
+                } else {
+                    style_attr
+                        .split(';')
+                        .filter(|s| !s.is_empty())
+                        .filter_map(|s| {
+                            let mut parts = s.splitn(2, ':');
+                            match (parts.next(), parts.next()) {
+                                (Some(key), Some(val)) if !key.trim().is_empty() => {
+                                    Some((key.trim().to_string(), val.trim().to_string()))
+                                }
+                                _ => None,
+                            }
+                        })
+                        .collect()
+                };
+                if value.is_empty() {
+                    styles.remove(name);
+                } else {
+                    styles.insert(name.to_string(), value);
+                }
+                *style_attr = styles
+                    .into_iter()
+                    .map(|(k, v)| format!("{}:{}", k, v))
+                    .collect::<Vec<_>>()
+                    .join(";");
+            }
+        }
+        self
+    }
     pub fn property(&mut self, name: &str, value: &str) -> &mut Self {
         {
             let mut arena = self.arena.borrow_mut();
@@ -494,63 +534,68 @@ impl Selection {
     pub fn clone(&self) -> Selection {
         Selection { arena: Rc::clone(&self.arena), keys: self.keys.clone(), pending_data: self.pending_data.clone(), enter_keys: self.enter_keys.clone(), update_keys: self.update_keys.clone(), exit_keys: self.exit_keys.clone() }
     }
-    /// Stub for transition (D3 animation)
-    pub fn transition(&mut self) -> &mut Self {
-        // No-op: not supported in Rust
-        self
+    /// Deep clone: clones all nodes and structure
+    pub fn deep_clone(&self) -> Selection {
+        let arena = self.arena.borrow();
+        let mut new_arena = Rc::new(RefCell::new(Arena { nodes: SlotMap::with_key() }));
+        let mut key_map = HashMap::new();
+        for &key in &self.keys {
+            Self::clone_node_recursive(&arena, &mut new_arena.borrow_mut(), key, None, &mut key_map);
+        }
+        let new_keys = self.keys.iter().map(|k| key_map[k]).collect();
+        Selection {
+            arena: new_arena,
+            keys: new_keys,
+            pending_data: self.pending_data.clone(),
+            enter_keys: self.enter_keys.clone(),
+            update_keys: self.update_keys.clone(),
+            exit_keys: self.exit_keys.clone(),
+        }
     }
-    /// Stub for interrupt (D3 animation)
-    pub fn interrupt(&mut self) -> &mut Self {
-        // No-op: not supported in Rust
-        self
-    }
-    /// Stub for dispatch (event dispatch)
-    pub fn dispatch(&mut self, _event: &str) -> &mut Self {
-        // No-op: not supported in Rust
-        self
+    fn clone_node_recursive(
+        arena: &Arena,
+        new_arena: &mut Arena,
+        key: NodeKey,
+        parent: Option<NodeKey>,
+        key_map: &mut HashMap<NodeKey, NodeKey>,
+    ) {
+        let node = &arena.nodes[key];
+        let mut new_node = node.clone();
+        new_node.parent = parent;
+        new_node.children = vec![];
+        let new_key = new_arena.nodes.insert(new_node);
+        key_map.insert(key, new_key);
+        for &child in &node.children {
+            Self::clone_node_recursive(arena, new_arena, child, Some(new_key), key_map);
+            new_arena.nodes[new_key].children.push(key_map[&child]);
+        }
     }
 
-    /// D3-like join pattern: apply closures to enter, update, exit selections
-    pub fn join<E, U, X>(&mut self, mut enter: E, mut update: U, mut exit: X) -> &mut Self
-    where
-        E: FnMut(&mut Selection),
-        U: FnMut(&mut Selection),
-        X: FnMut(&mut Selection),
-    {
-        if let Some(ref enter_keys) = self.enter_keys {
-            let mut enter_sel = Selection {
-                arena: Rc::clone(&self.arena),
-                keys: enter_keys.clone(),
-                pending_data: None,
-                enter_keys: None,
-                update_keys: None,
-                exit_keys: None,
-            };
-            enter(&mut enter_sel);
+    /// Find first matching descendant by tag or class (D3 .find)
+    pub fn find(&self, selector: &str) -> Option<Node> {
+        let (tag, classes) = parse_selector(selector);
+        let arena = self.arena.borrow();
+        for &key in &self.keys {
+            let mut stack = vec![key];
+            while let Some(k) = stack.pop() {
+                let node = &arena.nodes[k];
+                let tag_match = match &tag {
+                    Some(t) => node.tag == *t,
+                    None => true,
+                };
+                let class_match = classes.is_empty() || {
+                    let node_classes: HashSet<String> = node.attributes.get("class")
+                        .map(|c| c.split_whitespace().map(|s| s.to_string()).collect())
+                        .unwrap_or_else(HashSet::new);
+                    classes.iter().all(|c| node_classes.contains(&c.to_string()))
+                };
+                if tag_match && class_match {
+                    return Some(node.clone());
+                }
+                stack.extend(&node.children);
+            }
         }
-        if let Some(ref update_keys) = self.update_keys {
-            let mut update_sel = Selection {
-                arena: Rc::clone(&self.arena),
-                keys: update_keys.clone(),
-                pending_data: None,
-                enter_keys: None,
-                update_keys: None,
-                exit_keys: None,
-            };
-            update(&mut update_sel);
-        }
-        if let Some(ref exit_keys) = self.exit_keys {
-            let mut exit_sel = Selection {
-                arena: Rc::clone(&self.arena),
-                keys: exit_keys.clone(),
-                pending_data: None,
-                enter_keys: None,
-                update_keys: None,
-                exit_keys: None,
-            };
-            exit(&mut exit_sel);
-        }
-        self
+        None
     }
 
     /// Documentation for all selection methods (D3 parity)
