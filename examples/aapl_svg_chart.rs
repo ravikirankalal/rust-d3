@@ -63,13 +63,7 @@ fn main() {
       .attr("transform", &format!("translate(0,{})",height - marginBottom))
       .call( |_| {axis_bottom(x).ticks_count(width / 80).tick_size_outer(0.0);});
 
-    svg.append("line")
-        .attr("x1", &margin.to_string())
-        .attr("y1", &(height - margin).to_string())
-        .attr("x2", &(width - margin).to_string())
-        .attr("y2", &(height - margin).to_string())
-        .attr("stroke", "black");
-
+    //
     svg.append("line")
         .attr("x1", &margin.to_string())
         .attr("y1", &margin.to_string())
