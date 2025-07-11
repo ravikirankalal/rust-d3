@@ -2,6 +2,7 @@ use rust_d3::selection::{Arena, Selection};
 use rust_d3::shape::Area;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use rust_d3::scale::ScaleTime;
 use rust_d3::scale::ScaleLinear;
 use chrono::Utc;
 use rust_d3::time::format::time_parse;
@@ -29,12 +30,12 @@ fn generate_svg_chart() -> String {
         dates.push(DateTime::<Utc>::from_utc(parsed.unwrap(), Utc));
         closes.push(parts[1].parse::<f32>().unwrap_or(0.0));
     }
-    let width = 928;
-    let height = 500;
-    let margin_top = 20;
-    let margin_right = 30;
-    let margin_bottom = 30;
-    let margin_left = 40;
+    let width:usize  = 928;
+    let height:usize  = 500;
+    let margin_top: i32 = 20;
+    let margin_right: i32 = 30;
+    let margin_bottom: i32 = 30;
+    let margin_left: i32= 40;
     let n = closes.len();
     let min_close = closes.iter().cloned().fold(f32::INFINITY, f32::min);
     let max_close = closes.iter().cloned().fold(f32::NEG_INFINITY, f32::max);
@@ -45,12 +46,15 @@ fn generate_svg_chart() -> String {
         .attr("viewBox", &format!("0 0 {} {}", width, height))
         .attr("xmlns", "http://www.w3.org/2000/svg")
         .attr("style", "max-width: 100%; height: auto;");
-    let x = ScaleLinear::new([0.0, (n - 1) as f64], [margin_left as f64, (width - margin_right) as f64]);
-    let y = ScaleLinear::new([min_close as f64, max_close as f64], [(height - margin_bottom) as f64, 20.0]);
+    let x = ScaleTime::new(
+        [dates.first().unwrap().naive_utc(), dates.last().unwrap().naive_utc()],
+        [margin_left as f64, (width as i32- margin_right) as f64]
+    );
+    let y = ScaleLinear::new([min_close as f64, max_close as f64], [(height as i32- margin_bottom) as f64, 20.0]);
     
     // Append x-axis
     let mut x_axis_group = svg.append("g");
-    x_axis_group.attr("transform", &format!("translate(0,{})", height - margin_bottom));
+    x_axis_group.attr("transform", &format!("translate(0,{})", height as i32- margin_bottom));
     x_axis_group.call(|sel| {
         axis_bottom(x.clone())
             .tick_count(width / 80)
@@ -59,22 +63,25 @@ fn generate_svg_chart() -> String {
             .render(sel);
     });
     // Append y-axis
-    let mut y_axis_group = svg.append("g");
-    y_axis_group.attr("transform", &format!("translate({},0)", margin_left));
-    y_axis_group.call(|sel| {
-        axis_left(y.clone())
-            .tick_count(height / 40)
-            .tick_size_inner(6.0)
-            .tick_padding(3.0)
-            .render(sel);
-    });
-    // let y_axis = axis_left(y.clone()).tick_count(height / 40).tick_size_inner(6.0).tick_padding(3.0);
-    // y_axis.render(&mut y_axis_group);
+    svg.append("g")
+      .attr("transform", &format!("translate({},0)",margin_left))
+      .call(|sel| {axis_left(y.clone()).tick_count(height / 40).render(sel);})
+      .call(|g| {g.select(".domain").remove();})
+      .call(|g| { g.select_all(Some(".tick line"))
+          .attr("x2", (width as i32 - margin_left - margin_right).to_string().as_str())
+          .attr("stroke-opacity", 0.1.to_string().as_str());})
+      .call(|g| {g.append("text")
+          .attr("x", (-margin_left).to_string().as_str())
+          .attr("y", 10.to_string().as_str())
+          .attr("fill", "currentColor")
+          .attr("text-anchor", "start")
+          .text("↑ Daily close ($)");});
 
+    // Area generator
     let area = Area::new()
-        .x(|_d: &f32, i: usize| x.scale(i as f64))
+        .x(|_d: &f32, i: usize| x.scale(dates[i].naive_utc()))
         .y0(|_d: &f32, _| y.scale(min_close as f64))
-        .y1(|d: &f32, _| y.scale(*d as f64));
+        .y1(|d: &f32, i| y.scale(*d as f64));
     svg.append("path")
       .attr("fill", "steelblue")
       .attr("d", &area.generate(&closes))
