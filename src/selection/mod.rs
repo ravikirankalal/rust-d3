@@ -305,4 +305,53 @@ impl<'a> Selection<'a> {
     pub fn order(&mut self) -> &mut Self {
         self
     }
+
+    pub fn render_node(arena: &Arena, key: NodeKey) -> String {
+        let node = &arena.nodes[key];
+        let mut s = String::new();
+        s.push('<');
+        s.push_str(&node.tag);
+        for (k, v) in &node.attributes {
+            s.push(' ');
+            s.push_str(k);
+            s.push_str("=\"");
+            s.push_str(v);
+            s.push('"');
+        }
+        if node.children.is_empty() {
+            s.push_str("/>");
+            return s;
+        }
+        s.push('>');
+        for &child in &node.children {
+            s.push_str(&Self::render_node(arena, child));
+        }
+        s.push_str(&format!("</{}>", node.tag));
+        s
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_render_node_svg() {
+        let mut arena = Arena { nodes: SlotMap::with_key() };
+        let mut svg = Selection::root(&mut arena, "svg");
+        svg.attr("width", "100").attr("height", "100");
+        let mut g = svg.append("g");
+        g.attr("fill", "red");
+        let mut rect = g.append("rect");
+        rect.attr("x", "10").attr("y", "20").attr("width", "30").attr("height", "40");
+        let root_key = svg.iter().next().copied().unwrap();
+        let svg_str = Selection::render_node(&arena, root_key);
+        assert!(svg_str.contains("<svg"));
+        assert!(svg_str.contains("<g"));
+        assert!(svg_str.contains("<rect"));
+        assert!(svg_str.contains("width=\"100\""));
+        assert!(svg_str.contains("fill=\"red\""));
+        assert!(svg_str.contains("x=\"10\""));
+        assert!(svg_str.contains("y=\"20\""));
+        assert!(svg_str.contains("</svg>"));
+    }
 }

@@ -1,6 +1,6 @@
 use rust_d3::array::extent::extent;
 use rust_d3::array::max::max;
-use rust_d3::selection::{Arena, NodeKey, Selection};
+use rust_d3::selection::{Arena, Selection};
 use rust_d3::shape::Area;
 use serde::de;
 use std::fs::File;
@@ -89,30 +89,7 @@ fn main() {
     //     .attr("stroke", "steelblue")
     //     .attr("stroke-width", "2");
     // Render SVG as string
-    fn render_node(arena: &Arena, key: NodeKey) -> String {
-        let node = &arena.nodes[key];
-        let mut s = String::new();
-        s.push('<');
-        s.push_str(&node.tag);
-        for (k, v) in &node.attributes {
-            s.push(' ');
-            s.push_str(k);
-            s.push_str("=\"");
-            s.push_str(v);
-            s.push('"');
-        }
-        if node.children.is_empty() {
-            s.push_str("/>");
-            return s;
-        }
-        s.push('>');
-        for &child in &node.children {
-            s.push_str(&render_node(arena, child));
-        }
-        s.push_str(&format!("</{}>", node.tag));
-        s
-    }
     let root_key = svg.iter().next().copied().unwrap();
-    let svg_str = render_node(&arena, root_key);
+    let svg_str = Selection::render_node(&arena, root_key);
     println!("{}", svg_str);
 }
