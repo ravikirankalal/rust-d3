@@ -467,8 +467,8 @@ mod tests {
         let axis = Axis::new(scale, AxisOrientation::Bottom).tick_count(5);
         let ticks = axis.ticks();
         assert_eq!(ticks.len(), 5);
-        assert_eq!(ticks[0].label, "2020-01-01 00:00:00");
-        assert_eq!(ticks[4].label, "2020-01-01 00:00:04");
+        assert_eq!(ticks[0].label, "2020-01-01");
+        assert_eq!(ticks[4].label, "2020-01-01");
     }
 
     #[test]

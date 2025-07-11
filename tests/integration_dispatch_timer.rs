@@ -61,6 +61,7 @@ async fn integration_timer_pause_resume_dispatch() {
         timer.start();
         tokio::time::sleep(Duration::from_millis(50)).await; // Give more time for ticks
         timer.pause();
+        tokio::time::sleep(Duration::from_millis(10)).await; // Allow in-flight ticks to complete
         let paused_count = count.load(Ordering::SeqCst);
         tokio::time::sleep(Duration::from_millis(50)).await;
         assert_eq!(paused_count, count.load(Ordering::SeqCst));

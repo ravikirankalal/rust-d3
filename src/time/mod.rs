@@ -102,10 +102,10 @@ impl TimeInterval for Day {
         chrono::NaiveDate::from_ymd_opt(date.year(), date.month(), date.day()).unwrap().and_hms_opt(0, 0, 0).unwrap()
     }
     fn ceil(&self, date: NaiveDateTime) -> NaiveDateTime {
-        self.floor(date) + chrono::Duration::days(1)
+        self.floor(date) + chrono::Duration::try_days(1).unwrap()
     }
     fn offset(&self, date: NaiveDateTime, step: i32) -> NaiveDateTime {
-        date + chrono::Duration::days(step as i64)
+        date + chrono::Duration::try_days(step as i64).unwrap()
     }
     fn range(&self, start: NaiveDateTime, stop: NaiveDateTime, step: i32) -> Vec<NaiveDateTime> {
         let mut v = Vec::new();
@@ -129,10 +129,10 @@ impl TimeInterval for UtcDay {
         d.and_hms_opt(0, 0, 0).unwrap()
     }
     fn ceil(&self, date: NaiveDateTime) -> NaiveDateTime {
-        self.floor(date) + chrono::Duration::days(1)
+        self.floor(date) + chrono::Duration::try_days(1).unwrap()
     }
     fn offset(&self, date: NaiveDateTime, step: i32) -> NaiveDateTime {
-        date + chrono::Duration::days(step as i64)
+        date + chrono::Duration::try_days(step as i64).unwrap()
     }
     fn range(&self, start: NaiveDateTime, stop: NaiveDateTime, step: i32) -> Vec<NaiveDateTime> {
         let mut v = Vec::new();
@@ -151,14 +151,14 @@ pub struct Week;
 impl TimeInterval for Week {
     fn floor(&self, date: NaiveDateTime) -> NaiveDateTime {
         let weekday = date.weekday().num_days_from_sunday() as i64;
-        let d = date.date() - chrono::Duration::days(weekday);
+        let d = date.date() - chrono::Duration::try_days(weekday).unwrap();
         d.and_hms_opt(0, 0, 0).unwrap()
     }
     fn ceil(&self, date: NaiveDateTime) -> NaiveDateTime {
-        self.floor(date) + chrono::Duration::days(7)
+        self.floor(date) + chrono::Duration::try_days(7).unwrap()
     }
     fn offset(&self, date: NaiveDateTime, step: i32) -> NaiveDateTime {
-        date + chrono::Duration::days(7 * step as i64)
+        date + chrono::Duration::try_days(7 * step as i64).unwrap()
     }
     fn range(&self, start: NaiveDateTime, stop: NaiveDateTime, step: i32) -> Vec<NaiveDateTime> {
         let mut v = Vec::new();
@@ -316,14 +316,14 @@ pub struct Sunday;
 impl TimeInterval for Sunday {
     fn floor(&self, date: NaiveDateTime) -> NaiveDateTime {
         let weekday = date.weekday().num_days_from_sunday() as i64;
-        let d = date.date() - chrono::Duration::days(weekday);
+        let d = date.date() - chrono::Duration::try_days(weekday).unwrap();
         d.and_hms_opt(0, 0, 0).unwrap()
     }
     fn ceil(&self, date: NaiveDateTime) -> NaiveDateTime {
-        self.floor(date) + chrono::Duration::days(7)
+        self.floor(date) + chrono::Duration::try_days(7).unwrap()
     }
     fn offset(&self, date: NaiveDateTime, step: i32) -> NaiveDateTime {
-        date + chrono::Duration::days(7 * step as i64)
+        date + chrono::Duration::try_days(7 * step as i64).unwrap()
     }
     fn range(&self, start: NaiveDateTime, stop: NaiveDateTime, step: i32) -> Vec<NaiveDateTime> {
         let mut v = Vec::new();
@@ -343,14 +343,14 @@ macro_rules! week_start_interval {
         impl TimeInterval for $name {
             fn floor(&self, date: NaiveDateTime) -> NaiveDateTime {
                 let weekday = (7 + date.weekday().num_days_from_sunday() as i64 - $weekday) % 7;
-                let d = date.date() - chrono::Duration::days(weekday);
+                let d = date.date() - chrono::Duration::try_days(weekday).unwrap();
                 d.and_hms_opt(0, 0, 0).unwrap()
             }
             fn ceil(&self, date: NaiveDateTime) -> NaiveDateTime {
-                self.floor(date) + chrono::Duration::days(7)
+                self.floor(date) + chrono::Duration::try_days(7).unwrap()
             }
             fn offset(&self, date: NaiveDateTime, step: i32) -> NaiveDateTime {
-                date + chrono::Duration::days(7 * step as i64)
+                date + chrono::Duration::try_days(7 * step as i64).unwrap()
             }
             fn range(&self, start: NaiveDateTime, stop: NaiveDateTime, step: i32) -> Vec<NaiveDateTime> {
                 let mut v = Vec::new();
@@ -427,9 +427,9 @@ mod tests {
         let range = every_2_days.range(start, stop, 1);
         assert_eq!(range.len(), 4);
         assert_eq!(range[0], start);
-        assert_eq!(range[1], start + chrono::Duration::days(2));
-        assert_eq!(range[2], start + chrono::Duration::days(4));
-        assert_eq!(range[3], start + chrono::Duration::days(6));
+        assert_eq!(range[1], start + chrono::Duration::try_days(2).unwrap());
+        assert_eq!(range[2], start + chrono::Duration::try_days(4).unwrap());
+        assert_eq!(range[3], start + chrono::Duration::try_days(6).unwrap());
     }
     #[test]
     fn test_time_every_fn() {
@@ -439,7 +439,7 @@ mod tests {
         let range = every_3_weeks.range(start, stop, 1);
         assert_eq!(range.len(), 2);
         assert_eq!(range[0], start);
-        assert_eq!(range[1], start + chrono::Duration::days(21));
+        assert_eq!(range[1], start + chrono::Duration::try_days(21).unwrap());
     }
     #[test]
     fn test_monday_interval() {

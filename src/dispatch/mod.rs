@@ -31,8 +31,11 @@
 //!
 //! ```rust
 //! use rust_d3::dispatch::Dispatch;
-//! use rust_d3::selection::Selection;
-//! let mut sel = Selection::select_all("rect");
+//! use rust_d3::selection::{Arena, Selection};
+//! use slotmap::SlotMap;
+//! let mut arena = Arena { nodes: SlotMap::with_key() };
+//! let mut root = Selection::root(&mut arena, "root");
+//! let mut sel = root.select_all(None);
 //! let mut dispatcher = Dispatch::new();
 //! dispatcher.on("custom", || println!("custom event!"));
 //! // In a real integration, you might call dispatcher.call("custom") inside a transition or selection event

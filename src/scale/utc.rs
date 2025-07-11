@@ -62,7 +62,7 @@ impl ScaleUtc {
         let mut t = d0;
         while t <= d1 {
             ticks.push(t);
-            match t.checked_add_signed(Duration::seconds(step)) {
+            match t.checked_add_signed(Duration::try_seconds(step).unwrap()) {
                 Some(next) => t = next,
                 None => break,
             }
@@ -91,7 +91,7 @@ mod tests {
         let s = ScaleUtc::new([d0, d1], [0.0, 100.0]);
         assert_eq!(s.scale(d0), 0.0);
         assert_eq!(s.scale(d1), 100.0);
-        let mid = d0 + chrono::Duration::seconds(43200);
+        let mid = d0 + chrono::Duration::try_seconds(43200).unwrap();
         assert_eq!(s.scale(mid), 50.0);
         assert_eq!(s.invert(50.0), mid);
     }

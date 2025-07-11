@@ -1,14 +1,11 @@
-use rust_d3::array::extent::extent;
-use rust_d3::array::max::max;
 use rust_d3::selection::{Arena, Selection};
 use rust_d3::shape::Area;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use rust_d3::scale::ScaleLinear;
-use chrono::Utc;
+use chrono::{Utc, TimeZone};
 use rust_d3::time::format::time_parse;
-use rust_d3::axis::{axis_bottom, axis_left};
-use chrono::{DateTime, NaiveDateTime};
+use rust_d3::axis::{axis_bottom, axis_left, AxisRenderable};
 
 
 fn main() {
@@ -25,7 +22,7 @@ fn main() {
         // println!("Line {}: {:?}", i, parts);
         let parsed = time_parse("%Y-%m-%d", parts[0].to_string().as_str());
         // println!("Parsed date: {:?}", parts[0].to_string().as_str());
-        dates.push(DateTime::<Utc>::from_utc(parsed.unwrap(), Utc));
+        dates.push(Utc.from_utc_datetime(&parsed.unwrap()));
         closes.push(parts[1].parse::<f32>().unwrap_or(0.0));
     }
     println!("Dates: {:?}", dates);
@@ -33,8 +30,8 @@ fn main() {
     // Create dimensions and margins for the chart
     let width = 600;
     let height = 300;
-    let margin = 40;
-    let margin_top = 20;
+    let _margin = 40;
+    let _margin_top = 20;
     let margin_right = 30;
     let margin_bottom = 30;
     let margin_left = 40;
@@ -54,25 +51,25 @@ fn main() {
     // X scale
     let x = ScaleLinear::new([0.0, (n - 1) as f64], [margin_left as f64, (width - margin_right) as f64]);
     // Y scale (invert so higher values are at the top)
-    let y = ScaleLinear::new([min_close as f64, max_close as f64], [(height - margin_bottom) as f64, margin_top as f64]);
+    let y = ScaleLinear::new([min_close as f64, max_close as f64], [(height - margin_bottom) as f64, _margin_top as f64]);
 
     // Append x-axis
     let mut x_axis_group = svg.append("g");
     x_axis_group.attr("transform", &format!("translate(0,{})", height - margin_bottom));
     let x_axis = axis_bottom(x.clone()).tick_count(width / 80).tick_size_inner(6.0).tick_padding(3.0);
-    rust_d3::axis::render_axis_bottom(&x_axis, &mut x_axis_group);
+    x_axis.render(&mut x_axis_group);
 
     // Append y-axis
     let mut y_axis_group = svg.append("g");
     y_axis_group.attr("transform", &format!("translate({},0)", margin_left));
     let y_axis = axis_left(y.clone()).tick_count(height / 40).tick_size_inner(6.0).tick_padding(3.0);
-    rust_d3::axis::render_axis_left(&y_axis, &mut y_axis_group);
+    y_axis.render(&mut y_axis_group);
 
     // Area generator
     let area = Area::new()
         .x(|_d: &f32, i: usize| x.scale(i as f64))
         .y0(|_d: &f32, _| y.scale(min_close as f64))
-        .y1(|d: &f32, _| y.scale(*d as f64));
+        .y1(|d: &f32, _i| y.scale(*d as f64));
 
     svg.append("path")
       .attr("fill", "steelblue")
