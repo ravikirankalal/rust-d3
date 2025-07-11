@@ -14,6 +14,7 @@ pub struct Node {
     pub data: Option<String>,
     pub children: Vec<NodeKey>,
     pub parent: Option<NodeKey>,
+    pub text: Option<String>, // Add text field for node
 }
 
 pub struct Arena {
@@ -34,6 +35,7 @@ impl Node {
             data: None,
             children: vec![],
             parent: None,
+            text: None, // Initialize text field
         }
     }
 }
@@ -52,6 +54,7 @@ impl<'a> Selection<'a> {
             data: None,
             children: vec![],
             parent: None,
+            text: None, // Initialize text field
         };
         let root_key = arena.nodes.insert(root);
         Selection { arena, keys: vec![root_key], pending_data: None }
@@ -78,6 +81,7 @@ impl<'a> Selection<'a> {
                 data: None,
                 children: vec![],
                 parent: Some(key),
+                text: None, // Initialize text field
             };
             let child_key = self.arena.nodes.insert(child);
             self.arena.nodes[key].children.push(child_key);
@@ -152,6 +156,7 @@ impl<'a> Selection<'a> {
                     data,
                     children: vec![],
                     parent: Some(parent_key),
+                    text: None, // Initialize text field
                 };
                 let new_key = self.arena.nodes.insert(node);
                 self.arena.nodes[parent_key].children.push(new_key);
@@ -189,7 +194,13 @@ impl<'a> Selection<'a> {
     pub fn style(&mut self, _name: &str, _value: &str) -> &mut Self { self }
     pub fn property(&mut self, _name: &str, _value: &str) -> &mut Self { self }
     pub fn classed(&mut self, _name: &str, _on: bool) -> &mut Self { self }
-    pub fn text(&mut self, _value: &str) -> &mut Self { self }
+    pub fn text(&mut self, value: &str) -> &mut Self {
+        for key in &self.keys {
+            let node = &mut self.arena.nodes[*key];
+            node.text = Some(value.to_string());
+        }
+        self
+    }
     pub fn html(&mut self, _value: &str) -> &mut Self { self }
     pub fn insert(&mut self, _tag: &str) -> &mut Self { self }
     pub fn call<F: FnOnce(&mut Self)>(&mut self, f: F) -> &mut Self { f(self); self }
@@ -318,11 +329,15 @@ impl<'a> Selection<'a> {
             s.push_str(v);
             s.push('"');
         }
-        if node.children.is_empty() {
+        if node.children.is_empty() && node.text.is_none() {
             s.push_str("/>");
             return s;
         }
         s.push('>');
+        // Insert text content if present
+        if let Some(ref text) = node.text {
+            s.push_str(text);
+        }
         for &child in &node.children {
             s.push_str(&Self::render_node(arena, child));
         }

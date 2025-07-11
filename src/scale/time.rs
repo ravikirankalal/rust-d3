@@ -21,4 +21,20 @@ impl ScaleTime {
             .unwrap()
             .naive_utc()
     }
+    pub fn ticks(&self, count: usize) -> Vec<chrono::NaiveDateTime> {
+        let start = self.domain[0];
+        let end = self.domain[1];
+        let start_ms = start.and_utc().timestamp_millis();
+        let end_ms = end.and_utc().timestamp_millis();
+        let step = (end_ms - start_ms) / (count as i64 - 1);
+        let mut ticks = Vec::new();
+        for i in 0..count {
+            let ms = start_ms + step * i as i64;
+            let dt = chrono::DateTime::<chrono::Utc>::from_timestamp(ms / 1000, ((ms % 1000) * 1_000_000) as u32)
+                .unwrap()
+                .naive_utc();
+            ticks.push(dt);
+        }
+        ticks
+    }
 }

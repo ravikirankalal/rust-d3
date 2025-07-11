@@ -1,5 +1,3 @@
-use rust_d3::array::extent::extent;
-use rust_d3::array::max::max;
 use rust_d3::selection::{Arena, Selection};
 use rust_d3::shape::Area;
 use std::fs::File;
@@ -14,6 +12,8 @@ use usvg::{Tree, Options};
 use resvg::render;
 use tiny_skia::Pixmap;
 use eframe::egui::{ColorImage, TextureHandle};
+use rust_d3::axis::AxisRenderable;
+use usvg::fontdb;
 
 fn generate_svg_chart() -> String {
     let file = File::open("examples/aapl.csv").expect("Cannot open aapl.csv");
@@ -29,8 +29,9 @@ fn generate_svg_chart() -> String {
         dates.push(DateTime::<Utc>::from_utc(parsed.unwrap(), Utc));
         closes.push(parts[1].parse::<f32>().unwrap_or(0.0));
     }
-    let width = 600;
-    let height = 300;
+    let width = 928;
+    let height = 500;
+    let margin_top = 20;
     let margin_right = 30;
     let margin_bottom = 30;
     let margin_left = 40;
@@ -50,15 +51,26 @@ fn generate_svg_chart() -> String {
     // Append x-axis
     let mut x_axis_group = svg.append("g");
     x_axis_group.attr("transform", &format!("translate(0,{})", height - margin_bottom));
-    x_axis_group.call(axis_bottom(x.clone()).tick_count(width / 80).tick_size_inner(6.0).tick_padding(3.0));
-    ;
-    // rust_d3::axis::render_axis_bottom(&x_axis, &mut x_axis_group);
-    
+    x_axis_group.call(|sel| {
+        axis_bottom(x.clone())
+            .tick_count(width / 80)
+            .tick_size_inner(6.0)
+            .tick_padding(3.0)
+            .render(sel);
+    });
     // Append y-axis
     let mut y_axis_group = svg.append("g");
     y_axis_group.attr("transform", &format!("translate({},0)", margin_left));
-    let y_axis = axis_left(y.clone()).tick_count(height / 40).tick_size_inner(6.0).tick_padding(3.0);
-    rust_d3::axis::render_axis_left(&y_axis, &mut y_axis_group);
+    y_axis_group.call(|sel| {
+        axis_left(y.clone())
+            .tick_count(height / 40)
+            .tick_size_inner(6.0)
+            .tick_padding(3.0)
+            .render(sel);
+    });
+    // let y_axis = axis_left(y.clone()).tick_count(height / 40).tick_size_inner(6.0).tick_padding(3.0);
+    // y_axis.render(&mut y_axis_group);
+
     let area = Area::new()
         .x(|_d: &f32, i: usize| x.scale(i as f64))
         .y0(|_d: &f32, _| y.scale(min_close as f64))
@@ -78,7 +90,10 @@ struct ChartApp {
 
 impl ChartApp {
     fn rasterize_svg(&self, ctx: &eframe::egui::Context) -> Option<TextureHandle> {
-        let opt = Options::default();
+        let mut opt = Options::default();
+        let mut fontdb = fontdb::Database::new();
+        fontdb.load_system_fonts(); // Load system fonts for SVG text rendering
+        opt.fontdb = std::sync::Arc::new(fontdb); // Fix: wrap fontdb in Arc
         let tree = Tree::from_str(&self.svg, &opt).ok()?;
         let size = tree.size();
         let mut pixmap = Pixmap::new(size.width() as u32, size.height() as u32)?;
@@ -93,9 +108,8 @@ impl ChartApp {
 
 impl eframe::App for ChartApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        if self.texture.is_none() {
-            self.texture = self.rasterize_svg(ctx);
-        }
+        // Always reload the texture for dynamic updates
+        self.texture = self.rasterize_svg(ctx);
         egui::CentralPanel::default().frame(
             egui::Frame::default().fill(egui::Color32::WHITE)
         ).show(ctx, |ui| {
@@ -111,10 +125,11 @@ impl eframe::App for ChartApp {
 
 fn main() -> eframe::Result<()> {
     let svg_str = generate_svg_chart();
+    println!("\n--- SVG OUTPUT ---\n{}\n--- END SVG ---\n", svg_str);
     let options = eframe::NativeOptions::default();
     eframe::run_native(
         "Apple Stock Chart",
         options,
-        Box::new(|cc| Ok(Box::new(ChartApp { svg: svg_str, texture: None }))),
+        Box::new(|_cc| Ok(Box::new(ChartApp { svg: svg_str, texture: None }))),
     )
 }

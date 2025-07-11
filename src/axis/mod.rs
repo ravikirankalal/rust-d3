@@ -98,127 +98,223 @@ impl<S> Axis<S> {
     }
 }
 
-impl Axis<crate::scale::ScaleLinear> {
-    /// Returns ticks for the axis. If `tick_values` is set, uses those. Otherwise, generates ticks.
-    /// Optionally accepts a custom tick count or tick values, like d3-axis.
-    pub fn ticks(&self) -> Vec<Tick> {
-        self.ticks_with(None)
-    }
-    /// Sets the tick count for the axis and returns self for chaining (d3-axis style).
-    pub fn ticks_count(mut self, count: usize) -> Self {
-        self.tick_count = count;
-        self
-    }
-    /// Returns ticks for the axis using the current configuration.
-    pub fn get_ticks(&self) -> Vec<Tick> {
-        self.ticks_with(None)
-    }
-    /// Returns ticks for the axis using a custom tick count (like d3-axis).
-    pub fn get_ticks_with_count(&self, count: usize) -> Vec<Tick> {
-        self.ticks_with_count(count)
-    }
-    pub fn ticks_with(&self, tick_input: Option<&[f64]>) -> Vec<Tick> {
-        let values: Vec<f64> = if let Some(input) = tick_input {
-            input.to_vec()
-        } else if let Some(ref values) = self.tick_values {
-            values.clone()
-        } else {
-            let domain = self.scale.domain;
-            let count = self.tick_count.max(2);
-            let step = (domain[1] - domain[0]) / (count as f64 - 1.0);
-            (0..count).map(|i| domain[0] + i as f64 * step).collect()
-        };
-        values.into_iter().map(|value| {
-            let position = self.scale.scale(value);
-            let label = if let Some(fmt) = self.tick_format {
-                (fmt)(value)
-            } else if let Some(ref locale) = self.locale {
-                crate::format::format_locale(value, locale, true)
-            } else {
-                format!("{:.6}", value)
-            };
-            Tick::new(value, label, position)
-        }).collect()
-    }
-    /// Returns ticks for the axis using a custom tick count (like d3-axis).
-    pub fn ticks_with_count(&self, count: usize) -> Vec<Tick> {
-        let domain = self.scale.domain;
-        let count = count.max(2);
-        let step = (domain[1] - domain[0]) / (count as f64 - 1.0);
-        (0..count).map(|i| {
-            let value = domain[0] + i as f64 * step;
-            let position = self.scale.scale(value);
-            let label = if let Some(fmt) = self.tick_format {
-                (fmt)(value)
-            } else if let Some(ref locale) = self.locale {
-                crate::format::format_locale(value, locale, true)
-            } else {
-                format!("{:.6}", value)
-            };
-            Tick::new(value, label, position)
-        }).collect()
-    }
+pub trait AxisRenderable {
+    fn render(&self, selection: &mut crate::selection::Selection);
 }
 
-impl Axis<crate::scale::ScaleLog> {
-    pub fn ticks(&self) -> Vec<Tick> {
-        let domain = self.scale.domain;
-        let base = self.scale.base;
-        let (d0, d1) = (domain[0].min(domain[1]), domain[0].max(domain[1]));
-        let log_base = |x: f64| x.log(base);
-        let start = log_base(d0).ceil();
-        let end = log_base(d1).floor();
-        let mut ticks = vec![];
-        // Always include lower bound if it's a power of base
-        if (log_base(d0) - log_base(d0).round()).abs() < 1e-6 {
-            ticks.push(d0);
-        }
-        for i in (start as i32)..=(end as i32) {
-            let value = base.powi(i);
-            if value > d0 && value < d1 {
-                ticks.push(value);
+impl AxisRenderable for Axis<crate::scale::ScaleLinear> {
+    fn render(&self, selection: &mut crate::selection::Selection) {
+        match self.orientation {
+            AxisOrientation::Bottom => {
+                let ticks = self.ticks();
+                println!("[AxisRenderable::ScaleLinear] Bottom axis ticks:");
+                for tick in &ticks {
+                    println!("  label: '{}' at position: {}", tick.label, tick.position);
+                }
+                if let (Some(first), Some(last)) = (ticks.first(), ticks.last()) {
+                    selection.append("line")
+                        .attr("x1", &first.position.to_string())
+                        .attr("x2", &last.position.to_string())
+                        .attr("y1", "0")
+                        .attr("y2", "0")
+                        .attr("stroke", "black")
+                        .attr("stroke-width", "1");
+                }
+                for tick in &ticks {
+                    selection.append("line")
+                        .attr("x1", &tick.position.to_string())
+                        .attr("x2", &tick.position.to_string())
+                        .attr("y1", "0")
+                        .attr("y2", &self.tick_size_inner.to_string())
+                        .attr("stroke", "black");
+                    selection.append("text")
+                        .attr("x", &tick.position.to_string())
+                        .attr("y", &format!("{}", self.tick_size_inner + self.tick_padding + 12.0))
+                        .attr("text-anchor", "middle")
+                        .attr("font-size", "12px")
+                        .attr("fill", "black")
+                        .attr("font-family", "Arial, sans-serif")
+                        .text(&tick.label);
+                }
             }
+            AxisOrientation::Left => {
+                let ticks = self.ticks();
+                println!("[AxisRenderable::ScaleLinear] Left axis ticks:");
+                for tick in &ticks {
+                    println!("  label: '{}' at position: {}", tick.label, tick.position);
+                }
+                if let (Some(first), Some(last)) = (ticks.first(), ticks.last()) {
+                    selection.append("line")
+                        .attr("x1", "0")
+                        .attr("x2", "0")
+                        .attr("y1", &first.position.to_string())
+                        .attr("y2", &last.position.to_string())
+                        .attr("stroke", "black")
+                        .attr("stroke-width", "1");
+                }
+                for tick in &ticks {
+                    selection.append("line")
+                        .attr("x1", "0")
+                        .attr("x2", &self.tick_size_inner.to_string())
+                        .attr("y1", &tick.position.to_string())
+                        .attr("y2", &tick.position.to_string())
+                        .attr("stroke", "black");
+                    selection.append("text")
+                        .attr("x", &format!("{}", self.tick_size_inner + self.tick_padding + 2.0))
+                        .attr("y", &tick.position.to_string())
+                        .attr("text-anchor", "start")
+                        .attr("font-size", "12px")
+                        .attr("fill", "black")
+                        .attr("font-family", "Arial, sans-serif")
+                        .text(&tick.label);
+                }
+            }
+            _ => {}
         }
-        // Always include upper bound if it's a power of base
-        if (log_base(d1) - log_base(d1).round()).abs() < 1e-6 && !ticks.iter().any(|&v| (v - d1).abs() < 1e-6) {
-            ticks.push(d1);
-        }
-        ticks.sort_by(|a, b| a.partial_cmp(b).unwrap());
-        ticks.into_iter().map(|value| {
-            let position = self.scale.scale(value);
-            let label = if let Some(fmt) = self.tick_format {
-                (fmt)(value)
-            } else {
-                format!("{:.6}", value)
-            };
-            Tick::new(value, label, position)
-        }).collect()
     }
 }
 
-impl Axis<crate::scale::ScaleTime> {
-    pub fn ticks(&self) -> Vec<Tick> {
-        let domain = self.scale.domain;
-        let tick_count = self.tick_count as i64;
-        let start = domain[0];
-        let end = domain[1];
-        let total_ms = end.and_utc().timestamp_millis() - start.and_utc().timestamp_millis();
-        let step_ms = total_ms / (tick_count - 1).max(1);
-        (0..tick_count)
-            .map(|i| {
-                let ms = start.and_utc().timestamp_millis() + i * step_ms;
-                let value = chrono::DateTime::<chrono::Utc>::from_timestamp((ms / 1000) as i64, ((ms % 1000) * 1_000_000) as u32)
-                    .map(|dt| dt.naive_utc())
-                    .unwrap_or_else(|| chrono::DateTime::<chrono::Utc>::from_timestamp(0, 0).unwrap().naive_utc());
-                let position = self.scale.scale(value);
-                let label = if let Some(fmt) = self.tick_format {
-                    (fmt)(ms as f64)
-                } else {
-                    value.format("%Y-%m-%d %H:%M:%S").to_string()
-                };
-                Tick::new(ms as f64, label, position)
-            })
-            .collect()
+impl AxisRenderable for Axis<crate::scale::ScaleLog> {
+    fn render(&self, selection: &mut crate::selection::Selection) {
+        match self.orientation {
+            AxisOrientation::Bottom => {
+                let ticks = self.ticks();
+                println!("[AxisRenderable::ScaleLog] Bottom axis ticks:");
+                for tick in &ticks {
+                    println!("  label: '{}' at position: {}", tick.label, tick.position);
+                }
+                if let (Some(first), Some(last)) = (ticks.first(), ticks.last()) {
+                    selection.append("line")
+                        .attr("x1", &first.position.to_string())
+                        .attr("x2", &last.position.to_string())
+                        .attr("y1", "0")
+                        .attr("y2", "0")
+                        .attr("stroke", "black")
+                        .attr("stroke-width", "1");
+                }
+                for tick in &ticks {
+                    selection.append("line")
+                        .attr("x1", &tick.position.to_string())
+                        .attr("x2", &tick.position.to_string())
+                        .attr("y1", "0")
+                        .attr("y2", &self.tick_size_inner.to_string())
+                        .attr("stroke", "black");
+                    selection.append("text")
+                        .attr("x", &tick.position.to_string())
+                        .attr("y", &format!("{}", self.tick_size_inner + self.tick_padding + 12.0))
+                        .attr("text-anchor", "middle")
+                        .attr("font-size", "12px")
+                        .attr("fill", "black")
+                        .attr("font-family", "Arial, sans-serif")
+                        .text(&tick.label);
+                }
+            }
+            AxisOrientation::Left => {
+                let ticks = self.ticks();
+                println!("[AxisRenderable::ScaleLog] Left axis ticks:");
+                for tick in &ticks {
+                    println!("  label: '{}' at position: {}", tick.label, tick.position);
+                }
+                if let (Some(first), Some(last)) = (ticks.first(), ticks.last()) {
+                    selection.append("line")
+                        .attr("x1", "0")
+                        .attr("x2", "0")
+                        .attr("y1", &first.position.to_string())
+                        .attr("y2", &last.position.to_string())
+                        .attr("stroke", "black")
+                        .attr("stroke-width", "1");
+                }
+                for tick in &ticks {
+                    selection.append("line")
+                        .attr("x1", "0")
+                        .attr("x2", &self.tick_size_inner.to_string())
+                        .attr("y1", &tick.position.to_string())
+                        .attr("y2", &tick.position.to_string())
+                        .attr("stroke", "black");
+                    selection.append("text")
+                        .attr("x", &format!("{}", self.tick_size_inner + self.tick_padding + 2.0))
+                        .attr("y", &tick.position.to_string())
+                        .attr("text-anchor", "start")
+                        .attr("font-size", "12px")
+                        .attr("fill", "black")
+                        .attr("font-family", "Arial, sans-serif")
+                        .text(&tick.label);
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
+impl AxisRenderable for Axis<crate::scale::ScaleTime> {
+    fn render(&self, selection: &mut crate::selection::Selection) {
+        match self.orientation {
+            AxisOrientation::Bottom => {
+                let ticks = self.ticks();
+                println!("[AxisRenderable::ScaleTime] Bottom axis ticks:");
+                for tick in &ticks {
+                    println!("  label: '{}' at position: {}", tick.label, tick.position);
+                }
+                if let (Some(first), Some(last)) = (ticks.first(), ticks.last()) {
+                    selection.append("line")
+                        .attr("x1", &first.position.to_string())
+                        .attr("x2", &last.position.to_string())
+                        .attr("y1", "0")
+                        .attr("y2", "0")
+                        .attr("stroke", "black")
+                        .attr("stroke-width", "1");
+                }
+                for tick in &ticks {
+                    selection.append("line")
+                        .attr("x1", &tick.position.to_string())
+                        .attr("x2", &tick.position.to_string())
+                        .attr("y1", "0")
+                        .attr("y2", &self.tick_size_inner.to_string())
+                        .attr("stroke", "black");
+                    selection.append("text")
+                        .attr("x", &tick.position.to_string())
+                        .attr("y", &format!("{}", self.tick_size_inner + self.tick_padding + 12.0))
+                        .attr("text-anchor", "middle")
+                        .attr("font-size", "12px")
+                        .attr("fill", "black")
+                        .attr("font-family", "Arial, sans-serif")
+                        .text(&tick.label);
+                }
+            }
+            AxisOrientation::Left => {
+                let ticks = self.ticks();
+                println!("[AxisRenderable::ScaleTime] Left axis ticks:");
+                for tick in &ticks {
+                    println!("  label: '{}' at position: {}", tick.label, tick.position);
+                }
+                if let (Some(first), Some(last)) = (ticks.first(), ticks.last()) {
+                    selection.append("line")
+                        .attr("x1", "0")
+                        .attr("x2", "0")
+                        .attr("y1", &first.position.to_string())
+                        .attr("y2", &last.position.to_string())
+                        .attr("stroke", "black")
+                        .attr("stroke-width", "1");
+                }
+                for tick in &ticks {
+                    selection.append("line")
+                        .attr("x1", "0")
+                        .attr("x2", &self.tick_size_inner.to_string())
+                        .attr("y1", &tick.position.to_string())
+                        .attr("y2", &tick.position.to_string())
+                        .attr("stroke", "black");
+                    selection.append("text")
+                        .attr("x", &format!("{}", self.tick_size_inner + self.tick_padding + 2.0))
+                        .attr("y", &tick.position.to_string())
+                        .attr("text-anchor", "start")
+                        .attr("font-size", "12px")
+                        .attr("fill", "black")
+                        .attr("font-family", "Arial, sans-serif")
+                        .text(&tick.label);
+                }
+            }
+            _ => {}
+        }
     }
 }
 
@@ -246,38 +342,76 @@ impl<T: Clone + PartialEq + ToString> Axis<crate::scale::ScalePoint<T>> {
     }
 }
 
-pub fn axis_bottom<S>(scale: S) -> Axis<S> {
-    Axis::new(scale, AxisOrientation::Bottom)
+impl Axis<crate::scale::ScaleLinear> {
+    pub fn ticks(&self) -> Vec<Tick> {
+        self.ticks_with(None)
+    }
+
+    pub fn ticks_with(&self, tick_input: Option<&[f64]>) -> Vec<Tick> {
+        let values: Vec<f64> = if let Some(input) = tick_input {
+            input.to_vec()
+        } else if let Some(ref values) = self.tick_values {
+            values.clone()
+        } else {
+            let domain = self.scale.domain;
+            let count = self.tick_count.max(2);
+            let step = (domain[1] - domain[0]) / (count as f64 - 1.0);
+            (0..count).map(|i| domain[0] + i as f64 * step).collect()
+        };
+        let ticks: Vec<Tick> = values.into_iter().map(|value| {
+            let position = self.scale.scale(value);
+            let label = if let Some(fmt) = self.tick_format {
+                (fmt)(value)
+            } else if let Some(ref locale) = self.locale {
+                crate::format::format_locale(value, locale, true)
+            } else {
+                format!("{:.6}", value)
+            };
+            println!("[Axis<ScaleLinear>::ticks_with] value: {}, position: {}, label: '{}'", value, position, label);
+            Tick::new(value, label, position)
+        }).collect();
+        ticks
+    }
 }
 
-/// Renders a bottom axis to a selection (SVG group)
-pub fn render_axis_bottom(axis: &Axis<crate::scale::ScaleLinear>, selection: &mut crate::selection::Selection) {
-    let ticks = axis.ticks();
-    // Draw axis line (baseline)
-    if let (Some(first), Some(last)) = (ticks.first(), ticks.last()) {
-        selection.append("line")
-            .attr("x1", &first.position.to_string())
-            .attr("x2", &last.position.to_string())
-            .attr("y1", "0")
-            .attr("y2", "0")
-            .attr("stroke", "black")
-            .attr("stroke-width", "1");
+impl Axis<crate::scale::ScaleLog> {
+    pub fn ticks_with(&self, tick_values: Option<Vec<f64>>) -> Vec<Tick> {
+        let values = tick_values.unwrap_or_else(|| {
+            self.scale.ticks(self.tick_count)
+        });
+        values.iter().map(|&v| {
+            Tick {
+                position: self.scale.scale(v),
+                value: v,
+                label: format!("{:.2}", v),
+            }
+        }).collect()
     }
-    for tick in ticks {
-        selection.append("line")
-            .attr("x1", &tick.position.to_string())
-            .attr("x2", &tick.position.to_string())
-            .attr("y1", "0")
-            .attr("y2", &axis.tick_size_inner.to_string())
-            .attr("stroke", "black");
-        selection.append("text")
-            .attr("x", &tick.position.to_string())
-            .attr("y", &format!("{}", axis.tick_size_inner + axis.tick_padding + 12.0)) // Add offset for label
-            .attr("text-anchor", "middle")
-            .attr("font-size", "12px")
-            .attr("fill", "black")
-            .text(&tick.label);
+    pub fn ticks(&self) -> Vec<Tick> {
+        self.ticks_with(None)
     }
+}
+
+impl Axis<crate::scale::ScaleTime> {
+    pub fn ticks_with(&self, tick_values: Option<Vec<chrono::NaiveDateTime>>) -> Vec<Tick> {
+        let values = tick_values.unwrap_or_else(|| {
+            self.scale.ticks(self.tick_count)
+        });
+        values.iter().map(|&dt| {
+            Tick {
+                position: self.scale.scale(dt),
+                value: dt.and_utc().timestamp_millis() as f64,
+                label: dt.format("%Y-%m-%d").to_string(),
+            }
+        }).collect()
+    }
+    pub fn ticks(&self) -> Vec<Tick> {
+        self.ticks_with(None)
+    }
+}
+
+pub fn axis_bottom<S>(scale: S) -> Axis<S> {
+    Axis::new(scale, AxisOrientation::Bottom)
 }
 
 pub fn axis_top<S>(scale: S) -> Axis<S> {
@@ -288,36 +422,6 @@ pub fn axis_right<S>(scale: S) -> Axis<S> {
 }
 pub fn axis_left<S>(scale: S) -> Axis<S> {
     Axis::new(scale, AxisOrientation::Left)
-}
-
-/// Renders a left axis to a selection (SVG group)
-pub fn render_axis_left(axis: &Axis<crate::scale::ScaleLinear>, selection: &mut crate::selection::Selection) {
-    let ticks = axis.ticks();
-    // Draw axis line (baseline)
-    if let (Some(first), Some(last)) = (ticks.first(), ticks.last()) {
-        selection.append("line")
-            .attr("x1", "0")
-            .attr("x2", "0")
-            .attr("y1", &first.position.to_string())
-            .attr("y2", &last.position.to_string())
-            .attr("stroke", "black")
-            .attr("stroke-width", "1");
-    }
-    for tick in ticks {
-        selection.append("line")
-            .attr("x1", "0")
-            .attr("x2", &axis.tick_size_inner.to_string())
-            .attr("y1", &tick.position.to_string())
-            .attr("y2", &tick.position.to_string())
-            .attr("stroke", "black");
-        selection.append("text")
-            .attr("x", &format!("{}", axis.tick_size_inner + axis.tick_padding + 2.0)) // Add offset for label
-            .attr("y", &tick.position.to_string())
-            .attr("text-anchor", "start")
-            .attr("font-size", "12px")
-            .attr("fill", "black")
-            .text(&tick.label);
-    }
 }
 
 #[cfg(test)]
