@@ -22,9 +22,9 @@ fn main() {
         if i == 0 { continue; } // skip header
         let parts: Vec<&str> = line.split(',').collect();
         if parts.len() < 2 { continue; }
-        println!("Line {}: {:?}", i, parts);
+        // println!("Line {}: {:?}", i, parts);
         let parsed = time_parse("%Y-%m-%d", parts[0].to_string().as_str());
-        println!("Parsed date: {:?}", parts[0].to_string().as_str());
+        // println!("Parsed date: {:?}", parts[0].to_string().as_str());
         dates.push(DateTime::<Utc>::from_utc(parsed.unwrap(), Utc));
         closes.push(parts[1].parse::<f32>().unwrap_or(0.0));
     }
@@ -57,14 +57,18 @@ fn main() {
     let y = ScaleLinear::new([min_close as f64, max_close as f64], [(height - margin_bottom) as f64, margin_top as f64]);
 
     // Append x-axis
-    svg.append("g")
-      .attr("transform", &format!("translate(0,{})", height - margin_bottom))
-      .call(|_| { axis_bottom(x.clone()).ticks_count(width / 80).tick_size_outer(0.0); });
+    let mut append = svg.append("g");
+    append
+        .attr("transform", &format!("translate(0,{})", height - margin_bottom));
+    let x_axis = axis_bottom(x.clone()).tick_count(width / 80).tick_size_inner(6.0).tick_padding(3.0);
+    rust_d3::axis::render_axis_bottom(&x_axis, &mut append);
 
     // Append y-axis
-    svg.append("g")
-      .attr("transform", &format!("translate({},0)", margin_left))
-      .call(|_| { axis_left(y.clone()).ticks_count(height / 40).tick_size_outer(0.0); });
+    let mut append1 = svg.append("g");
+    append1
+        .attr("transform", &format!("translate({},0)", margin_left));
+    let y_axis = axis_left(y.clone()).tick_count(height / 40).tick_size_inner(6.0).tick_padding(3.0);
+    rust_d3::axis::render_axis_left(&y_axis, &mut append1);
 
     // Area generator
     let area = Area::new()
@@ -72,10 +76,10 @@ fn main() {
         .y0(|_d: &f32, _| y.scale(min_close as f64))
         .y1(|d: &f32, _| y.scale(*d as f64));
 
-    // svg.append("path")
-    //   .attr("fill", "steelblue")
-    //   .attr("d", &area.generate(&closes))
-    //   .attr("stroke-width", "2");
+    svg.append("path")
+      .attr("fill", "steelblue")
+      .attr("d", &area.generate(&closes))
+      .attr("stroke-width", "2");
 
     let root_key = svg.iter().next().copied().unwrap();
     let svg_str = Selection::render_node(&arena, root_key);

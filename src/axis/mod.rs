@@ -249,6 +249,25 @@ impl<T: Clone + PartialEq + ToString> Axis<crate::scale::ScalePoint<T>> {
 pub fn axis_bottom<S>(scale: S) -> Axis<S> {
     Axis::new(scale, AxisOrientation::Bottom)
 }
+
+/// Renders a bottom axis to a selection (SVG group)
+pub fn render_axis_bottom(axis: &Axis<crate::scale::ScaleLinear>, selection: &mut crate::selection::Selection) {
+    let ticks = axis.ticks();
+    for tick in ticks {
+        selection.append("line")
+            .attr("x1", &tick.position.to_string())
+            .attr("x2", &tick.position.to_string())
+            .attr("y1", "0")
+            .attr("y2", &axis.tick_size_inner.to_string())
+            .attr("stroke", "black");
+        selection.append("text")
+            .attr("x", &tick.position.to_string())
+            .attr("y", &format!("{}", axis.tick_size_inner + axis.tick_padding))
+            .attr("text-anchor", "middle")
+            .text(&tick.label);
+    }
+}
+
 pub fn axis_top<S>(scale: S) -> Axis<S> {
     Axis::new(scale, AxisOrientation::Top)
 }
@@ -257,6 +276,24 @@ pub fn axis_right<S>(scale: S) -> Axis<S> {
 }
 pub fn axis_left<S>(scale: S) -> Axis<S> {
     Axis::new(scale, AxisOrientation::Left)
+}
+
+/// Renders a left axis to a selection (SVG group)
+pub fn render_axis_left(axis: &Axis<crate::scale::ScaleLinear>, selection: &mut crate::selection::Selection) {
+    let ticks = axis.ticks();
+    for tick in ticks {
+        selection.append("line")
+            .attr("x1", "0")
+            .attr("x2", &axis.tick_size_inner.to_string())
+            .attr("y1", &tick.position.to_string())
+            .attr("y2", &tick.position.to_string())
+            .attr("stroke", "black");
+        selection.append("text")
+            .attr("x", &format!("{}", axis.tick_size_inner + axis.tick_padding))
+            .attr("y", &tick.position.to_string())
+            .attr("text-anchor", "start")
+            .text(&tick.label);
+    }
 }
 
 #[cfg(test)]
