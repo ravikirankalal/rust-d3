@@ -11,13 +11,16 @@ pub struct Selection {
     arena: Rc<RefCell<Arena>>,
     keys: Vec<NodeKey>,
     pending_data: Option<Vec<String>>,
+    enter_keys: Option<Vec<NodeKey>>,
+    update_keys: Option<Vec<NodeKey>>,
+    exit_keys: Option<Vec<NodeKey>>,
 }
 
 // Full impl Selection moved from mod.rs
 impl Selection {
     /// Create a new selection from arena and keys (usually root node)
     pub fn new(arena: Rc<RefCell<Arena>>, keys: Vec<NodeKey>) -> Self {
-        Selection { arena, keys, pending_data: None }
+        Selection { arena, keys, pending_data: None, enter_keys: None, update_keys: None, exit_keys: None }
     }
     pub fn root(arena: Rc<RefCell<Arena>>, tag: &str) -> Self {
         let root = Node {
@@ -31,7 +34,7 @@ impl Selection {
             event_handlers: HashMap::new(),
         };
         let root_key = arena.borrow_mut().nodes.insert(root);
-        Selection { arena, keys: vec![root_key], pending_data: None }
+        Selection { arena, keys: vec![root_key], pending_data: None, enter_keys: None, update_keys: None, exit_keys: None }
     }
     pub fn len(&self) -> usize { self.keys.len() }
     pub fn is_empty(&self) -> bool { self.keys.is_empty() }
@@ -53,7 +56,7 @@ impl Selection {
             self.arena.borrow_mut().nodes[key].children.push(child_key);
             new_keys.push(child_key);
         }
-        Selection { arena: Rc::clone(&self.arena), keys: new_keys, pending_data: None }
+        Selection { arena: Rc::clone(&self.arena), keys: new_keys, pending_data: None, enter_keys: None, update_keys: None, exit_keys: None }
     }
     pub fn attr(&mut self, name: &str, value: &str) -> &mut Self {
         {
@@ -85,7 +88,7 @@ impl Selection {
                 }
             }
         }
-        Selection { arena: Rc::clone(&self.arena), keys: found, pending_data: None }
+        Selection { arena: Rc::clone(&self.arena), keys: found, pending_data: None, enter_keys: None, update_keys: None, exit_keys: None }
     }
     pub fn data<T: ToString>(&mut self, data: &[T]) -> DataJoin {
         let mut enter_keys = Vec::new();
@@ -119,9 +122,12 @@ impl Selection {
         while let Some(&node_key) = node_iter.next() {
             exit_keys.push(node_key);
         }
-        let update_selection = Selection { arena: Rc::clone(&self.arena), keys: update_keys, pending_data: None };
-        let enter_selection = Selection { arena: Rc::clone(&self.arena), keys: enter_keys, pending_data: None };
-        let exit_selection = Selection { arena: Rc::clone(&self.arena), keys: exit_keys, pending_data: None };
+        self.enter_keys = Some(enter_keys.clone());
+        self.update_keys = Some(update_keys.clone());
+        self.exit_keys = Some(exit_keys.clone());
+        let update_selection = Selection { arena: Rc::clone(&self.arena), keys: update_keys, pending_data: None, enter_keys: None, update_keys: None, exit_keys: None };
+        let enter_selection = Selection { arena: Rc::clone(&self.arena), keys: enter_keys, pending_data: None, enter_keys: None, update_keys: None, exit_keys: None };
+        let exit_selection = Selection { arena: Rc::clone(&self.arena), keys: exit_keys, pending_data: None, enter_keys: None, update_keys: None, exit_keys: None };
         DataJoin { update: update_selection, enter: enter_selection, exit: exit_selection }
     }
     pub fn datum<T: ToString>(&mut self, value: T) -> &mut Self {
@@ -134,7 +140,7 @@ impl Selection {
         }
         self
     }
-    pub fn join(&mut self, tag: &str) -> &mut Self {
+    pub fn join_nodes(&mut self, tag: &str) -> &mut Self {
         {
             let mut arena = self.arena.borrow_mut();
             let parent = if self.keys.is_empty() {
@@ -175,7 +181,7 @@ impl Selection {
         let arena = Rc::new(RefCell::new(Arena { nodes: SlotMap::with_key() }));
         let root = Node::new(tag);
         let root_key = arena.borrow_mut().nodes.insert(root);
-        Selection { arena, keys: vec![root_key], pending_data: None }
+        Selection { arena, keys: vec![root_key], pending_data: None, enter_keys: None, update_keys: None, exit_keys: None }
     }
     pub fn nodes(&self) -> Vec<Node> {
         let arena = self.arena.borrow();
@@ -357,12 +363,12 @@ impl Selection {
     where F: FnMut(&Node) -> bool {
         let arena = self.arena.borrow();
         let filtered: Vec<NodeKey> = self.keys.iter().cloned().filter(|k| f(&arena.nodes[*k])).collect();
-        Selection { arena: Rc::clone(&self.arena), keys: filtered, pending_data: None }
+        Selection { arena: Rc::clone(&self.arena), keys: filtered, pending_data: None, enter_keys: None, update_keys: None, exit_keys: None }
     }
     pub fn merge(&mut self, other: &Selection) -> Selection {
         let mut merged = self.keys.clone();
         merged.extend(other.keys.iter().cloned());
-        Selection { arena: Rc::clone(&self.arena), keys: merged, pending_data: None }
+        Selection { arena: Rc::clone(&self.arena), keys: merged, pending_data: None, enter_keys: None, update_keys: None, exit_keys: None }
     }
     pub fn children(&mut self) -> Selection {
         let mut child_keys = Vec::new();
@@ -370,7 +376,7 @@ impl Selection {
         for &key in &self.keys {
             child_keys.extend(arena.nodes[key].children.iter().cloned());
         }
-        Selection { arena: Rc::clone(&self.arena), keys: child_keys, pending_data: None }
+        Selection { arena: Rc::clone(&self.arena), keys: child_keys, pending_data: None, enter_keys: None, update_keys: None, exit_keys: None }
     }
     pub fn select_child(&mut self, tag: &str) -> Selection {
         let mut child_keys = Vec::new();
@@ -382,7 +388,7 @@ impl Selection {
                 }
             }
         }
-        Selection { arena: Rc::clone(&self.arena), keys: child_keys, pending_data: None }
+        Selection { arena: Rc::clone(&self.arena), keys: child_keys, pending_data: None, enter_keys: None, update_keys: None, exit_keys: None }
     }
     pub fn parent(&mut self) -> Selection {
         let mut parent_keys = Vec::new();
@@ -392,7 +398,7 @@ impl Selection {
                 parent_keys.push(parent);
             }
         }
-        Selection { arena: Rc::clone(&self.arena), keys: parent_keys, pending_data: None }
+        Selection { arena: Rc::clone(&self.arena), keys: parent_keys, pending_data: None, enter_keys: None, update_keys: None, exit_keys: None }
     }
     pub fn select_parent(&mut self, tag: &str) -> Selection {
         let mut parent_keys = Vec::new();
@@ -404,10 +410,10 @@ impl Selection {
                 }
             }
         }
-        Selection { arena: Rc::clone(&self.arena), keys: parent_keys, pending_data: None }
+        Selection { arena: Rc::clone(&self.arena), keys: parent_keys, pending_data: None, enter_keys: None, update_keys: None, exit_keys: None }
     }
     pub fn clone_selection(&mut self) -> Selection {
-        Selection { arena: Rc::clone(&self.arena), keys: self.keys.clone(), pending_data: None }
+        Selection { arena: Rc::clone(&self.arena), keys: self.keys.clone(), pending_data: None, enter_keys: None, update_keys: None, exit_keys: None }
     }
     pub fn find_all(&mut self, tag: &str) -> Selection {
         let mut found = Vec::new();
@@ -419,7 +425,7 @@ impl Selection {
                 }
             }
         }
-        Selection { arena: Rc::clone(&self.arena), keys: found, pending_data: None }
+        Selection { arena: Rc::clone(&self.arena), keys: found, pending_data: None, enter_keys: None, update_keys: None, exit_keys: None }
     }
     pub fn select(&mut self, tag: &str) -> Selection {
         let mut found = Vec::new();
@@ -429,13 +435,13 @@ impl Selection {
                 found.push(child_key);
             }
         }
-        Selection { arena: Rc::clone(&self.arena), keys: found, pending_data: None }
+        Selection { arena: Rc::clone(&self.arena), keys: found, pending_data: None, enter_keys: None, update_keys: None, exit_keys: None }
     }
     pub fn select_by(&mut self, selector: &str) -> Selection {
         let mut found = Vec::new();
         let (tag, classes) = parse_selector(selector);
         find_matching_descendants(Rc::clone(&self.arena), &self.keys, &tag, &classes, &mut found);
-        Selection { arena: Rc::clone(&self.arena), keys: found, pending_data: None }
+        Selection { arena: Rc::clone(&self.arena), keys: found, pending_data: None, enter_keys: None, update_keys: None, exit_keys: None }
     }
     pub fn sort_by<F>(&mut self, mut cmp: F) -> &mut Self
     where F: FnMut(&Node, &Node) -> std::cmp::Ordering {
@@ -472,6 +478,83 @@ impl Selection {
         }
         self
     }
+    /// Returns the update selection from the last data join
+    pub fn update(&self) -> Selection {
+        Selection { arena: Rc::clone(&self.arena), keys: self.update_keys.clone().unwrap_or_default(), pending_data: None, enter_keys: None, update_keys: None, exit_keys: None }
+    }
+    /// Returns the enter selection from the last data join
+    pub fn enter(&self) -> Selection {
+        Selection { arena: Rc::clone(&self.arena), keys: self.enter_keys.clone().unwrap_or_default(), pending_data: None, enter_keys: None, update_keys: None, exit_keys: None }
+    }
+    /// Returns the exit selection from the last data join
+    pub fn exit(&self) -> Selection {
+        Selection { arena: Rc::clone(&self.arena), keys: self.exit_keys.clone().unwrap_or_default(), pending_data: None, enter_keys: None, update_keys: None, exit_keys: None }
+    }
+    /// Shallow clone (just keys, not nodes)
+    pub fn clone(&self) -> Selection {
+        Selection { arena: Rc::clone(&self.arena), keys: self.keys.clone(), pending_data: self.pending_data.clone(), enter_keys: self.enter_keys.clone(), update_keys: self.update_keys.clone(), exit_keys: self.exit_keys.clone() }
+    }
+    /// Stub for transition (D3 animation)
+    pub fn transition(&mut self) -> &mut Self {
+        // No-op: not supported in Rust
+        self
+    }
+    /// Stub for interrupt (D3 animation)
+    pub fn interrupt(&mut self) -> &mut Self {
+        // No-op: not supported in Rust
+        self
+    }
+    /// Stub for dispatch (event dispatch)
+    pub fn dispatch(&mut self, _event: &str) -> &mut Self {
+        // No-op: not supported in Rust
+        self
+    }
+
+    /// D3-like join pattern: apply closures to enter, update, exit selections
+    pub fn join<E, U, X>(&mut self, mut enter: E, mut update: U, mut exit: X) -> &mut Self
+    where
+        E: FnMut(&mut Selection),
+        U: FnMut(&mut Selection),
+        X: FnMut(&mut Selection),
+    {
+        if let Some(ref enter_keys) = self.enter_keys {
+            let mut enter_sel = Selection {
+                arena: Rc::clone(&self.arena),
+                keys: enter_keys.clone(),
+                pending_data: None,
+                enter_keys: None,
+                update_keys: None,
+                exit_keys: None,
+            };
+            enter(&mut enter_sel);
+        }
+        if let Some(ref update_keys) = self.update_keys {
+            let mut update_sel = Selection {
+                arena: Rc::clone(&self.arena),
+                keys: update_keys.clone(),
+                pending_data: None,
+                enter_keys: None,
+                update_keys: None,
+                exit_keys: None,
+            };
+            update(&mut update_sel);
+        }
+        if let Some(ref exit_keys) = self.exit_keys {
+            let mut exit_sel = Selection {
+                arena: Rc::clone(&self.arena),
+                keys: exit_keys.clone(),
+                pending_data: None,
+                enter_keys: None,
+                update_keys: None,
+                exit_keys: None,
+            };
+            exit(&mut exit_sel);
+        }
+        self
+    }
+
+    /// Documentation for all selection methods (D3 parity)
+    // select, select_all, filter, data, datum, append, insert, remove, attr, style, property, classed, text, html, on, each, call, merge, order, raise, lower, node, nodes, size, empty, parent, children, clone, deep_clone, find, find_all, select_by, sort_by, map, select_child, select_parent, transition, interrupt, dispatch, enter, update, exit, join
     pub fn render_node(arena: &Rc<RefCell<Arena>>, key: NodeKey) -> String {
         let arena_borrow = arena.borrow();
         let node = &arena_borrow.nodes[key];
