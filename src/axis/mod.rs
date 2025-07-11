@@ -6,6 +6,9 @@ pub mod ticks;
 pub mod axis_structs;
 pub mod axis_impl;
 pub mod axis_renderable;
+pub mod axis_renderable_log;
+pub mod axis_renderable_band;
+pub mod axis_renderable_point;
 pub mod axis_ticks;
 pub mod axis_constructors;
 

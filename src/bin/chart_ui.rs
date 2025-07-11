@@ -15,7 +15,6 @@ use tiny_skia::Pixmap;
 use usvg::fontdb;
 use usvg::{Options, Tree};
 use slotmap::SlotMap;
-use std::collections::HashSet;
 use std::cell::RefCell;
 use std::rc::Rc;
 
