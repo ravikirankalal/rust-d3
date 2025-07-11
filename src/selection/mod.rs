@@ -190,7 +190,28 @@ impl<'a> Selection<'a> {
     // Stub D3-like methods for test compatibility
     pub fn enter(&mut self) -> Selection<'_> { Selection { arena: self.arena, keys: vec![], pending_data: None } }
     pub fn exit(&mut self) -> Selection<'_> { Selection { arena: self.arena, keys: vec![], pending_data: None } }
-    pub fn remove(&mut self) -> &mut Self { self.keys.clear(); self }
+    pub fn remove(&mut self) -> &mut Self {
+        println!("[Selection::remove] Arena nodes before: {}", self.arena.nodes.len());
+        println!("[Selection::remove] Keys to remove: {:?}", self.keys);
+        for &key in &self.keys {
+            // Debug: print node tag and class before removal
+            if let Some(node) = self.arena.nodes.get(key) {
+                let tag = &node.tag;
+                let class = node.attributes.get("class").cloned().unwrap_or_default();
+                println!("[Selection::remove] Removing node: <{} class=\"{}\">", tag, class);
+            }
+            // Remove from parent's children
+            if let Some(parent_key) = self.arena.nodes[key].parent {
+                let parent = &mut self.arena.nodes[parent_key];
+                parent.children.retain(|&c| c != key);
+            }
+            // Remove all children recursively
+            remove_node_recursively(self.arena, key);
+        }
+        println!("[Selection::remove] Arena nodes after: {}", self.arena.nodes.len());
+        self.keys.clear();
+        self
+    }
     pub fn style(&mut self, _name: &str, _value: &str) -> &mut Self { self }
     pub fn property(&mut self, _name: &str, _value: &str) -> &mut Self { self }
     pub fn classed(&mut self, _name: &str, _on: bool) -> &mut Self { self }
@@ -303,6 +324,17 @@ impl<'a> Selection<'a> {
         Selection { arena: self.arena, keys: found, pending_data: None }
     }
 
+    /// D3-like selector: supports tag, .class, tag.class, and multiple classes
+    /// Now supports recursive search for matching descendants
+    pub fn select_by(&mut self, selector: &str) -> Selection<'_> {
+        let mut found = Vec::new();
+        let (tag, classes) = parse_selector(selector);
+        for &key in &self.keys {
+            find_matching_descendants(self.arena, key, &tag, &classes, &mut found);
+        }
+        Selection { arena: self.arena, keys: found, pending_data: None }
+    }
+
     /// D3-like sort_by: sort nodes by a comparator
     pub fn sort_by<F>(&mut self, mut cmp: F) -> &mut Self
     where
@@ -368,5 +400,58 @@ mod tests {
         assert!(svg_str.contains("x=\"10\""));
         assert!(svg_str.contains("y=\"20\""));
         assert!(svg_str.contains("</svg>"));
+    }
+}
+
+/// Parse selector string into tag and classes
+fn parse_selector(selector: &str) -> (Option<String>, Vec<String>) {
+    let mut tag = None;
+    let mut classes = Vec::new();
+    for part in selector.split('.') {
+        if tag.is_none() {
+            if !part.is_empty() {
+                tag = Some(part.to_string());
+            }
+        } else {
+            if !part.is_empty() {
+                classes.push(part.to_string());
+            }
+        }
+    }
+    (tag, classes)
+}
+
+/// Recursively remove node and its children from arena
+fn remove_node_recursively(arena: &mut Arena, key: NodeKey) {
+    let children = arena.nodes[key].children.clone();
+    for child_key in children {
+        remove_node_recursively(arena, child_key);
+    }
+    arena.nodes.remove(key);
+}
+
+/// Recursively find matching descendants by tag and classes
+fn find_matching_descendants(
+    arena: &Arena,
+    key: NodeKey,
+    tag: &Option<String>,
+    classes: &Vec<String>,
+    found: &mut Vec<NodeKey>,
+) {
+    let node = &arena.nodes[key];
+    let tag_match = tag.as_ref().map_or(true, |t| &node.tag == t);
+    let class_match = if classes.is_empty() {
+        true
+    } else {
+        node.attributes.get("class").map_or(false, |cls| {
+            let node_classes: Vec<&str> = cls.split_whitespace().collect();
+            classes.iter().all(|c| node_classes.contains(&c.as_str()))
+        })
+    };
+    if tag_match && class_match {
+        found.push(key);
+    }
+    for &child_key in &node.children {
+        find_matching_descendants(arena, child_key, tag, classes, found);
     }
 }

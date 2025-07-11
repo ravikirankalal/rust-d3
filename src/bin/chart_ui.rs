@@ -63,19 +63,21 @@ fn generate_svg_chart() -> String {
             .render(sel);
     });
     // Append y-axis
-    svg.append("g")
-      .attr("transform", &format!("translate({},0)",margin_left))
-      .call(|sel| {axis_left(y.clone()).tick_count(height / 40).render(sel);})
-      .call(|g| {g.select(".domain").remove();})
-      .call(|g| { g.select_all(Some(".tick line"))
-          .attr("x2", (width as i32 - margin_left - margin_right).to_string().as_str())
-          .attr("stroke-opacity", 0.1.to_string().as_str());})
-      .call(|g| {g.append("text")
-          .attr("x", (-margin_left).to_string().as_str())
-          .attr("y", 10.to_string().as_str())
-          .attr("fill", "currentColor")
-          .attr("text-anchor", "start")
-          .text("↑ Daily close ($)");});
+    let mut y_axis_group = svg.append("g");
+    y_axis_group.attr("transform", &format!("translate({},{})",margin_left, 0));
+    y_axis_group.call(|sel| {
+        axis_left(y.clone()).tick_count(height / 40).render(sel);
+    });
+    y_axis_group.call(|sel|{sel.select_by(".domain").remove();});
+    y_axis_group.call(|g| { g.select_by(".tick line")
+        .attr("x2", (width as i32 - margin_left - margin_right).to_string().as_str())
+        .attr("stroke-opacity", 0.1.to_string().as_str());});
+    y_axis_group.call(|g| { g.append("text")
+        .attr("x", (-margin_left).to_string().as_str())
+        .attr("y", 10.to_string().as_str())
+        .attr("fill", "currentColor")
+        .attr("text-anchor", "start")
+        .text("↑ Daily close ($)");});
 
     // Area generator
     let area = Area::new()

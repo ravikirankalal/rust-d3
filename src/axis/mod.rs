@@ -118,7 +118,8 @@ impl AxisRenderable for Axis<crate::scale::ScaleLinear> {
                         .attr("y1", "0")
                         .attr("y2", "0")
                         .attr("stroke", "black")
-                        .attr("stroke-width", "1");
+                        .attr("stroke-width", "1")
+                        .attr("class", "domain");
                 }
                 for tick in &ticks {
                     selection.append("line")
@@ -150,7 +151,8 @@ impl AxisRenderable for Axis<crate::scale::ScaleLinear> {
                         .attr("y1", &first.position.to_string())
                         .attr("y2", &last.position.to_string())
                         .attr("stroke", "black")
-                        .attr("stroke-width", "1");
+                        .attr("stroke-width", "1")
+                        .attr("class", "domain");
                 }
                 for tick in &ticks {
                     selection.append("line")
@@ -190,7 +192,8 @@ impl AxisRenderable for Axis<crate::scale::ScaleLog> {
                         .attr("y1", "0")
                         .attr("y2", "0")
                         .attr("stroke", "black")
-                        .attr("stroke-width", "1");
+                        .attr("stroke-width", "1")
+                        .attr("class", "domain");
                 }
                 for tick in &ticks {
                     selection.append("line")
@@ -222,7 +225,8 @@ impl AxisRenderable for Axis<crate::scale::ScaleLog> {
                         .attr("y1", &first.position.to_string())
                         .attr("y2", &last.position.to_string())
                         .attr("stroke", "black")
-                        .attr("stroke-width", "1");
+                        .attr("stroke-width", "1")
+                        .attr("class", "domain");
                 }
                 for tick in &ticks {
                     selection.append("line")
@@ -262,7 +266,8 @@ impl AxisRenderable for Axis<crate::scale::ScaleTime> {
                         .attr("y1", "0")
                         .attr("y2", "0")
                         .attr("stroke", "black")
-                        .attr("stroke-width", "1");
+                        .attr("stroke-width", "1")
+                        .attr("class", "domain");
                 }
                 for tick in &ticks {
                     selection.append("line")
@@ -294,7 +299,8 @@ impl AxisRenderable for Axis<crate::scale::ScaleTime> {
                         .attr("y1", &first.position.to_string())
                         .attr("y2", &last.position.to_string())
                         .attr("stroke", "black")
-                        .attr("stroke-width", "1");
+                        .attr("stroke-width", "1")
+                        .attr("class", "domain");
                 }
                 for tick in &ticks {
                     selection.append("line")
