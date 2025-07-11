@@ -253,6 +253,16 @@ pub fn axis_bottom<S>(scale: S) -> Axis<S> {
 /// Renders a bottom axis to a selection (SVG group)
 pub fn render_axis_bottom(axis: &Axis<crate::scale::ScaleLinear>, selection: &mut crate::selection::Selection) {
     let ticks = axis.ticks();
+    // Draw axis line (baseline)
+    if let (Some(first), Some(last)) = (ticks.first(), ticks.last()) {
+        selection.append("line")
+            .attr("x1", &first.position.to_string())
+            .attr("x2", &last.position.to_string())
+            .attr("y1", "0")
+            .attr("y2", "0")
+            .attr("stroke", "black")
+            .attr("stroke-width", "1");
+    }
     for tick in ticks {
         selection.append("line")
             .attr("x1", &tick.position.to_string())
@@ -262,8 +272,10 @@ pub fn render_axis_bottom(axis: &Axis<crate::scale::ScaleLinear>, selection: &mu
             .attr("stroke", "black");
         selection.append("text")
             .attr("x", &tick.position.to_string())
-            .attr("y", &format!("{}", axis.tick_size_inner + axis.tick_padding))
+            .attr("y", &format!("{}", axis.tick_size_inner + axis.tick_padding + 12.0)) // Add offset for label
             .attr("text-anchor", "middle")
+            .attr("font-size", "12px")
+            .attr("fill", "black")
             .text(&tick.label);
     }
 }
@@ -281,6 +293,16 @@ pub fn axis_left<S>(scale: S) -> Axis<S> {
 /// Renders a left axis to a selection (SVG group)
 pub fn render_axis_left(axis: &Axis<crate::scale::ScaleLinear>, selection: &mut crate::selection::Selection) {
     let ticks = axis.ticks();
+    // Draw axis line (baseline)
+    if let (Some(first), Some(last)) = (ticks.first(), ticks.last()) {
+        selection.append("line")
+            .attr("x1", "0")
+            .attr("x2", "0")
+            .attr("y1", &first.position.to_string())
+            .attr("y2", &last.position.to_string())
+            .attr("stroke", "black")
+            .attr("stroke-width", "1");
+    }
     for tick in ticks {
         selection.append("line")
             .attr("x1", "0")
@@ -289,9 +311,11 @@ pub fn render_axis_left(axis: &Axis<crate::scale::ScaleLinear>, selection: &mut 
             .attr("y2", &tick.position.to_string())
             .attr("stroke", "black");
         selection.append("text")
-            .attr("x", &format!("{}", axis.tick_size_inner + axis.tick_padding))
+            .attr("x", &format!("{}", axis.tick_size_inner + axis.tick_padding + 2.0)) // Add offset for label
             .attr("y", &tick.position.to_string())
             .attr("text-anchor", "start")
+            .attr("font-size", "12px")
+            .attr("fill", "black")
             .text(&tick.label);
     }
 }
