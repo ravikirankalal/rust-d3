@@ -28,6 +28,7 @@ impl Selection {
             children: vec![],
             parent: None,
             text: None,
+            event_handlers: HashMap::new(),
         };
         let root_key = arena.borrow_mut().nodes.insert(root);
         Selection { arena, keys: vec![root_key], pending_data: None }
@@ -46,6 +47,7 @@ impl Selection {
                 children: vec![],
                 parent: Some(key),
                 text: None,
+                event_handlers: HashMap::new(),
             };
             let child_key = self.arena.borrow_mut().nodes.insert(child);
             self.arena.borrow_mut().nodes[key].children.push(child_key);
@@ -107,6 +109,7 @@ impl Selection {
                     children: vec![],
                     parent: None,
                     text: None,
+                    event_handlers: HashMap::new(),
                 };
                 let placeholder_key = arena.nodes.insert(placeholder_node);
                 enter_keys.push(placeholder_key);
@@ -156,6 +159,7 @@ impl Selection {
                         children: vec![],
                         parent: Some(parent_key),
                         text: None,
+                        event_handlers: HashMap::new(),
                     };
                     let new_key = arena.nodes.insert(node);
                     arena.nodes[parent_key].children.push(new_key);
@@ -268,8 +272,65 @@ impl Selection {
         }
         self
     }
-    pub fn html(&mut self, _value: &str) -> &mut Self { self }
-    pub fn insert(&mut self, _tag: &str) -> &mut Self { self }
+    /// Set inner HTML (for SVG/text, sets the text field)
+    pub fn html(&mut self, value: &str) -> &mut Self {
+        {
+            let mut arena = self.arena.borrow_mut();
+            for &key in &self.keys {
+                arena.nodes[key].text = Some(value.to_string());
+            }
+        }
+        self
+    }
+
+    /// Insert a new child node before a reference node (by tag or index)
+    pub fn insert(&mut self, tag: &str, before: Option<&str>) -> &mut Self {
+        {
+            let mut arena = self.arena.borrow_mut();
+            for &parent_key in &self.keys {
+                let new_node = Node {
+                    tag: tag.to_string(),
+                    attributes: HashMap::new(),
+                    properties: HashMap::new(),
+                    data: None,
+                    children: vec![],
+                    parent: Some(parent_key),
+                    text: None,
+                    event_handlers: HashMap::new(),
+                };
+                let new_key = arena.nodes.insert(new_node);
+                let pos = if let Some(before_tag) = before {
+                    // Find position before mutable borrow
+                    let children = &arena.nodes[parent_key].children;
+                    children.iter().position(|&c| arena.nodes[c].tag == before_tag)
+                } else {
+                    None
+                };
+                let parent = &mut arena.nodes[parent_key];
+                if let Some(pos) = pos {
+                    parent.children.insert(pos, new_key);
+                } else {
+                    parent.children.push(new_key);
+                }
+            }
+        }
+        self
+    }
+
+    /// Attach an event handler (stores handler in node, for API completeness)
+    pub fn on<F>(&mut self, event: &str, handler: F) -> &mut Self
+    where F: FnMut(&mut Node) + Clone + 'static {
+        {
+            let mut arena = self.arena.borrow_mut();
+            for &key in &self.keys {
+                let node = &mut arena.nodes[key];
+                node.event_handlers.entry(event.to_string())
+                    .or_insert_with(Vec::new)
+                    .push(Box::new(handler.clone()));
+            }
+        }
+        self
+    }
     pub fn call<F: FnOnce(&mut Self)>(&mut self, f: F) -> &mut Self { f(self); self }
     pub fn empty(&self) -> bool { self.keys.is_empty() }
     pub fn size(&self) -> usize { self.keys.len() }
