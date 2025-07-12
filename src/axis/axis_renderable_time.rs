@@ -1,5 +1,6 @@
 // AxisRenderable implementation for Axis<ScaleTime>
 use super::axis_structs::Axis;
+use super::axis_structs::GridStyle;
 use super::orientation::AxisOrientation;
 
 impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleTime> {
@@ -7,25 +8,34 @@ impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleTime> {
         let ticks = self.ticks();
         // Draw grid lines if enabled
         if self.grid {
+            let style = self.grid_style.clone().unwrap_or(GridStyle { color: "#ccc".to_string(), width: 1.0, dasharray: None });
             for tick in &ticks {
                 match self.orientation {
                     AxisOrientation::Bottom | AxisOrientation::Top => {
-                        selection.append("line")
-                            .attr("x1", &tick.position.to_string())
+                        let mut line = selection.append("line");
+                        line.attr("x1", &tick.position.to_string())
                             .attr("x2", &tick.position.to_string())
                             .attr("y1", "0")
                             .attr("y2", "-100%")
-                            .attr("stroke", "#ccc")
+                            .attr("stroke", &style.color)
+                            .attr("stroke-width", &style.width.to_string())
                             .attr("class", "grid");
+                        if let Some(dash) = &style.dasharray {
+                            line.attr("stroke-dasharray", dash);
+                        }
                     }
                     AxisOrientation::Left | AxisOrientation::Right => {
-                        selection.append("line")
-                            .attr("x1", "0")
+                        let mut line = selection.append("line");
+                        line.attr("x1", "0")
                             .attr("x2", "100%")
                             .attr("y1", &tick.position.to_string())
                             .attr("y2", &tick.position.to_string())
-                            .attr("stroke", "#ccc")
+                            .attr("stroke", &style.color)
+                            .attr("stroke-width", &style.width.to_string())
                             .attr("class", "grid");
+                        if let Some(dash) = &style.dasharray {
+                            line.attr("stroke-dasharray", dash);
+                        }
                     }
                 }
             }
