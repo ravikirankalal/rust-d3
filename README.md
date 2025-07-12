@@ -1,271 +1,148 @@
 # Rust D3
 
-A Rust library for creating D3-style data visualizations with SVG output.
+This project is a Rust port of D3.js, aiming to provide data-driven document manipulation and visualization tools in Rust.
 
-## Overview
+## Getting Started
 
-This library provides a Rust implementation of popular chart types similar to D3.js, focusing on:
-- Clean, composable API design
-- SVG output for scalable graphics
-- Multiple chart types with customization options
-- Type-safe data handling
-- Comprehensive test coverage
+1. Ensure you have [Rust](https://www.rust-lang.org/tools/install) installed.
+2. Build the project:
+   ```sh
+   cargo build
+   ```
+3. Run tests:
+   ```sh
+   cargo test
+   ```
 
-## Features
-
-- **Bar Charts** - For categorical data visualization
-- **Line Charts** - For continuous data trends
-- **Pie Charts** - For proportional data representation  
-- **Donut Charts** - Pie charts with inner radius
-- **Customizable Styling** - Colors, sizes, margins, and titles
-- **Scales** - Linear, ordinal, and band scales for data mapping
-- **SVG Output** - Scalable vector graphics for web and print
-
-## Chart Types Supported
-
-### Bar Chart
-![Bar Chart Example](examples/bar_chart.svg)
-
-### Line Chart  
-![Line Chart Example](examples/line_chart.svg)
-
-### Pie Chart
-![Pie Chart Example](examples/pie_chart.svg)
-
-### Donut Chart
-![Donut Chart Example](examples/donut_chart.svg)
-
-## Installation
-
-Add this to your `Cargo.toml`:
-
-```toml
-[dependencies]
-rust-d3 = "0.1.0"
-```
-
-## Quick Start
-
-### Bar Chart
-
-```rust
-use rust_d3::charts::{BarChart, Chart};
-use rust_d3::data::DataPoint;
-
-let data = vec![
-    DataPoint::new("Q1", 120.0),
-    DataPoint::new("Q2", 85.0),
-    DataPoint::new("Q3", 150.0),
-    DataPoint::new("Q4", 95.0),
-];
-
-let chart = BarChart::new()
-    .data(data)
-    .width(600)
-    .height(400)
-    .title("Quarterly Sales")
-    .color("#3498db");
-
-let svg = chart.render();
-// Save to file or use in web application
-std::fs::write("chart.svg", svg.to_string()).unwrap();
-```
-
-### Line Chart
-
-```rust
-use rust_d3::charts::{LineChart, Chart};
-use rust_d3::data::Point2D;
-
-let data = vec![
-    Point2D::new(0.0, 10.0),
-    Point2D::new(1.0, 25.0),
-    Point2D::new(2.0, 15.0),
-    Point2D::new(3.0, 40.0),
-    Point2D::new(4.0, 30.0),
-];
-
-let chart = LineChart::new()
-    .data(data)
-    .width(600)
-    .height(400)
-    .title("Stock Price")
-    .color("#e74c3c")
-    .show_points(true);
-
-let svg = chart.render();
-```
-
-### Pie Chart
-
-```rust
-use rust_d3::charts::{PieChart, Chart};
-use rust_d3::data::DataPoint;
-
-let data = vec![
-    DataPoint::new("Chrome", 65.0),
-    DataPoint::new("Firefox", 15.0),
-    DataPoint::new("Safari", 12.0),
-    DataPoint::new("Edge", 8.0),
-];
-
-let chart = PieChart::new()
-    .data(data)
-    .width(600)
-    .height(400)
-    .title("Browser Share")
-    .show_labels(true);
-
-let svg = chart.render();
-```
-
-### Donut Chart
-
-```rust
-use rust_d3::charts::{PieChart, Chart};
-use rust_d3::data::DataPoint;
-
-let data = vec![
-    DataPoint::new("Desktop", 45.0),
-    DataPoint::new("Mobile", 40.0),
-    DataPoint::new("Tablet", 15.0),
-];
-
-let chart = PieChart::new()
-    .data(data)
-    .width(600)
-    .height(400)
-    .title("Device Usage")
-    .inner_radius(80.0)  // This makes it a donut chart
-    .show_labels(true);
-
-let svg = chart.render();
-```
-
-## Customization
-
-All charts support extensive customization:
-
-```rust
-let chart = BarChart::new()
-    .data(data)
-    .width(800)
-    .height(600)
-    .title("Custom Chart")
-    .color("#9b59b6")
-    .margins(60, 40, 80, 100);  // top, right, bottom, left
-```
-
-For line charts:
-
-```rust
-let chart = LineChart::new()
-    .data(data)
-    .color("#f39c12")
-    .show_points(false)
-    .line_width(3.0);
-```
-
-For pie charts:
-
-```rust
-let custom_colors = vec![
-    "#ff6b6b".to_string(),
-    "#4ecdc4".to_string(), 
-    "#45b7d1".to_string(),
-    "#96ceb4".to_string(),
-];
-
-let chart = PieChart::new()
-    .data(data)
-    .colors(custom_colors)
-    .show_labels(false);
-```
-
-## API Documentation
-
-### Core Types
-
-- `DataPoint` - Single labeled numeric value for bar/pie charts
-- `Point2D` - X/Y coordinate pair for line charts/scatter plots
-- `Chart` trait - Common interface for all chart types
-
-### Scales
-
-- `LinearScale` - Maps continuous domain to continuous range
-- `BandScale` - Maps discrete domain to continuous range (for bar positioning)
-- `OrdinalScale` - Maps discrete domain to discrete range (for colors)
-
-### Chart Types
-
-- `BarChart` - Vertical bar chart with categorical x-axis
-- `LineChart` - Line chart with continuous x/y axes  
-- `PieChart` - Pie chart with optional inner radius for donut charts
-
-## Building and Testing
-
-```bash
-# Build the library
-cargo build
-
-# Run all tests
-cargo test
-
-# Run integration tests (generates example charts)
-cargo test --test integration_tests
-
-# Run examples
-cargo run --bin rust-d3-examples
-
-# Generate documentation
-cargo doc --open
-
-# Run test coverage
-cargo tarpaulin
-```
-
-## Examples
-
-The `examples/` directory contains sample SVG files generated by running:
-
-```bash
-cargo run --bin rust-d3-examples
-```
-
-Integration tests also generate example charts in the `target/` directory:
-
-```bash 
-cargo test --test integration_tests
-```
+## Project Structure
+- `src/lib.rs`: Main library code.
+- `tests/`: Integration tests.
 
 ## Contributing
+Contributions are welcome! Please open issues or pull requests for discussion.
 
-Contributions are welcome! Please feel free to submit a Pull Request. 
+## d3-time Parity (Time Intervals)
 
-### Development Setup
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed setup instructions.
+The `time` module provides D3.js-like time intervals, step intervals, custom week start intervals, and UTC intervals for flexible date/time manipulation and range generation.
 
-### CI/CD Pipeline
-This project uses GitHub Actions for:
-- **Continuous Integration**: Automated testing on every push/PR
-- **Code Quality**: Format checking, linting, and security audits  
-- **Cross-platform Testing**: Linux, Windows, and macOS support
-- **Automated Releases**: Binary builds and crates.io publishing on version tags
+- **Intervals**: `Second`, `Minute`, `Hour`, `Day`, `Week`, `Month`, `Year`
+- **Step Intervals**: Use `.every(n)` or `time_every::<Interval>(n)` for intervals that advance by a custom step (e.g., every 2 days, every 3 weeks)
+- **Custom Week Start Intervals**: `Sunday`, `Monday`, `Tuesday`, `Wednesday`, `Thursday`, `Friday`, `Saturday`
+- **UTC Intervals**: `UtcDay` (pattern for UtcWeek, UtcMonth, etc.)
+- **Range Generation**: Generate Vecs of `chrono::NaiveDateTime` for any interval and step
+- **Trait-based**: All intervals implement the `TimeInterval` trait for composability
 
-[![CI](https://github.com/ravikirankalal/rust-d3/workflows/CI/badge.svg)](https://github.com/ravikirankalal/rust-d3/actions/workflows/ci.yml)
+### Example Usage
 
-### Areas for Improvement
-- Additional chart types (scatter plots, histograms, box plots)
-- More scale types (log, time scales)
-- Animation support
-- Interactive features
-- Performance optimizations
-- Additional customization options
+```rust
+use rust_d3::time::{Day, Monday, UtcDay, time_every, TimeInterval};
+use chrono::{NaiveDate, Utc};
 
-## License
+let every_2_days = Day::every(2).unwrap();
+let start = NaiveDate::from_ymd_opt(2025, 7, 1).unwrap().and_hms_opt(0, 0, 0).unwrap();
+let stop = NaiveDate::from_ymd_opt(2025, 7, 8).unwrap().and_hms_opt(0, 0, 0).unwrap();
+let range = every_2_days.range(start, stop, 1);
+assert_eq!(range, vec![
+    start,
+    start + chrono::Duration::days(2),
+    start + chrono::Duration::days(4),
+    start + chrono::Duration::days(6),
+]);
 
-This project is licensed under the GPL-3.0 License - see the [LICENSE](LICENSE) file for details.
+let monday = Monday;
+let d = NaiveDate::from_ymd_opt(2025, 7, 8).unwrap().and_hms_opt(15, 30, 0).unwrap();
+assert_eq!(monday.floor(d), NaiveDate::from_ymd_opt(2025, 7, 7).unwrap().and_hms_opt(0, 0, 0).unwrap());
 
-## Inspiration
+let utc_day = UtcDay;
+let d = Utc.with_ymd_and_hms(2025, 7, 8, 15, 30, 0).unwrap().naive_utc();
+assert_eq!(utc_day.floor(d), Utc.with_ymd_and_hms(2025, 7, 8, 0, 0, 0).unwrap().naive_utc());
 
-This library is inspired by the excellent [D3.js](https://d3js.org/) library for JavaScript, bringing similar concepts and capabilities to the Rust ecosystem.
+let every_3_weeks = time_every::<rust_d3::time::Week>(3).unwrap();
+let start = NaiveDate::from_ymd_opt(2025, 7, 6).unwrap().and_hms_opt(0, 0, 0).unwrap();
+let stop = NaiveDate::from_ymd_opt(2025, 8, 17).unwrap().and_hms_opt(0, 0, 0).unwrap();
+let range = every_3_weeks.range(start, stop, 1);
+assert_eq!(range, vec![
+    start,
+    start + chrono::Duration::days(21),
+]);
+```
+
+See `src/time/README.md` for full API and more examples.
+
+## D3 Selection API Parity Examples
+
+The Rust D3 selection system provides full API parity with D3.js selection patterns. Below are example/test code snippets for all major D3 selection features:
+
+```rust
+use rust_d3::selection::Selection;
+
+// Create a root SVG node
+let mut sel = Selection::create("svg");
+
+// Append a group and set attributes
+sel.append("g").attr("class", "group");
+
+// Select all groups and bind data
+sel.select_all(Some("g")).data(&["a", "b", "c"]);
+
+// Set attributes and styles using functions
+sel.attr_fn("id", |node, i| format!("node-{}", i));
+sel.style("fill", "red");
+sel.style_fn("stroke", |node, _| format!("#{}", node.tag.len()));
+
+// Class manipulation
+sel.classed("active", true);
+
+// Set text and HTML
+sel.text("Hello");
+sel.html("<span>World</span>");
+
+// Event handling
+sel.on("click", |node| { /* ... */ });
+
+// Iteration and chaining
+sel.each(|node| { /* ... */ });
+sel.call(|s| { s.attr("foo", "bar"); });
+
+// Merging selections
+let other_sel = Selection::create("rect");
+sel.merge(&other_sel);
+
+// Ordering
+sel.order().raise().lower();
+
+// Access nodes and properties
+let node = sel.node();
+let nodes = sel.nodes();
+let size = sel.size();
+let is_empty = sel.empty();
+let parent = sel.parent();
+let children = sel.children();
+let cloned = sel.clone();
+let deep_cloned = sel.clone_selection();
+
+// Find and select
+let found = sel.find_all("rect");
+let selected = sel.select("g");
+let selected_by = sel.select_by("g.active");
+
+// Sorting and mapping
+sel.sort_by(|a, b| a.tag.cmp(&b.tag));
+let mapped: Vec<_> = sel.map(|node| node.tag.clone());
+
+// Child and parent selection
+let child_sel = sel.select_child("rect");
+let parent_sel = sel.select_parent("svg");
+
+// Animation/event stubs
+sel.transition().interrupt().dispatch("custom");
+
+// Data join pattern
+let update = sel.update();
+let enter = sel.enter();
+let exit = sel.exit();
+sel.join(|enter| { /* ... */ }, |update| { /* ... */ }, |exit| { /* ... */ });
+sel.join_nodes("g");
+```
+
+See `src/selection/selection.rs` for full API and more advanced usage patterns.
