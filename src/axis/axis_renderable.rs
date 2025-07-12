@@ -2,6 +2,8 @@
 
 pub trait AxisRenderable {
     fn render(&self, selection: &mut crate::selection::Selection);
+    fn before_render(&self) {}
+    fn after_render(&self) {}
 }
 
 // Removed AxisRenderable impls for ScaleLinear, ScaleTime, ScaleLog, ScaleBand, ScalePoint from this file.

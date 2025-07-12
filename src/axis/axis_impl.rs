@@ -19,8 +19,16 @@ impl<S> Axis<S> {
             tick_arguments: None,
             offset: 0.0,
             locale: None,
-            grid: false, // default: no grid lines
-            title: None, // default: no axis title
+            grid: false,
+            grid_style: None,
+            title: None,
+            title_style: None,
+            minor_ticks: None,
+            minor_tick_size: None,
+            tick_label_angle: None,
+            tick_label_style: None,
+            axis_line_style: None,
+            on_render: None,
         }
     }
     pub fn tick_count(mut self, count: usize) -> Self {
