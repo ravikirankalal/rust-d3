@@ -1,7 +1,7 @@
 use rust_d3::selection::{Arena, NodeKey, Selection};
 
 fn main() {
-    let data = vec![30, 80, 45, 60, 20, 90, 55];
+    let mut data = [30, 80, 45, 60, 20, 90, 55];
     let width = 300;
     let height = 120;
     let bar_width = 30;
@@ -9,7 +9,7 @@ fn main() {
 
     // Create arena and root SVG node using Selection API
     let mut arena = Arena { nodes: slotmap::SlotMap::with_key() };
-    let mut svg = Selection::root(&mut arena, "svg");
+    let mut svg = Selection::create("svg");
 
     svg.attr("width", &width.to_string())
         .attr("height", &height.to_string())
@@ -18,11 +18,11 @@ fn main() {
         .attr("style", "max-width: 100%; height: auto;");
 
     // Add a rect for each bar.
-    svg.append("g")
-    .attr("fill", "steelblue")
-    .select_all(None)
+    let data_join = svg.append("g")
+        .attr("fill", "steelblue")
+        .select_all(None)
         .data(&data)
-        .join("rect")
+    .enter().exit().append("rect")
         .attr_fn("x", |_, i| (i * (bar_width + bar_gap)).to_string())
         .attr_fn("y", |n, _| {
             let d = n.data.as_ref().and_then(|s| s.parse::<i32>().ok()).unwrap_or(0);

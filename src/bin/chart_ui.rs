@@ -84,10 +84,10 @@ fn generate_svg_chart() -> String {
         axis_left(y.clone()).tick_count(height / 40).render(sel);
     });
     y_axis_group.call(|sel| {
-        sel.select_by(".domain").remove();
+        sel.select(".domain").remove();
     });
     y_axis_group.call(|g| {
-        g.select_by(".tick line")
+        g.select_all(Some(".tick line"))
             .attr(
                 "x2",
                 (width as i32 - margin_left - margin_right)
@@ -95,14 +95,6 @@ fn generate_svg_chart() -> String {
                     .as_str(),
             )
             .attr("stroke-opacity", 0.1.to_string().as_str());
-    });
-    y_axis_group.call(|g| {
-        g.append("text")
-            .attr("x", (-margin_left).to_string().as_str())
-            .attr("y", 10.to_string().as_str())
-            .attr("fill", "currentColor")
-            .attr("text-anchor", "start")
-            .text("↑ Daily close ($)");
     });
 
     // Area generator
@@ -161,7 +153,8 @@ impl eframe::App for ChartApp {
 fn main() -> eframe::Result<()> {
     let svg_str = generate_svg_chart();
     println!("\n--- SVG OUTPUT ---\n{}\n--- END SVG ---\n", svg_str);
-    let options = eframe::NativeOptions::default();
+    let options = eframe::NativeOptions::default(); // No window size field available in this version
+    // To set window size, use ctx.request_repaint() or egui window API after startup if needed
     eframe::run_native(
         "Apple Stock Chart",
         options,
