@@ -1,14 +1,14 @@
-// AxisRenderable implementation for Axis<ScaleLog>
+// AxisRenderable implementation for Axis<ScaleTime>
 use super::axis_structs::Axis;
 use super::orientation::AxisOrientation;
 use super::ticks::Tick;
 
-impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleLog> {
+impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleTime> {
     fn render(&self, selection: &mut crate::selection::Selection) {
         match self.orientation {
             AxisOrientation::Bottom => {
                 let ticks = self.ticks();
-                println!("[AxisRenderable::ScaleLog] Bottom axis ticks:");
+                println!("[AxisRenderable::ScaleTime] Bottom axis ticks:");
                 for tick in &ticks {
                     println!("  label: '{}' at position: {}", tick.label, tick.position);
                 }
@@ -41,7 +41,7 @@ impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleLog> {
             }
             AxisOrientation::Left => {
                 let ticks = self.ticks();
-                println!("[AxisRenderable::ScaleLog] Left axis ticks:");
+                println!("[AxisRenderable::ScaleTime] Left axis ticks:");
                 for tick in &ticks {
                     println!("  label: '{}' at position: {}", tick.label, tick.position);
                 }
@@ -74,7 +74,7 @@ impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleLog> {
             }
             AxisOrientation::Top => {
                 let ticks = self.ticks();
-                println!("[AxisRenderable::ScaleLog] Top axis ticks:");
+                println!("[AxisRenderable::ScaleTime] Top axis ticks:");
                 for tick in &ticks {
                     println!("  label: '{}' at position: {}", tick.label, tick.position);
                 }
@@ -93,11 +93,11 @@ impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleLog> {
                         .attr("x1", &tick.position.to_string())
                         .attr("x2", &tick.position.to_string())
                         .attr("y1", "0")
-                        .attr("y2", &self.tick_size_inner.to_string())
+                        .attr("y2", &(-self.tick_size_inner).to_string())
                         .attr("stroke", "black");
                     selection.append("text")
                         .attr("x", &tick.position.to_string())
-                        .attr("y", &format!("{}", -(self.tick_size_inner + self.tick_padding + 2.0)))
+                        .attr("y", &format!("{}", -(self.tick_size_inner + self.tick_padding)))
                         .attr("text-anchor", "middle")
                         .attr("font-size", "12px")
                         .attr("fill", "black")
@@ -107,7 +107,7 @@ impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleLog> {
             }
             AxisOrientation::Right => {
                 let ticks = self.ticks();
-                println!("[AxisRenderable::ScaleLog] Right axis ticks:");
+                println!("[AxisRenderable::ScaleTime] Right axis ticks:");
                 for tick in &ticks {
                     println!("  label: '{}' at position: {}", tick.label, tick.position);
                 }
@@ -124,12 +124,12 @@ impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleLog> {
                 for tick in &ticks {
                     selection.append("line")
                         .attr("x1", "0")
-                        .attr("x2", &self.tick_size_inner.to_string())
+                        .attr("x2", &(-self.tick_size_inner).to_string())
                         .attr("y1", &tick.position.to_string())
                         .attr("y2", &tick.position.to_string())
                         .attr("stroke", "black");
                     selection.append("text")
-                        .attr("x", &format!("{}", -(self.tick_size_inner + self.tick_padding + 2.0)))
+                        .attr("x", &format!("{}", -(self.tick_size_inner + self.tick_padding)))
                         .attr("y", &tick.position.to_string())
                         .attr("text-anchor", "end")
                         .attr("font-size", "12px")
@@ -138,6 +138,7 @@ impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleLog> {
                         .text(&tick.label);
                 }
             }
+            _ => {}
         }
     }
 }

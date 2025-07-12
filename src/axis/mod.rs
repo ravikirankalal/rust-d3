@@ -9,6 +9,8 @@ pub mod axis_renderable;
 pub mod axis_renderable_log;
 pub mod axis_renderable_band;
 pub mod axis_renderable_point;
+pub mod axis_renderable_linear;
+pub mod axis_renderable_time;
 pub mod axis_ticks;
 pub mod axis_constructors;
 
