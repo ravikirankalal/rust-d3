@@ -537,7 +537,7 @@ impl Selection {
     /// Deep clone: clones all nodes and structure
     pub fn deep_clone(&self) -> Selection {
         let arena = self.arena.borrow();
-        let mut new_arena = Rc::new(RefCell::new(Arena { nodes: SlotMap::with_key() }));
+        let new_arena = Rc::new(RefCell::new(Arena { nodes: SlotMap::with_key() }));
         let mut key_map = HashMap::new();
         for &key in &self.keys {
             Self::clone_node_recursive(&arena, &mut new_arena.borrow_mut(), key, None, &mut key_map);

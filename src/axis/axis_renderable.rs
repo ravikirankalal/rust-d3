@@ -1,9 +1,5 @@
 // AxisRenderable trait and implementations for different scales
 
-use super::axis_structs::Axis;
-use super::orientation::AxisOrientation;
-use super::ticks::Tick;
-
 pub trait AxisRenderable {
     fn render(&self, selection: &mut crate::selection::Selection);
 }

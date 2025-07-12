@@ -45,9 +45,6 @@ fn generate_svg_chart() -> String {
     let _n = closes.len();
     let min_close = closes.iter().cloned().fold(f32::INFINITY, f32::min);
     let max_close = closes.iter().cloned().fold(f32::NEG_INFINITY, f32::max);
-    let mut arena = Arena {
-        nodes: slotmap::SlotMap::with_key(),
-    };
     let arena = Rc::new(RefCell::new(Arena { nodes: SlotMap::with_key() }));
     let mut svg = Selection::root(Rc::clone(&arena), "svg");
     svg.attr("width", &width.to_string())
@@ -112,7 +109,7 @@ fn generate_svg_chart() -> String {
     let area = Area::new()
         .x(|_d: &f32, i: usize| x.scale(dates[i].naive_utc()))
         .y0(|_d: &f32, _| y.scale(min_close as f64))
-        .y1(|d: &f32, i| y.scale(*d as f64));
+        .y1(|d: &f32, _i| y.scale(*d as f64));
     svg.append("path")
         .attr("fill", "steelblue")
         .attr("d", &area.generate(&closes))

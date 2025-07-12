@@ -1,13 +1,37 @@
 // AxisRenderable implementation for Axis<ScaleTime>
 use super::axis_structs::Axis;
 use super::orientation::AxisOrientation;
-use super::ticks::Tick;
 
 impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleTime> {
     fn render(&self, selection: &mut crate::selection::Selection) {
+        let ticks = self.ticks();
+        // Draw grid lines if enabled
+        if self.grid {
+            for tick in &ticks {
+                match self.orientation {
+                    AxisOrientation::Bottom | AxisOrientation::Top => {
+                        selection.append("line")
+                            .attr("x1", &tick.position.to_string())
+                            .attr("x2", &tick.position.to_string())
+                            .attr("y1", "0")
+                            .attr("y2", "-100%")
+                            .attr("stroke", "#ccc")
+                            .attr("class", "grid");
+                    }
+                    AxisOrientation::Left | AxisOrientation::Right => {
+                        selection.append("line")
+                            .attr("x1", "0")
+                            .attr("x2", "100%")
+                            .attr("y1", &tick.position.to_string())
+                            .attr("y2", &tick.position.to_string())
+                            .attr("stroke", "#ccc")
+                            .attr("class", "grid");
+                    }
+                }
+            }
+        }
         match self.orientation {
             AxisOrientation::Bottom => {
-                let ticks = self.ticks();
                 println!("[AxisRenderable::ScaleTime] Bottom axis ticks:");
                 for tick in &ticks {
                     println!("  label: '{}' at position: {}", tick.label, tick.position);
@@ -40,7 +64,6 @@ impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleTime> {
                 }
             }
             AxisOrientation::Left => {
-                let ticks = self.ticks();
                 println!("[AxisRenderable::ScaleTime] Left axis ticks:");
                 for tick in &ticks {
                     println!("  label: '{}' at position: {}", tick.label, tick.position);
@@ -73,7 +96,6 @@ impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleTime> {
                 }
             }
             AxisOrientation::Top => {
-                let ticks = self.ticks();
                 println!("[AxisRenderable::ScaleTime] Top axis ticks:");
                 for tick in &ticks {
                     println!("  label: '{}' at position: {}", tick.label, tick.position);
@@ -106,7 +128,6 @@ impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleTime> {
                 }
             }
             AxisOrientation::Right => {
-                let ticks = self.ticks();
                 println!("[AxisRenderable::ScaleTime] Right axis ticks:");
                 for tick in &ticks {
                     println!("  label: '{}' at position: {}", tick.label, tick.position);
@@ -138,7 +159,28 @@ impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleTime> {
                         .text(&tick.label);
                 }
             }
-            _ => {}
+        }
+        // Draw axis title if set
+        if let Some(ref title) = self.title {
+            match self.orientation {
+                AxisOrientation::Bottom => {
+                    selection.append("text")
+                        .attr("x", "50%")
+                        .attr("y", "40")
+                        .attr("text-anchor", "middle")
+                        .attr("class", "axis-title")
+                        .text(title);
+                }
+                AxisOrientation::Left => {
+                    selection.append("text")
+                        .attr("x", "-40")
+                        .attr("y", "50%")
+                        .attr("text-anchor", "middle")
+                        .attr("class", "axis-title")
+                        .text(title);
+                }
+                _ => {}
+            }
         }
     }
 }

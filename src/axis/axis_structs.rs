@@ -16,6 +16,8 @@ pub struct Axis<S> {
     pub tick_arguments: Option<Vec<f64>>, // For D3-like tickArguments
     pub offset: f64, // For pixel offset (D3 parity)
     pub locale: Option<String>, // For locale-aware formatting
+    pub grid: bool, // Show grid lines
+    pub title: Option<String>, // Axis title
 }
 
 pub struct AxisLayout {
@@ -27,4 +29,18 @@ pub struct AxisLayout {
     pub axis_start: f64,
     pub axis_end: f64,
     pub offset: f64,
+}
+
+impl<S> Axis<S> {
+    // ...existing methods...
+
+    pub fn grid(mut self, show: bool) -> Self {
+        self.grid = show;
+        self
+    }
+    pub fn title(mut self, title: &str) -> Self {
+        self.title = Some(title.to_string());
+        self
+    }
+    // ...existing methods...
 }
