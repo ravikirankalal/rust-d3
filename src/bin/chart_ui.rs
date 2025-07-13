@@ -57,7 +57,7 @@ fn generate_svg_chart() -> String {
             dates.first().unwrap().naive_utc(),
             dates.last().unwrap().naive_utc(),
         ],
-        [margin_left as f64, (width as i32 - margin_right) as f64],
+        [(margin_left*2) as f64, (width as i32 - margin_right) as f64],
     );
     let y = ScaleLinear::new(
         [min_close as f64, max_close as f64],
@@ -90,9 +90,9 @@ fn generate_svg_chart() -> String {
     });
     // Append y-axis
     let mut y_axis_group = svg.append("g");
-    y_axis_group.attr("transform", &format!("translate({},{})", margin_left, 0));
+    y_axis_group.attr("transform", &format!("translate({},{})", margin_left*2, 0));
     y_axis_group.call(|sel| {
-        axis_left(y.clone()).tick_count(height / 40).render(sel);
+        axis_left(y.clone()).grid(true).tick_count(height / 40).render(sel);
     });
     y_axis_group.call(|sel| {
         sel.select_by(".domain").remove();

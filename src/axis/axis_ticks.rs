@@ -50,7 +50,7 @@ impl Axis<crate::scale::ScaleLinear> {
             } else if let Some(ref locale) = self.locale {
                 crate::format::format_locale(value, locale, true)
             } else {
-                format!("{:.6}", value)
+                d3_si_format(value)
             };
             println!("[Axis<ScaleLinear>::ticks_with] value: {}, position: {}, label: '{}'", value, position, label);
             Tick::new(value, label, position)
@@ -92,5 +92,25 @@ impl Axis<crate::scale::ScaleTime> {
     }
     pub fn ticks(&self) -> Vec<Tick> {
         self.ticks_with(None)
+    }
+}
+
+// D3-like SI formatter for numbers
+fn d3_si_format(value: f64) -> String {
+    if value == 0.0 {
+        return "0".to_string();
+    }
+    let abs = value.abs();
+    let prefixes = ["y", "z", "a", "f", "p", "n", "µ", "m", "", "k", "M", "G", "T", "P", "E", "Z", "Y"];
+    let i = (abs.log10() / 3.0).floor() as isize + 8; // +8 to index into prefixes array
+    let i = i.max(0).min(prefixes.len() as isize - 1) as usize; // Clamp index to bounds
+    let value_with_prefix = value / 10f64.powf((i as f64 - 8.0) * 3.0);
+    let prefix = prefixes[i];
+    if abs >= 1.0 {
+        format!("{:.2}{}", value_with_prefix, prefix)
+    } else if abs >= 1e-2 {
+        format!("{:.3}{}", value_with_prefix, prefix)
+    } else {
+        format!("{:.1e}{}", value_with_prefix, prefix)
     }
 }

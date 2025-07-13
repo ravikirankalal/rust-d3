@@ -98,9 +98,9 @@ impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleLinear> 
                         .attr("stroke", "black")
                         .attr("class", "tick");
                     selection.append("text")
-                        .attr("x", &format!("{}", self.tick_size_inner + self.tick_padding + 2.0))
+                        .attr("x", &format!("{}", -(self.tick_padding + 2.0))) // negative x offset
                         .attr("y", &tick.position.to_string())
-                        .attr("text-anchor", "start")
+                        .attr("text-anchor", "end") // align right
                         .attr("font-size", "12px")
                         .attr("fill", "black")
                         .attr("font-family", "Arial, sans-serif")
