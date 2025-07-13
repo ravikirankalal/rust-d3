@@ -64,6 +64,17 @@ fn generate_svg_chart() -> String {
         [(height as i32 - margin_bottom) as f64, 20.0],
     );
 
+    // Area generator
+    let area = Area::new()
+        .x(|_d: &f32, i: usize| x.scale(dates[i].naive_utc()))
+        .y0(|_d: &f32, _| y.scale(min_close as f64))
+        .y1(|d: &f32, _i| y.scale(*d as f64));
+    svg.append("path")
+        .attr("fill", "steelblue")
+        .attr("d", &area.generate(&closes))
+        .attr("stroke-width", "2");
+    let root_key = svg.iter().next().copied().unwrap();
+    
     // Append x-axis
     let mut x_axis_group = svg.append("g");
     x_axis_group.attr(
@@ -86,32 +97,15 @@ fn generate_svg_chart() -> String {
     y_axis_group.call(|sel| {
         sel.select_by(".domain").remove();
     });
-    y_axis_group.call(|sel| {
-        sel.children().debug_print_children("Before remove: y_axis_group");
-        sel.select_by(".domain").remove();
-        sel.children().debug_print_children("After remove: y_axis_group");
-    });
+    // Adjust tick lines for x-axis
     y_axis_group.call(|g| {
-        g.select_all(Some(".tick line"))
-            .attr(
-                "x2",
-                (width as i32 - margin_left - margin_right)
-                    .to_string()
-                    .as_str(),
-            )
-            .attr("stroke-opacity", 0.1.to_string().as_str());
+        g.select_all(Some(".tick line")).clone()
+            .attr("x2",(width as i32 - margin_left - margin_right).to_string().as_str())
+            .attr("stroke-opacity", "1")
+            .attr("stroke", "#888");
     });
 
-    // Area generator
-    let area = Area::new()
-        .x(|_d: &f32, i: usize| x.scale(dates[i].naive_utc()))
-        .y0(|_d: &f32, _| y.scale(min_close as f64))
-        .y1(|d: &f32, _i| y.scale(*d as f64));
-    svg.append("path")
-        .attr("fill", "steelblue")
-        .attr("d", &area.generate(&closes))
-        .attr("stroke-width", "2");
-    let root_key = svg.iter().next().copied().unwrap();
+    
     Selection::render_node(&arena, root_key)
 }
 

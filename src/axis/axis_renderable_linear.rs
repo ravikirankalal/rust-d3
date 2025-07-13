@@ -62,7 +62,8 @@ impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleLinear> 
                         .attr("x2", &tick.position.to_string())
                         .attr("y1", "0")
                         .attr("y2", &self.tick_size_inner.to_string())
-                        .attr("stroke", "black");
+                        .attr("stroke", "black")
+                        .attr("class", "tick");
                     selection.append("text")
                         .attr("x", &tick.position.to_string())
                         .attr("y", &format!("{}", self.tick_size_inner + self.tick_padding + 12.0))
@@ -94,7 +95,8 @@ impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleLinear> 
                         .attr("x2", &self.tick_size_inner.to_string())
                         .attr("y1", &tick.position.to_string())
                         .attr("y2", &tick.position.to_string())
-                        .attr("stroke", "black");
+                        .attr("stroke", "black")
+                        .attr("class", "tick");
                     selection.append("text")
                         .attr("x", &format!("{}", self.tick_size_inner + self.tick_padding + 2.0))
                         .attr("y", &tick.position.to_string())
@@ -126,7 +128,8 @@ impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleLinear> 
                         .attr("x2", &tick.position.to_string())
                         .attr("y1", "0")
                         .attr("y2", &(-self.tick_size_inner).to_string())
-                        .attr("stroke", "black");
+                        .attr("stroke", "black")
+                        .attr("class", "tick");
                     selection.append("text")
                         .attr("x", &tick.position.to_string())
                         .attr("y", &format!("{}", -(self.tick_size_inner + self.tick_padding)))
@@ -158,7 +161,8 @@ impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleLinear> 
                         .attr("x2", &(-self.tick_size_inner).to_string())
                         .attr("y1", &tick.position.to_string())
                         .attr("y2", &tick.position.to_string())
-                        .attr("stroke", "black");
+                        .attr("stroke", "black")
+                        .attr("class", "tick");
                     selection.append("text")
                         .attr("x", &format!("{}", -(self.tick_size_inner + self.tick_padding)))
                         .attr("y", &tick.position.to_string())
