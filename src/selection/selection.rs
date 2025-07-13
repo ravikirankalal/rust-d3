@@ -5,7 +5,7 @@ use slotmap::SlotMap;
 use crate::selection::arena::{Arena, NodeKey};
 use crate::selection::node::Node;
 use crate::selection::data_join::DataJoin;
-use crate::selection::utils::{parse_selector, remove_node_recursively, find_matching_descendants};
+use crate::selection::utils::{remove_node_recursively, find_matching_descendants};
 
 pub struct Selection {
     arena: Rc<RefCell<Arena>>,
@@ -194,10 +194,39 @@ impl Selection {
     pub fn remove(&mut self) -> &mut Self {
         {
             let mut arena = self.arena.borrow_mut();
+            println!("[REMOVE] Selection keys: {:?}", self.keys);
             for &key in &self.keys {
-                if let Some(parent_key) = arena.nodes[key].parent {
-                    let parent = &mut arena.nodes[parent_key];
-                    parent.children.retain(|&c| c != key);
+                // Debug: print node and parent before removal
+                if let Some(node) = arena.nodes.get(key) {
+                    println!("[REMOVE] Removing node: tag={}, class={:?}, key={:?}", node.tag, node.attributes.get("class"), key);
+                    if let Some(parent_key) = node.parent {
+                        if let Some(parent) = arena.nodes.get(parent_key) {
+                            println!("[REMOVE] Parent before: key={:?}, children={:?}", parent_key, parent.children);
+                        }
+                    }
+                }
+                // Always update parent children list, but only if parent is still valid
+                if let Some(parent_key) = arena.nodes.get(key).and_then(|n| n.parent) {
+                    if let Some(parent) = arena.nodes.get_mut(parent_key) {
+                        println!("[REMOVE] Parent children before retain: {:?}", parent.children);
+                        println!("[REMOVE] Key to remove: {:?}", key);
+                        for (i, &c) in parent.children.iter().enumerate() {
+                            println!("[REMOVE] Child {} key: {:?}", i, c);
+                        }
+                        parent.children.retain(|&c| {
+                            let should_keep = c != key;
+                            if !should_keep {
+                                println!("[REMOVE] Removing child key: {:?}", c);
+                            }
+                            should_keep
+                        });
+                        println!("[REMOVE] Parent children after retain: {:?}", parent.children);
+                        // Extra check: if key is still present, forcibly remove
+                        if parent.children.contains(&key) {
+                            parent.children.retain(|&c| c != key);
+                            println!("[REMOVE] Forcibly removed key {:?} from parent.children", key);
+                        }
+                    }
                 }
                 remove_node_recursively(&mut arena, key);
             }
@@ -480,7 +509,31 @@ impl Selection {
     pub fn select_by(&mut self, selector: &str) -> Selection {
         let mut found = Vec::new();
         let (tag, classes) = parse_selector(selector);
-        find_matching_descendants(Rc::clone(&self.arena), &self.keys, &tag, &classes, &mut found);
+        println!("[SELECT_BY] selector: {} -> tag: {:?}, classes: {:?}", selector, tag, classes);
+        let arena = self.arena.borrow();
+        for &root_key in &self.keys {
+            println!("[SELECT_BY] Searching from root key: {:?}", root_key);
+            let mut stack = vec![root_key];
+            while let Some(key) = stack.pop() {
+                if let Some(node) = arena.nodes.get(key) {
+                    let tag_match = match &tag {
+                        Some(t) => node.tag == *t,
+                        None => true,
+                    };
+                    let node_classes: std::collections::HashSet<String> = node.attributes.get("class")
+                        .map(|c| c.split_whitespace().map(|s| s.to_string()).collect())
+                        .unwrap_or_else(std::collections::HashSet::new);
+                    let class_match = classes.is_empty() || classes.iter().all(|c| node_classes.contains(&c.to_string()));
+                    println!("[SELECT_BY] Node key: {:?}, tag: {}, class: {:?}, tag_match: {}, class_match: {}", key, node.tag, node.attributes.get("class"), tag_match, class_match);
+                    if tag_match && class_match {
+                        println!("[SELECT_BY] -> MATCHED key: {:?}", key);
+                        found.push(key);
+                    }
+                    stack.extend(&node.children);
+                }
+            }
+        }
+        println!("[SELECT_BY] Found keys: {:?}", found);
         Selection { arena: Rc::clone(&self.arena), keys: found, pending_data: None, enter_keys: None, update_keys: None, exit_keys: None }
     }
     pub fn sort_by<F>(&mut self, mut cmp: F) -> &mut Self
@@ -602,6 +655,9 @@ impl Selection {
     // select, select_all, filter, data, datum, append, insert, remove, attr, style, property, classed, text, html, on, each, call, merge, order, raise, lower, node, nodes, size, empty, parent, children, clone, deep_clone, find, find_all, select_by, sort_by, map, select_child, select_parent, transition, interrupt, dispatch, enter, update, exit, join
     pub fn render_node(arena: &Rc<RefCell<Arena>>, key: NodeKey) -> String {
         let arena_borrow = arena.borrow();
+        if !arena_borrow.nodes.contains_key(key) {
+            return String::new(); // Node was removed, skip rendering
+        }
         let node = &arena_borrow.nodes[key];
         let mut s = String::new();
         s.push('<');
@@ -627,4 +683,28 @@ impl Selection {
         s.push_str(&format!("</{}>", node.tag));
         s
     }
+
+    /// Debug helper: print tag and class of each child node in the selection
+    pub fn debug_print_children(&self, label: &str) {
+        let arena_ref = self.arena.borrow();
+        println!("[DEBUG] {} children count: {}", label, self.keys.len());
+        for (i, key) in self.keys.iter().enumerate() {
+            if let Some(node) = arena_ref.nodes.get(*key) {
+                let class = node.attributes.get("class");
+                println!("[DEBUG] Child {}: tag={}, class={:?}", i, node.tag, class);
+            }
+        }
+    }
+}
+pub fn parse_selector(selector: &str) -> (Option<String>, Vec<String>) {
+    // If selector starts with '.', treat as class selector
+    if let Some(stripped) = selector.strip_prefix('.') {
+        return (None, vec![stripped.to_string()]);
+    }
+    // If selector is tag.class (e.g. line.domain)
+    if let Some((tag, class)) = selector.split_once('.') {
+        return (Some(tag.to_string()), vec![class.to_string()]);
+    }
+    // If selector is just a tag
+    (Some(selector.to_string()), vec![])
 }

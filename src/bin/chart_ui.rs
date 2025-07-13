@@ -84,7 +84,12 @@ fn generate_svg_chart() -> String {
         axis_left(y.clone()).tick_count(height / 40).render(sel);
     });
     y_axis_group.call(|sel| {
-        sel.select(".domain").remove();
+        sel.select_by(".domain").remove();
+    });
+    y_axis_group.call(|sel| {
+        sel.children().debug_print_children("Before remove: y_axis_group");
+        sel.select_by(".domain").remove();
+        sel.children().debug_print_children("After remove: y_axis_group");
     });
     y_axis_group.call(|g| {
         g.select_all(Some(".tick line"))

@@ -74,7 +74,7 @@ impl<T: Clone + PartialEq + ToString> super::axis_renderable::AxisRenderable for
                     .attr("y1", "0")
                     .attr("y2", "0")
                     .attr("stroke", "black")
-                    .attr("class", "axis-line");
+                    .attr("class", "domain");
             }
             AxisOrientation::Left => {
                 selection.append("line")
@@ -83,7 +83,7 @@ impl<T: Clone + PartialEq + ToString> super::axis_renderable::AxisRenderable for
                     .attr("y1", "0")
                     .attr("y2", "100%")
                     .attr("stroke", "black")
-                    .attr("class", "axis-line");
+                    .attr("class", "domain");
             }
             AxisOrientation::Top => {
                 selection.append("line")
@@ -92,7 +92,7 @@ impl<T: Clone + PartialEq + ToString> super::axis_renderable::AxisRenderable for
                     .attr("y1", "0")
                     .attr("y2", "0")
                     .attr("stroke", "black")
-                    .attr("class", "axis-line");
+                    .attr("class", "domain");
             }
             AxisOrientation::Right => {
                 selection.append("line")
@@ -101,7 +101,7 @@ impl<T: Clone + PartialEq + ToString> super::axis_renderable::AxisRenderable for
                     .attr("y1", "0")
                     .attr("y2", "100%")
                     .attr("stroke", "black")
-                    .attr("class", "axis-line");
+                    .attr("class", "domain");
             }
         }
         match self.orientation {
