@@ -5,8 +5,11 @@ use super::orientation::AxisOrientation;
 
 impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleTime> {
     fn render(&self, selection: &mut crate::selection::Selection) {
+        // Get existing transform if any
+        let existing_transform = selection.get_attr("transform");
+        
         // Apply half-pixel offset for crisp lines based on orientation
-        let transform = match self.orientation {
+        let offset_transform = match self.orientation {
             AxisOrientation::Bottom | AxisOrientation::Top => {
                 format!("translate({},0)", self.offset)
             }
@@ -14,7 +17,28 @@ impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleTime> {
                 format!("translate(0,{})", self.offset)
             }
         };
-        selection.attr("transform", &transform);
+        
+        // Combine existing transform with offset
+        let final_transform = match &existing_transform {
+            Some(existing) => {
+                if self.offset != 0.0 {
+                    format!("{} {}", existing, offset_transform)
+                } else {
+                    existing.clone()
+                }
+            }
+            None => {
+                if self.offset != 0.0 {
+                    offset_transform
+                } else {
+                    String::new()
+                }
+            }
+        };
+        
+        if !final_transform.is_empty() {
+            selection.attr("transform", &final_transform);
+        }
         let ticks = self.ticks();
         let range = self.scale.range();
         let range0 = range[0] + self.offset;

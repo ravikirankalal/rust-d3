@@ -79,9 +79,11 @@ fn generate_svg_chart() -> String {
 
     // // Append x-axis
     let mut x_axis_group = svg.append("g");
+    let x_transform = format!("translate(0,{})", height as i32 - margin_bottom);
+    println!("[DEBUG] Setting x-axis transform: {}", x_transform);
     x_axis_group.attr(
         "transform",
-        &format!("translate(0,{})", height as i32 - margin_bottom),
+        &x_transform,
     );
     x_axis_group.call(|sel| {
         axis_bottom(x.clone())
@@ -91,29 +93,32 @@ fn generate_svg_chart() -> String {
     });
 
     // Append y-axis
+    let y_transform = format!("translate({},{})", margin_left, 0);
+    println!("[DEBUG] Setting y-axis transform: {}", y_transform);
     svg.append("g")
-    .attr("transform", &format!("translate({},{})", margin_left, 0))
+    .attr("transform", &y_transform)
     .call(|sel| {
         axis_left(y.clone())
             .with_ticks(10)
             .tick_size(10.0)
             .render(sel);
-    });
-    // .call(|sel| {
-    //     sel.select_by(".domain").remove();
-    // });
+    })
+    //remove the domain line
+    .call(|sel| {
+        sel.select_by(".domain").remove();
+    })
     // Adjust tick lines for x-axis
-    // y_axis_group.call(|g| {
-    //     g.select_by(".tick").clone()
-    //         .attr(
-    //             "x2",
-    //             (width as i32 - margin_left - margin_right)
-    //                 .to_string()
-    //                 .as_str(),
-    //         )
-    //         .attr("stroke-opacity", "0.1");
-    //     // .attr("stroke", "#888");
-    // });
+    .call(|g| {
+        g.select_by(".tick").clone()
+            .attr(
+                "x2",
+                (width as i32 - margin_left - margin_right)
+                    .to_string()
+                    .as_str(),
+            )
+            .attr("stroke-opacity", "0.1");
+        // .attr("stroke", "#888");
+    });
 
     Selection::render_node(&arena, root_key)
 }

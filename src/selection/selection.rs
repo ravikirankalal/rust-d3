@@ -108,6 +108,16 @@ impl Selection {
     pub fn iter(&self) -> impl Iterator<Item = &NodeKey> {
         self.keys.iter()
     }
+    
+    /// Get an attribute value from the first node in the selection
+    pub fn get_attr(&self, name: &str) -> Option<String> {
+        if let Some(key) = self.keys.first() {
+            let arena = self.arena.borrow();
+            arena.nodes[*key].attributes.get(name).cloned()
+        } else {
+            None
+        }
+    }
     /// Append a new child element to each node in the selection
     ///
     /// # Examples
