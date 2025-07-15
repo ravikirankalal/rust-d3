@@ -72,11 +72,12 @@ impl Selection {
         self
     }
     pub fn attr_fn<F>(&mut self, name: &str, mut f: F) -> &mut Self
-    where F: FnMut(&Node, usize) -> String {
+    where F: FnMut(&Node, usize, Option<String>) -> String {
         {
             let mut arena = self.arena.borrow_mut();
             for (i, &key) in self.keys.iter().enumerate() {
-                let value = f(&arena.nodes[key], i);
+                let previous_value = arena.nodes[key].attributes.get(name).cloned();
+                let value = f(&arena.nodes[key], i, previous_value);
                 if value.is_empty() {
                     arena.nodes[key].attributes.remove(name);
                 } else {
@@ -281,11 +282,13 @@ impl Selection {
     }
     /// Set style using a function (D3 .style with function)
     pub fn style_fn<F>(&mut self, name: &str, mut f: F) -> &mut Self
-    where F: FnMut(&Node, usize) -> String {
+    where F: FnMut(&Node, usize, Option<String>) -> String {
         {
             let mut arena = self.arena.borrow_mut();
             for (i, &key) in self.keys.iter().enumerate() {
-                let value = f(&arena.nodes[key], i);
+                // Clone the node before getting mutable reference to avoid borrow checker issues
+                let node_clone = arena.nodes[key].clone();
+                
                 let node = &mut arena.nodes[key];
                 let style_attr = node.attributes.entry("style".to_string()).or_insert_with(String::new);
                 let mut styles: HashMap<String, String> = if style_attr.is_empty() {
@@ -305,6 +308,8 @@ impl Selection {
                         })
                         .collect()
                 };
+                let previous_value = styles.get(name).cloned();
+                let value = f(&node_clone, i, previous_value);
                 if value.is_empty() {
                     styles.remove(name);
                 } else {
@@ -556,7 +561,48 @@ impl Selection {
         }
         self
     }
-    pub fn order(&mut self) -> &mut Self { self }
+    pub fn order(&mut self) -> &mut Self {
+        // In D3, order() reorders the DOM elements to match the selection order
+        // We need to update parent.children to reflect the current selection order
+        {
+            let mut arena = self.arena.borrow_mut();
+            // Group keys by their parent
+            let mut parent_groups: HashMap<Option<NodeKey>, Vec<NodeKey>> = HashMap::new();
+            
+            for &key in &self.keys {
+                if let Some(node) = arena.nodes.get(key) {
+                    let parent_key = node.parent;
+                    parent_groups.entry(parent_key).or_insert_with(Vec::new).push(key);
+                }
+            }
+            
+            // For each parent, reorder its children to match the selection order
+            for (parent_key, mut selected_keys) in parent_groups {
+                if let Some(parent_key) = parent_key {
+                    if let Some(parent) = arena.nodes.get_mut(parent_key) {
+                        // Create a new children vector with selected keys in selection order
+                        let mut new_children = Vec::new();
+                        let mut remaining_children = parent.children.clone();
+                        
+                        // First, add the selected keys in their selection order
+                        for &selected_key in &selected_keys {
+                            if let Some(pos) = remaining_children.iter().position(|&c| c == selected_key) {
+                                remaining_children.remove(pos);
+                                new_children.push(selected_key);
+                            }
+                        }
+                        
+                        // Then, add any remaining children that weren't in the selection
+                        new_children.extend(remaining_children);
+                        
+                        // Update the parent's children
+                        parent.children = new_children;
+                    }
+                }
+            }
+        }
+        self
+    }
     pub fn raise(&mut self) -> &mut Self {
         {
             let mut arena = self.arena.borrow_mut();

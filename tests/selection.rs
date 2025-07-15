@@ -24,8 +24,8 @@ fn test_append_and_attr_fn() {
     let data = vec![10, 20, 30];
     rects.data(&data)
         .update
-        .attr_fn("x", |_, i| (i * 10).to_string())
-        .attr_fn("height", |n, _| n.data.as_ref().unwrap().clone());
+        .attr_fn("x", |_, i, _| (i * 10).to_string())
+        .attr_fn("height", |n, _, _| n.data.as_ref().unwrap().clone());
     let nodes = rects.nodes();
     assert_eq!(nodes.len(), 1); // Only one rect appended per append call
     let rect = &nodes[0];
@@ -49,8 +49,8 @@ fn test_data_and_attr_fn_multiple() {
     let data = vec![10, 20, 30];
     rects.data(&data)
         .update
-        .attr_fn("x", |_, i| (i * 10).to_string())
-        .attr_fn("height", |n, _| n.data.as_ref().unwrap().clone());
+        .attr_fn("x", |_, i, _| (i * 10).to_string())
+        .attr_fn("height", |n, _, _| n.data.as_ref().unwrap().clone());
     let nodes = rects.nodes();
     assert_eq!(nodes.len(), 3);
     for (i, node) in nodes.iter().enumerate() {
@@ -128,7 +128,7 @@ fn test_attr_fn_callback_behavior() {
     let data = vec![5, 10, 15, 20];
     let mut joined = rects.data(&data);
     joined.update
-        .attr_fn("custom", |n, i| {
+        .attr_fn("custom", |n, i, _| {
             // Test that node data is correct and index is as expected
             let d = n.data.as_ref().unwrap().parse::<i32>().unwrap();
             format!("{}-{}", d, i)
@@ -295,7 +295,7 @@ fn test_data_join_attr() {
     let data = vec![10, 20, 30];
     let mut joined = rects.data(&data);
     joined.enter.append("rect")
-        .attr_fn("x", |_, i| (i * 10).to_string());
+        .attr_fn("x", |_, i, _| (i * 10).to_string());
 
     let nodes = svg.select_all(Some("rect")).nodes();
     assert_eq!(nodes.len(), 3);
@@ -339,7 +339,7 @@ fn test_data_join_chained_attr() {
     let data = vec![10, 20, 30];
     let mut joined = rects.data(&data);
     joined.enter.append("rect")
-        .attr_fn("custom", |n, i| {
+        .attr_fn("custom", |n, i, _| {
             format!("{}-{}", n.tag, i)
         });
 
@@ -421,4 +421,75 @@ fn test_style_none_value_removes_style() {
     let style = node.attributes.get("style").unwrap();
     assert!(!style.contains("color"));
     assert!(style.contains("font-size:12px"));
+}
+
+#[test]
+fn test_attr_fn_with_previous_value() {
+    let arena = Rc::new(RefCell::new(Arena { nodes: SlotMap::with_key() }));
+    let mut svg = Selection::root(Rc::clone(&arena), "svg");
+    
+    // Set initial attribute
+    svg.attr("width", "100");
+    
+    // Use attr_fn with previous value (D3 signature: node, index, previous_value)
+    svg.attr_fn("width", |node, index, prev_value| {
+        let prev = prev_value.unwrap_or_default();
+        format!("{}-{}-{}", node.tag, index, prev)
+    });
+    
+    let node = svg.node().unwrap();
+    assert_eq!(node.attributes.get("width"), Some(&"svg-0-100".to_string()));
+}
+
+#[test]
+fn test_style_fn_with_previous_value() {
+    let arena = Rc::new(RefCell::new(Arena { nodes: SlotMap::with_key() }));
+    let mut svg = Selection::root(Rc::clone(&arena), "svg");
+    
+    // Set initial style
+    svg.style("width", "100px");
+    
+    // Use style_fn with previous value (D3 signature: node, index, previous_value)
+    svg.style_fn("width", |node, index, prev_value| {
+        let prev = prev_value.unwrap_or_default();
+        format!("{}-{}-{}", node.tag, index, prev)
+    });
+    
+    let node = svg.node().unwrap();
+    let style = node.attributes.get("style").unwrap();
+    assert!(style.contains("width:svg-0-100px"));
+}
+
+#[test]
+fn test_order_method() {
+    let arena = Rc::new(RefCell::new(Arena { nodes: SlotMap::with_key() }));
+    let mut svg = Selection::root(Rc::clone(&arena), "svg");
+    
+    // Create multiple child elements and store keys
+    let rect1_key = *svg.append("rect").attr("id", "rect1").iter().next().unwrap();
+    let rect2_key = *svg.append("rect").attr("id", "rect2").iter().next().unwrap();
+    let rect3_key = *svg.append("rect").attr("id", "rect3").iter().next().unwrap();
+    
+    // Initially children should be in order: rect1, rect2, rect3
+    let initial_children = svg.children();
+    let initial_ids: Vec<_> = initial_children.nodes().iter()
+        .map(|n| n.attributes.get("id").unwrap().clone())
+        .collect();
+    assert_eq!(initial_ids, vec!["rect1", "rect2", "rect3"]);
+    
+    // Create a selection with reversed order: rect3, rect2, rect1
+    let mut reversed_selection = Selection::new(
+        Rc::clone(&arena), 
+        vec![rect3_key, rect2_key, rect1_key]
+    );
+    
+    // Apply order() - should reorder DOM elements to match selection order
+    reversed_selection.order();
+    
+    // Check that DOM order now matches selection order
+    let reordered_children = svg.children();
+    let reordered_ids: Vec<_> = reordered_children.nodes().iter()
+        .map(|n| n.attributes.get("id").unwrap().clone())
+        .collect();
+    assert_eq!(reordered_ids, vec!["rect3", "rect2", "rect1"]);
 }
