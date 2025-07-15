@@ -46,16 +46,15 @@ impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleTime> {
                 for tick in &ticks {
                     println!("  label: '{}' at position: {}", tick.label, tick.position);
                 }
-                if let (Some(first), Some(last)) = (ticks.first(), ticks.last()) {
-                    selection.append("line")
-                        .attr("x1", &first.position.to_string())
-                        .attr("x2", &last.position.to_string())
-                        .attr("y1", "0")
-                        .attr("y2", "0")
-                        .attr("stroke", "black")
-                        .attr("stroke-width", "1")
-                        .attr("class", "domain");
-                }
+                // FIX: Use scale.range for domain line
+                selection.append("line")
+                    .attr("x1", &self.scale.range[0].to_string())
+                    .attr("x2", &self.scale.range[1].to_string())
+                    .attr("y1", "0")
+                    .attr("y2", "0")
+                    .attr("stroke", "black")
+                    .attr("stroke-width", "1")
+                    .attr("class", "domain");
                 for tick in &ticks {
                     selection.append("line")
                         .attr("x1", &tick.position.to_string())
