@@ -4,18 +4,18 @@
 //!
 //! This module provides utilities for representing and manipulating colors.
 
-pub mod rgb;
-pub mod hsl;
-pub mod lab;
 pub mod convert;
 pub mod hcl;
+pub mod hsl;
+pub mod lab;
+pub mod rgb;
 
 use std::str::FromStr;
 
-use rgb::Rgb;
+use hcl::Hcl;
 use hsl::Hsl;
 use lab::Lab;
-use hcl::Hcl;
+use rgb::Rgb;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Color {
@@ -60,13 +60,25 @@ impl FromStr for Color {
             let parts: Vec<&str> = inner.split(',').map(|s| s.trim()).collect();
             if parts.len() == 3 {
                 let h = parts[0].parse().map_err(|_| ColorParseError)?;
-                let s = parts[1].trim_end_matches('%').parse().map_err(|_| ColorParseError)?;
-                let l = parts[2].trim_end_matches('%').parse().map_err(|_| ColorParseError)?;
+                let s = parts[1]
+                    .trim_end_matches('%')
+                    .parse()
+                    .map_err(|_| ColorParseError)?;
+                let l = parts[2]
+                    .trim_end_matches('%')
+                    .parse()
+                    .map_err(|_| ColorParseError)?;
                 return Ok(Color::Hsl(Hsl::new(h, s, l, 1.0)));
             } else if parts.len() == 4 {
                 let h = parts[0].parse().map_err(|_| ColorParseError)?;
-                let s = parts[1].trim_end_matches('%').parse().map_err(|_| ColorParseError)?;
-                let l = parts[2].trim_end_matches('%').parse().map_err(|_| ColorParseError)?;
+                let s = parts[1]
+                    .trim_end_matches('%')
+                    .parse()
+                    .map_err(|_| ColorParseError)?;
+                let l = parts[2]
+                    .trim_end_matches('%')
+                    .parse()
+                    .map_err(|_| ColorParseError)?;
                 let a = parts[3].parse().map_err(|_| ColorParseError)?;
                 return Ok(Color::Hsl(Hsl::new(h, s, l, a)));
             }
@@ -75,8 +87,14 @@ impl FromStr for Color {
             let parts: Vec<&str> = inner.split(',').map(|s| s.trim()).collect();
             if parts.len() == 4 {
                 let h = parts[0].parse().map_err(|_| ColorParseError)?;
-                let s = parts[1].trim_end_matches('%').parse().map_err(|_| ColorParseError)?;
-                let l = parts[2].trim_end_matches('%').parse().map_err(|_| ColorParseError)?;
+                let s = parts[1]
+                    .trim_end_matches('%')
+                    .parse()
+                    .map_err(|_| ColorParseError)?;
+                let l = parts[2]
+                    .trim_end_matches('%')
+                    .parse()
+                    .map_err(|_| ColorParseError)?;
                 let a = parts[3].parse().map_err(|_| ColorParseError)?;
                 return Ok(Color::Hsl(Hsl::new(h, s, l, a)));
             }
@@ -174,7 +192,11 @@ impl Color {
                     s = 0.0;
                 } else {
                     let d = max - min;
-                    s = if l > 0.5 { d / (2.0 - max - min) } else { d / (max + min) };
+                    s = if l > 0.5 {
+                        d / (2.0 - max - min)
+                    } else {
+                        d / (max + min)
+                    };
 
                     h = if max == r {
                         (g - b) / d + (if g < b { 6.0 } else { 0.0 })
@@ -185,12 +207,7 @@ impl Color {
                     } / 6.0;
                 }
 
-                Hsl::new(
-                    h * 360.0,
-                    s * 100.0,
-                    l * 100.0,
-                    rgb.opacity,
-                )
+                Hsl::new(h * 360.0, s * 100.0, l * 100.0, rgb.opacity)
             }
             Color::Lab(lab) => {
                 let rgb_color = Color::Lab(lab.clone()).rgb();
@@ -227,28 +244,24 @@ impl Color {
         let k = k.unwrap_or(1.0);
         let r = self.rgb();
         let t = 1.0 / 0.7_f32.powf(k);
-        Color::Rgb(
-            Rgb::new(
-                (r.r as f32 * t).round() as u8,
-                (r.g as f32 * t).round() as u8,
-                (r.b as f32 * t).round() as u8,
-                r.opacity,
-            )
-        )
+        Color::Rgb(Rgb::new(
+            (r.r as f32 * t).round() as u8,
+            (r.g as f32 * t).round() as u8,
+            (r.b as f32 * t).round() as u8,
+            r.opacity,
+        ))
     }
 
     pub fn darker(&self, k: Option<f32>) -> Color {
         let k = k.unwrap_or(1.0);
         let r = self.rgb();
         let t = 0.7_f32.powf(k);
-        Color::Rgb(
-            Rgb::new(
-                (r.r as f32 * t).round() as u8,
-                (r.g as f32 * t).round() as u8,
-                (r.b as f32 * t).round() as u8,
-                r.opacity,
-            )
-        )
+        Color::Rgb(Rgb::new(
+            (r.r as f32 * t).round() as u8,
+            (r.g as f32 * t).round() as u8,
+            (r.b as f32 * t).round() as u8,
+            r.opacity,
+        ))
     }
 
     pub fn opacity(&self, value: f32) -> Color {
@@ -263,14 +276,12 @@ impl Color {
     pub fn gamma(&self, k: f32) -> Color {
         let r = self.rgb();
         let k_inv = 1.0 / k;
-        Color::Rgb(
-            Rgb::new(
-                ((r.r as f32 / 255.0).powf(k_inv) * 255.0).round() as u8,
-                ((r.g as f32 / 255.0).powf(k_inv) * 255.0).round() as u8,
-                ((r.b as f32 / 255.0).powf(k_inv) * 255.0).round() as u8,
-                r.opacity,
-            )
-        )
+        Color::Rgb(Rgb::new(
+            ((r.r as f32 / 255.0).powf(k_inv) * 255.0).round() as u8,
+            ((r.g as f32 / 255.0).powf(k_inv) * 255.0).round() as u8,
+            ((r.b as f32 / 255.0).powf(k_inv) * 255.0).round() as u8,
+            r.opacity,
+        ))
     }
 
     pub fn clamp(&self) -> Color {
@@ -344,4 +355,3 @@ impl Color {
         }
     }
 }
-

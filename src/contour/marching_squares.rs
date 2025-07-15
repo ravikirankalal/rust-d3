@@ -28,7 +28,10 @@ fn index(point: &[f64; 2], dx: usize) -> usize {
 
 #[allow(dead_code)]
 fn quant_key(point: &[f64; 2]) -> (i32, i32) {
-    ((point[0] * 1_000_000.0).round() as i32, (point[1] * 1_000_000.0).round() as i32)
+    (
+        (point[0] * 1_000_000.0).round() as i32,
+        (point[1] * 1_000_000.0).round() as i32,
+    )
 }
 
 #[allow(dead_code)]
@@ -143,8 +146,22 @@ where
                             let new_start = frag_f.start;
                             let new_end = frag_f_last;
                             let ring_clone = frag_f.ring.clone();
-                            fragment_by_start.insert(new_start, Fragment { start: new_start, end: new_end, ring: frag_f.ring });
-                            fragment_by_end.insert(new_end, Fragment { start: new_start, end: new_end, ring: ring_clone });
+                            fragment_by_start.insert(
+                                new_start,
+                                Fragment {
+                                    start: new_start,
+                                    end: new_end,
+                                    ring: frag_f.ring,
+                                },
+                            );
+                            fragment_by_end.insert(
+                                new_end,
+                                Fragment {
+                                    start: new_start,
+                                    end: new_end,
+                                    ring: ring_clone,
+                                },
+                            );
                         }
                     } else {
                         // Extend fragment at end
@@ -154,8 +171,22 @@ where
                         if frag_f.start == new_end {
                             callback(frag_f.ring);
                         } else {
-                            fragment_by_end.insert(new_end, Fragment { start: frag_f.start, end: new_end, ring: frag_f.ring.clone() });
-                            fragment_by_start.insert(frag_f.start, Fragment { start: frag_f.start, end: new_end, ring: frag_f.ring });
+                            fragment_by_end.insert(
+                                new_end,
+                                Fragment {
+                                    start: frag_f.start,
+                                    end: new_end,
+                                    ring: frag_f.ring.clone(),
+                                },
+                            );
+                            fragment_by_start.insert(
+                                frag_f.start,
+                                Fragment {
+                                    start: frag_f.start,
+                                    end: new_end,
+                                    ring: frag_f.ring,
+                                },
+                            );
                         }
                     }
                 } else if let Some(frag_g) = g {
@@ -167,8 +198,22 @@ where
                     if new_start == frag_g.end {
                         callback(frag_g.ring);
                     } else {
-                        fragment_by_start.insert(new_start, Fragment { start: new_start, end: frag_g.end, ring: frag_g.ring.clone() });
-                        fragment_by_end.insert(frag_g.end, Fragment { start: new_start, end: frag_g.end, ring: frag_g.ring });
+                        fragment_by_start.insert(
+                            new_start,
+                            Fragment {
+                                start: new_start,
+                                end: frag_g.end,
+                                ring: frag_g.ring.clone(),
+                            },
+                        );
+                        fragment_by_end.insert(
+                            frag_g.end,
+                            Fragment {
+                                start: new_start,
+                                end: frag_g.end,
+                                ring: frag_g.ring,
+                            },
+                        );
                     }
                 } else {
                     // New fragment
@@ -178,7 +223,14 @@ where
                     if start == end {
                         callback(ring);
                     } else {
-                        fragment_by_start.insert(start, Fragment { start, end, ring: ring.clone() });
+                        fragment_by_start.insert(
+                            start,
+                            Fragment {
+                                start,
+                                end,
+                                ring: ring.clone(),
+                            },
+                        );
                         fragment_by_end.insert(end, Fragment { start, end, ring });
                     }
                 }

@@ -43,14 +43,14 @@
 //! ```
 //!
 
-use std::collections::HashMap;
-use std::sync::{Arc};
 use std::any::Any;
+use std::borrow::Cow;
+use std::collections::HashMap;
 use std::fmt;
 use std::future::Future;
 use std::pin::Pin;
+use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::borrow::Cow;
 use tokio::sync::Mutex as TokioMutex;
 
 /// A handle for a registered event handler, for ergonomic removal.
@@ -89,8 +89,26 @@ impl<'a> Event<'a> {
 }
 
 pub struct Dispatch {
-    listeners: Arc<TokioMutex<HashMap<String, Vec<(Arc<dyn Fn(&Event) + Send + Sync>, HandlerHandle)>>>>,
-    async_listeners: Arc<TokioMutex<HashMap<String, Vec<(Arc<dyn Fn(Arc<Event<'static>>) -> Pin<Box<dyn Future<Output = ()> + Send + Sync>> + Send + Sync>, HandlerHandle)>>>>,
+    listeners:
+        Arc<TokioMutex<HashMap<String, Vec<(Arc<dyn Fn(&Event) + Send + Sync>, HandlerHandle)>>>>,
+    async_listeners: Arc<
+        TokioMutex<
+            HashMap<
+                String,
+                Vec<(
+                    Arc<
+                        dyn Fn(
+                                Arc<Event<'static>>,
+                            )
+                                -> Pin<Box<dyn Future<Output = ()> + Send + Sync>>
+                            + Send
+                            + Sync,
+                    >,
+                    HandlerHandle,
+                )>,
+            >,
+        >,
+    >,
     next_id: Arc<TokioMutex<u64>>,
 }
 
@@ -103,12 +121,18 @@ impl Dispatch {
         }
     }
     /// Register a handler and return a handle for ergonomic removal
-    pub async fn on_with_handle<F: Fn(&Event) + Send + Sync + 'static>(&self, event: &str, handler: F) -> HandlerHandle {
+    pub async fn on_with_handle<F: Fn(&Event) + Send + Sync + 'static>(
+        &self,
+        event: &str,
+        handler: F,
+    ) -> HandlerHandle {
         let mut map = self.listeners.lock().await;
         let mut id = self.next_id.lock().await;
         let handle = HandlerHandle(*id);
         *id += 1;
-        map.entry(event.to_string()).or_default().push((Arc::new(handler), handle.clone()));
+        map.entry(event.to_string())
+            .or_default()
+            .push((Arc::new(handler), handle.clone()));
         handle
     }
     /// Register a handler (no handle returned, for simple use)
@@ -154,12 +178,21 @@ impl Dispatch {
     }
     /// Return the number of listeners for an event
     pub async fn listeners(&self, event: &str) -> usize {
-        self.listeners.lock().await.get(event).map(|v| v.len()).unwrap_or(0)
+        self.listeners
+            .lock()
+            .await
+            .get(event)
+            .map(|v| v.len())
+            .unwrap_or(0)
     }
     /// Remove all listeners for a namespace (e.g. ".bar")
     pub async fn off_namespace(&self, namespace: &str) {
         let mut map = self.listeners.lock().await;
-        let ns = if namespace.starts_with('.') { &namespace[1..] } else { namespace };
+        let ns = if namespace.starts_with('.') {
+            &namespace[1..]
+        } else {
+            namespace
+        };
         map.retain(|k, _| !k.split('.').skip(1).any(|n| n == ns));
     }
     /// Call all handlers for an event (no event object, with propagation)
@@ -203,14 +236,18 @@ impl Dispatch {
     /// Call all handlers for all events matching a wildcard (e.g. "foo.*" or "*")
     pub async fn call_wildcard(&self, pattern: &str) {
         let matcher = |k: &str| {
-            if pattern == "*" { true }
-            else if pattern.ends_with(".*") {
-                k.starts_with(&pattern[..pattern.len()-2])
+            if pattern == "*" {
+                true
+            } else if pattern.ends_with(".*") {
+                k.starts_with(&pattern[..pattern.len() - 2])
             } else {
                 k == pattern
             }
         };
-        let events: Vec<String> = self.listeners.lock().await
+        let events: Vec<String> = self
+            .listeners
+            .lock()
+            .await
             .keys()
             .filter(|k| matcher(k))
             .cloned()
@@ -225,7 +262,12 @@ impl Dispatch {
     }
     /// List all handlers for an event
     pub async fn handlers(&self, event: &str) -> Vec<HandlerHandle> {
-        self.listeners.lock().await.get(event).map(|v| v.iter().map(|(_, h)| h.clone()).collect()).unwrap_or_default()
+        self.listeners
+            .lock()
+            .await
+            .get(event)
+            .map(|v| v.iter().map(|(_, h)| h.clone()).collect())
+            .unwrap_or_default()
     }
     /// Register an async handler and return a handle for ergonomic removal
     pub async fn on_async_with_handle<F, Fut>(&self, event: &str, handler: F) -> HandlerHandle

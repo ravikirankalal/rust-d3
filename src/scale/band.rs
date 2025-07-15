@@ -9,8 +9,20 @@ pub struct ScaleBand<T: Clone> {
 }
 
 impl<T: Clone + PartialEq> ScaleBand<T> {
-    pub fn new(domain: Vec<T>, range: [f64; 2], padding_inner: f64, padding_outer: f64, align: f64) -> Self {
-        Self { domain, range, padding_inner, padding_outer, align }
+    pub fn new(
+        domain: Vec<T>,
+        range: [f64; 2],
+        padding_inner: f64,
+        padding_outer: f64,
+        align: f64,
+    ) -> Self {
+        Self {
+            domain,
+            range,
+            padding_inner,
+            padding_outer,
+            align,
+        }
     }
     pub fn step(&self) -> f64 {
         let n = self.domain.len() as f64;
@@ -33,9 +45,10 @@ impl<T: Clone + PartialEq> ScaleBand<T> {
         }
         let step = self.step();
         let start = self.range[0] + (self.range[1] - self.range[0] - step * n) * self.align;
-        self.domain.iter().position(|v| v == x).map(|i| {
-            start + i as f64 * step
-        })
+        self.domain
+            .iter()
+            .position(|v| v == x)
+            .map(|i| start + i as f64 * step)
     }
 }
 

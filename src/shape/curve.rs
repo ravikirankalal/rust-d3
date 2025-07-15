@@ -81,7 +81,10 @@ impl Curve for BasisCurve {
             let (x0, y0) = self.points[0];
             let (x1, y1) = self.points[1];
             let (x2, y2) = self.points[2];
-            eprintln!("[BasisCurve] n == 3, points: ({},{}) ({},{}) ({},{})", x0, y0, x1, y1, x2, y2);
+            eprintln!(
+                "[BasisCurve] n == 3, points: ({},{}) ({},{}) ({},{})",
+                x0, y0, x1, y1, x2, y2
+            );
             // First segment: endpoint is (x1, y1)
             let c1x1 = (2.0 * x0 + x1) / 3.0;
             let c1y1 = (2.0 * y0 + y1) / 3.0;
@@ -89,7 +92,10 @@ impl Curve for BasisCurve {
             let c2y1 = (y0 + 2.0 * y1) / 3.0;
             let ex1 = x1;
             let ey1 = y1;
-            eprintln!("[BasisCurve] seg 0: C1: {},{} C2: {},{} E: {},{}", c1x1, c1y1, c2x1, c2y1, ex1, ey1);
+            eprintln!(
+                "[BasisCurve] seg 0: C1: {},{} C2: {},{} E: {},{}",
+                c1x1, c1y1, c2x1, c2y1, ex1, ey1
+            );
             // Second segment: endpoint is (x2, y2)
             let c1x2 = (2.0 * x1 + x2) / 3.0;
             let c1y2 = (2.0 * y1 + y2) / 3.0;
@@ -97,10 +103,19 @@ impl Curve for BasisCurve {
             let c2y2 = (y1 + 2.0 * y2) / 3.0;
             let ex2 = x2;
             let ey2 = y2;
-            eprintln!("[BasisCurve] seg 1: C1: {},{} C2: {},{} E: {},{}", c1x2, c1y2, c2x2, c2y2, ex2, ey2);
+            eprintln!(
+                "[BasisCurve] seg 1: C1: {},{} C2: {},{} E: {},{}",
+                c1x2, c1y2, c2x2, c2y2, ex2, ey2
+            );
             path.push_str(&format!("M{},{}", x0, y0));
-            path.push_str(&format!("C{},{} {},{} {},{}", c1x1, c1y1, c2x1, c2y1, ex1, ey1));
-            path.push_str(&format!("C{},{} {},{} {},{}", c1x2, c1y2, c2x2, c2y2, ex2, ey2));
+            path.push_str(&format!(
+                "C{},{} {},{} {},{}",
+                c1x1, c1y1, c2x1, c2y1, ex1, ey1
+            ));
+            path.push_str(&format!(
+                "C{},{} {},{} {},{}",
+                c1x2, c1y2, c2x2, c2y2, ex2, ey2
+            ));
             return;
         }
         // D3 basis: for >3 points, pad [p0, p0, p1, ..., pn-1, pn-1]
@@ -124,7 +139,10 @@ impl Curve for BasisCurve {
             let c2y = (p1y + 2.0 * p2y) / 3.0;
             let ex = (p1x + 4.0 * p2x + p3x) / 6.0;
             let ey = (p1y + 4.0 * p2y + p3y) / 6.0;
-            eprintln!("[BasisCurve] seg {}: C1: {:?},{:?} C2: {:?},{:?} E: {:?},{:?}", i, c1x, c1y, c2x, c2y, ex, ey);
+            eprintln!(
+                "[BasisCurve] seg {}: C1: {:?},{:?} C2: {:?},{:?} E: {:?},{:?}",
+                i, c1x, c1y, c2x, c2y, ex, ey
+            );
             path.push_str(&format!("C{},{} {},{} {},{}", c1x, c1y, c2x, c2y, ex, ey));
         }
     }
@@ -138,15 +156,22 @@ pub struct CardinalCurve {
 
 impl CardinalCurve {
     pub fn with_tension(tension: f64) -> Self {
-        Self { points: Vec::new(), tension }
+        Self {
+            points: Vec::new(),
+            tension,
+        }
     }
 }
 
 impl Curve for CardinalCurve {
     fn begin(&mut self, _path: &mut String) {
         self.points.clear();
-        if self.tension < 0.0 { self.tension = 0.0; }
-        if self.tension > 1.0 { self.tension = 1.0; }
+        if self.tension < 0.0 {
+            self.tension = 0.0;
+        }
+        if self.tension > 1.0 {
+            self.tension = 1.0;
+        }
     }
     fn line_to(&mut self, _path: &mut String, x: f64, y: f64, _first: bool) {
         self.points.push((x, y));
@@ -183,15 +208,27 @@ impl Curve for CardinalCurve {
             let c1y1 = y0 + t * (y1 - yp);
             let c2x1 = x1 - t * (x2 - x0);
             let c2y1 = y1 - t * (y2 - y0);
-            println!("[CardinalCurve] seg 0: C1: {},{} C2: {},{} E: {},{}", c1x1, c1y1, c2x1, c2y1, x1, y1);
-            path.push_str(&format!("C{},{} {},{} {},{}", c1x1, c1y1, c2x1, c2y1, x1, y1));
+            println!(
+                "[CardinalCurve] seg 0: C1: {},{} C2: {},{} E: {},{}",
+                c1x1, c1y1, c2x1, c2y1, x1, y1
+            );
+            path.push_str(&format!(
+                "C{},{} {},{} {},{}",
+                c1x1, c1y1, c2x1, c2y1, x1, y1
+            ));
             // Second segment: use x0 as previous, xn as next
             let c1x2 = x1 + t * (x2 - x0);
             let c1y2 = y1 + t * (y2 - y0);
             let c2x2 = x2 - t * (xn - x1);
             let c2y2 = y2 - t * (yn - y1);
-            println!("[CardinalCurve] seg 1: C1: {},{} C2: {},{} E: {},{}", c1x2, c1y2, c2x2, c2y2, x2, y2);
-            path.push_str(&format!("C{},{} {},{} {},{}", c1x2, c1y2, c2x2, c2y2, x2, y2));
+            println!(
+                "[CardinalCurve] seg 1: C1: {},{} C2: {},{} E: {},{}",
+                c1x2, c1y2, c2x2, c2y2, x2, y2
+            );
+            path.push_str(&format!(
+                "C{},{} {},{} {},{}",
+                c1x2, c1y2, c2x2, c2y2, x2, y2
+            ));
             return;
         }
         for i in 0..n - 1 {
@@ -203,7 +240,10 @@ impl Curve for CardinalCurve {
             let c1y = y1 + t * (y2 - y0);
             let c2x = x2 - t * (x3 - x1);
             let c2y = y2 - t * (y3 - y1);
-            println!("[CardinalCurve] seg {}: C1: {},{} C2: {},{} E: {},{}", i, c1x, c1y, c2x, c2y, x2, y2);
+            println!(
+                "[CardinalCurve] seg {}: C1: {},{} C2: {},{} E: {},{}",
+                i, c1x, c1y, c2x, c2y, x2, y2
+            );
             path.push_str(&format!("C{},{} {},{} {},{}", c1x, c1y, c2x, c2y, x2, y2));
         }
     }
@@ -271,7 +311,10 @@ impl Curve for MonotoneCurve {
             let c1y = y0 + t[i] * h / 3.0;
             let c2x = x1 - h / 3.0;
             let c2y = y1 - t[i + 1] * h / 3.0;
-            println!("[MonotoneCurve] seg {}: C1: {},{} C2: {},{} E: {},{}", i, c1x, c1y, c2x, c2y, x1, y1);
+            println!(
+                "[MonotoneCurve] seg {}: C1: {},{} C2: {},{} E: {},{}",
+                i, c1x, c1y, c2x, c2y, x1, y1
+            );
             path.push_str(&format!("C{},{} {},{} {},{}", c1x, c1y, c2x, c2y, x1, y1));
         }
     }

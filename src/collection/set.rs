@@ -9,10 +9,14 @@ pub struct Set<T> {
 
 impl<T: Eq + std::hash::Hash> Set<T> {
     pub fn new() -> Self {
-        Self { inner: HashSet::new() }
+        Self {
+            inner: HashSet::new(),
+        }
     }
     pub fn with_capacity(cap: usize) -> Self {
-        Self { inner: HashSet::with_capacity(cap) }
+        Self {
+            inner: HashSet::with_capacity(cap),
+        }
     }
     pub fn insert(&mut self, value: T) -> bool {
         self.inner.insert(value)

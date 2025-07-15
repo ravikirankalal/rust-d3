@@ -2,7 +2,10 @@
 
 use rust_d3::dispatch::Dispatch;
 use rust_d3::timer::Timer;
-use std::sync::{Arc, atomic::{AtomicUsize, Ordering}};
+use std::sync::{
+    Arc,
+    atomic::{AtomicUsize, Ordering},
+};
 use std::time::Duration;
 use tokio::sync::Mutex;
 
@@ -11,23 +14,28 @@ async fn integration_dispatch_timer_event() {
     let count = Arc::new(AtomicUsize::new(0));
     let count_clone = count.clone();
     let dispatcher = Dispatch::new();
-    dispatcher.on("tick", move || {
-        count_clone.fetch_add(1, Ordering::SeqCst);
-    }).await;
+    dispatcher
+        .on("tick", move || {
+            count_clone.fetch_add(1, Ordering::SeqCst);
+        })
+        .await;
     let dispatcher = Arc::new(Mutex::new(dispatcher));
     let dispatcher_clone = dispatcher.clone();
     let handle = tokio::spawn(async move {
-        let mut timer = Timer::new(move || {
-            let dispatcher_clone = dispatcher_clone.clone();
-            let (tx, rx) = std::sync::mpsc::channel();
-            let rt = tokio::runtime::Runtime::new().unwrap();
-            rt.block_on(async {
-                let d = dispatcher_clone.lock().await;
-                d.call("tick").await;
-                let _ = tx.send(());
-            });
-            let _ = rx.recv();
-        }, 5);
+        let mut timer = Timer::new(
+            move || {
+                let dispatcher_clone = dispatcher_clone.clone();
+                let (tx, rx) = std::sync::mpsc::channel();
+                let rt = tokio::runtime::Runtime::new().unwrap();
+                rt.block_on(async {
+                    let d = dispatcher_clone.lock().await;
+                    d.call("tick").await;
+                    let _ = tx.send(());
+                });
+                let _ = rx.recv();
+            },
+            5,
+        );
         timer.start();
         tokio::time::sleep(Duration::from_millis(25)).await;
         timer.stop();
@@ -41,23 +49,28 @@ async fn integration_timer_pause_resume_dispatch() {
     let count = Arc::new(AtomicUsize::new(0));
     let count_clone = count.clone();
     let dispatcher = Dispatch::new();
-    dispatcher.on("tick", move || {
-        count_clone.fetch_add(1, Ordering::SeqCst);
-    }).await;
+    dispatcher
+        .on("tick", move || {
+            count_clone.fetch_add(1, Ordering::SeqCst);
+        })
+        .await;
     let dispatcher = Arc::new(Mutex::new(dispatcher));
     let dispatcher_clone = dispatcher.clone();
     let handle = tokio::spawn(async move {
-        let mut timer = Timer::new(move || {
-            let dispatcher_clone = dispatcher_clone.clone();
-            let (tx, rx) = std::sync::mpsc::channel();
-            let rt = tokio::runtime::Runtime::new().unwrap();
-            rt.block_on(async {
-                let d = dispatcher_clone.lock().await;
-                d.call("tick").await;
-                let _ = tx.send(());
-            });
-            let _ = rx.recv();
-        }, 5); // Use 5ms interval for more robust timing
+        let mut timer = Timer::new(
+            move || {
+                let dispatcher_clone = dispatcher_clone.clone();
+                let (tx, rx) = std::sync::mpsc::channel();
+                let rt = tokio::runtime::Runtime::new().unwrap();
+                rt.block_on(async {
+                    let d = dispatcher_clone.lock().await;
+                    d.call("tick").await;
+                    let _ = tx.send(());
+                });
+                let _ = rx.recv();
+            },
+            5,
+        ); // Use 5ms interval for more robust timing
         timer.start();
         tokio::time::sleep(Duration::from_millis(50)).await; // Give more time for ticks
         timer.pause();
@@ -78,26 +91,31 @@ async fn integration_dispatch_remove_handler_mid_tick() {
     let count = Arc::new(AtomicUsize::new(0));
     let count_clone = count.clone();
     let dispatcher = Dispatch::new();
-    let handle = dispatcher.on_with_handle("tick", move |_| {
-        count_clone.fetch_add(1, Ordering::SeqCst);
-    }).await;
+    let handle = dispatcher
+        .on_with_handle("tick", move |_| {
+            count_clone.fetch_add(1, Ordering::SeqCst);
+        })
+        .await;
     let dispatcher = Arc::new(Mutex::new(dispatcher));
     let dispatcher_clone = dispatcher.clone();
     let handle_tokio = tokio::spawn(async move {
         let handle_clone = handle.clone();
-        let mut timer = Timer::new(move || {
-            let dispatcher_clone = dispatcher_clone.clone();
-            let handle_clone = handle_clone.clone();
-            let (tx, rx) = std::sync::mpsc::channel();
-            let rt = tokio::runtime::Runtime::new().unwrap();
-            rt.block_on(async {
-                let d = dispatcher_clone.lock().await;
-                d.call("tick").await;
-                d.off_handle("tick", &handle_clone).await;
-                let _ = tx.send(());
-            });
-            let _ = rx.recv();
-        }, 5);
+        let mut timer = Timer::new(
+            move || {
+                let dispatcher_clone = dispatcher_clone.clone();
+                let handle_clone = handle_clone.clone();
+                let (tx, rx) = std::sync::mpsc::channel();
+                let rt = tokio::runtime::Runtime::new().unwrap();
+                rt.block_on(async {
+                    let d = dispatcher_clone.lock().await;
+                    d.call("tick").await;
+                    d.off_handle("tick", &handle_clone).await;
+                    let _ = tx.send(());
+                });
+                let _ = rx.recv();
+            },
+            5,
+        );
         timer.start();
         tokio::time::sleep(Duration::from_millis(20)).await;
         timer.stop();
@@ -113,13 +131,15 @@ async fn integration_dispatch_event_bubbling_sim() {
     let log_child = log.clone();
     let parent = Arc::new(Dispatch::new());
     let child = Dispatch::new();
-    parent.on("custom", move || {
-        let log_parent = log_parent.clone();
-        let fut = async move {
-            log_parent.lock().await.push("parent".to_string());
-        };
-        tokio::spawn(fut);
-    }).await;
+    parent
+        .on("custom", move || {
+            let log_parent = log_parent.clone();
+            let fut = async move {
+                log_parent.lock().await.push("parent".to_string());
+            };
+            tokio::spawn(fut);
+        })
+        .await;
     // Handler that can optionally stop propagation
     let bubbling_handler = Arc::new({
         let log_child = log_child.clone();
@@ -141,36 +161,46 @@ async fn integration_dispatch_event_bubbling_sim() {
             }
         }
     });
-    child.on_with_handle("custom", {
-        let bubbling_handler = bubbling_handler.clone();
-        move |evt: &rust_d3::dispatch::Event| {
-            let evt_static = rust_d3::dispatch::Event {
-                event_type: std::borrow::Cow::Owned(evt.event_type.to_string()),
-                data: evt.data.clone(),
-                timestamp: evt.timestamp,
-                source: evt.source.as_ref().map(|s| std::borrow::Cow::Owned(s.to_string())),
-                propagation_stopped: evt.propagation_stopped.clone(),
-                default_prevented: evt.default_prevented.clone(),
-            };
-            let evt = Arc::new(evt_static);
-            tokio::spawn(bubbling_handler(evt));
-        }
-    }).await;
-    child.on_with_handle("custom-stop", {
-        let bubbling_handler = bubbling_handler.clone();
-        move |evt: &rust_d3::dispatch::Event| {
-            let evt_static = rust_d3::dispatch::Event {
-                event_type: std::borrow::Cow::Owned(evt.event_type.to_string()),
-                data: evt.data.clone(),
-                timestamp: evt.timestamp,
-                source: evt.source.as_ref().map(|s| std::borrow::Cow::Owned(s.to_string())),
-                propagation_stopped: evt.propagation_stopped.clone(),
-                default_prevented: evt.default_prevented.clone(),
-            };
-            let evt = Arc::new(evt_static);
-            tokio::spawn(bubbling_handler(evt));
-        }
-    }).await;
+    child
+        .on_with_handle("custom", {
+            let bubbling_handler = bubbling_handler.clone();
+            move |evt: &rust_d3::dispatch::Event| {
+                let evt_static = rust_d3::dispatch::Event {
+                    event_type: std::borrow::Cow::Owned(evt.event_type.to_string()),
+                    data: evt.data.clone(),
+                    timestamp: evt.timestamp,
+                    source: evt
+                        .source
+                        .as_ref()
+                        .map(|s| std::borrow::Cow::Owned(s.to_string())),
+                    propagation_stopped: evt.propagation_stopped.clone(),
+                    default_prevented: evt.default_prevented.clone(),
+                };
+                let evt = Arc::new(evt_static);
+                tokio::spawn(bubbling_handler(evt));
+            }
+        })
+        .await;
+    child
+        .on_with_handle("custom-stop", {
+            let bubbling_handler = bubbling_handler.clone();
+            move |evt: &rust_d3::dispatch::Event| {
+                let evt_static = rust_d3::dispatch::Event {
+                    event_type: std::borrow::Cow::Owned(evt.event_type.to_string()),
+                    data: evt.data.clone(),
+                    timestamp: evt.timestamp,
+                    source: evt
+                        .source
+                        .as_ref()
+                        .map(|s| std::borrow::Cow::Owned(s.to_string())),
+                    propagation_stopped: evt.propagation_stopped.clone(),
+                    default_prevented: evt.default_prevented.clone(),
+                };
+                let evt = Arc::new(evt_static);
+                tokio::spawn(bubbling_handler(evt));
+            }
+        })
+        .await;
     // Normal bubbling
     let evt = Arc::new(rust_d3::dispatch::Event {
         event_type: "custom".into(),
@@ -214,9 +244,9 @@ fn integration_timer_next_tick_query() {
 
 #[tokio::test]
 async fn integration_dispatch_async_event_bubbling() {
-    use std::sync::atomic::AtomicBool;
-    use std::sync::Arc;
     use rust_d3::dispatch::Dispatch;
+    use std::sync::Arc;
+    use std::sync::atomic::AtomicBool;
     use std::time::Instant;
     use tokio::sync::Mutex as TokioMutex;
     let log = Arc::new(TokioMutex::new(Vec::new()));
@@ -224,12 +254,14 @@ async fn integration_dispatch_async_event_bubbling() {
     let log_child = log.clone();
     let parent = Dispatch::new();
     let child = Dispatch::new();
-    parent.on_async("custom", move |_evt| {
-        let log_parent = log_parent.clone();
-        Box::pin(async move {
-            log_parent.lock().await.push("parent".to_string());
+    parent
+        .on_async("custom", move |_evt| {
+            let log_parent = log_parent.clone();
+            Box::pin(async move {
+                log_parent.lock().await.push("parent".to_string());
+            })
         })
-    }).await;
+        .await;
     let parent_arc = Arc::new(parent);
     let bubbling_handler = {
         let log_child = log_child.clone();
@@ -242,7 +274,9 @@ async fn integration_dispatch_async_event_bubbling() {
                 if evt.event_type == "custom-stop" {
                     evt.stop_propagation();
                 }
-                parent_arc.call_event_async_bubble(&parent_arc, "custom", evt.clone()).await;
+                parent_arc
+                    .call_event_async_bubble(&parent_arc, "custom", evt.clone())
+                    .await;
             }
         }
     };
@@ -284,40 +318,48 @@ async fn integration_multiple_timers_shared_dispatch() {
     let count_clone1 = count.clone();
     let _count_clone2 = count.clone(); // Silence unused variable warning
     let dispatcher = Dispatch::new();
-    dispatcher.on("tick", move || {
-        count_clone1.fetch_add(1, Ordering::SeqCst);
-    }).await;
+    dispatcher
+        .on("tick", move || {
+            count_clone1.fetch_add(1, Ordering::SeqCst);
+        })
+        .await;
     let dispatcher = Arc::new(Mutex::new(dispatcher));
     let dispatcher_clone1 = dispatcher.clone();
     let dispatcher_clone2 = dispatcher.clone();
     let handle1 = tokio::spawn(async move {
-        let mut timer = Timer::new(move || {
-            let dispatcher_clone = dispatcher_clone1.clone();
-            let (tx, rx) = std::sync::mpsc::channel();
-            let rt = tokio::runtime::Runtime::new().unwrap();
-            rt.block_on(async {
-                let d = dispatcher_clone.lock().await;
-                d.call("tick").await;
-                let _ = tx.send(());
-            });
-            let _ = rx.recv();
-        }, 5);
+        let mut timer = Timer::new(
+            move || {
+                let dispatcher_clone = dispatcher_clone1.clone();
+                let (tx, rx) = std::sync::mpsc::channel();
+                let rt = tokio::runtime::Runtime::new().unwrap();
+                rt.block_on(async {
+                    let d = dispatcher_clone.lock().await;
+                    d.call("tick").await;
+                    let _ = tx.send(());
+                });
+                let _ = rx.recv();
+            },
+            5,
+        );
         timer.start();
         tokio::time::sleep(Duration::from_millis(30)).await;
         timer.stop();
     });
     let handle2 = tokio::spawn(async move {
-        let mut timer = Timer::new(move || {
-            let dispatcher_clone = dispatcher_clone2.clone();
-            let (tx, rx) = std::sync::mpsc::channel();
-            let rt = tokio::runtime::Runtime::new().unwrap();
-            rt.block_on(async {
-                let d = dispatcher_clone.lock().await;
-                d.call("tick").await;
-                let _ = tx.send(());
-            });
-            let _ = rx.recv();
-        }, 7);
+        let mut timer = Timer::new(
+            move || {
+                let dispatcher_clone = dispatcher_clone2.clone();
+                let (tx, rx) = std::sync::mpsc::channel();
+                let rt = tokio::runtime::Runtime::new().unwrap();
+                rt.block_on(async {
+                    let d = dispatcher_clone.lock().await;
+                    d.call("tick").await;
+                    let _ = tx.send(());
+                });
+                let _ = rx.recv();
+            },
+            7,
+        );
         timer.start();
         tokio::time::sleep(Duration::from_millis(30)).await;
         timer.stop();
@@ -332,26 +374,31 @@ async fn integration_timer_dispatch_async_handler() {
     let count = Arc::new(AtomicUsize::new(0));
     let count_clone = count.clone();
     let dispatcher = Dispatch::new();
-    dispatcher.on_async("tick", move |_evt| {
-        let count_clone = count_clone.clone();
-        Box::pin(async move {
-            count_clone.fetch_add(1, Ordering::SeqCst);
+    dispatcher
+        .on_async("tick", move |_evt| {
+            let count_clone = count_clone.clone();
+            Box::pin(async move {
+                count_clone.fetch_add(1, Ordering::SeqCst);
+            })
         })
-    }).await;
+        .await;
     let dispatcher = Arc::new(Mutex::new(dispatcher));
     let dispatcher_clone = dispatcher.clone();
     let handle = tokio::spawn(async move {
-        let mut timer = Timer::new(move || {
-            let dispatcher_clone = dispatcher_clone.clone();
-            let (tx, rx) = std::sync::mpsc::channel();
-            let rt = tokio::runtime::Runtime::new().unwrap();
-            rt.block_on(async {
-                let d = dispatcher_clone.lock().await;
-                d.call_async("tick").await;
-                let _ = tx.send(());
-            });
-            let _ = rx.recv();
-        }, 5);
+        let mut timer = Timer::new(
+            move || {
+                let dispatcher_clone = dispatcher_clone.clone();
+                let (tx, rx) = std::sync::mpsc::channel();
+                let rt = tokio::runtime::Runtime::new().unwrap();
+                rt.block_on(async {
+                    let d = dispatcher_clone.lock().await;
+                    d.call_async("tick").await;
+                    let _ = tx.send(());
+                });
+                let _ = rx.recv();
+            },
+            5,
+        );
         timer.start();
         tokio::time::sleep(Duration::from_millis(60)).await;
         timer.stop();

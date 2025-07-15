@@ -1,5 +1,5 @@
 // Tests for SymbolOutput trait and custom output for all symbol types
-use rust_d3::shape::{Symbol, SymbolType, SymbolOutput};
+use rust_d3::shape::{Symbol, SymbolOutput, SymbolType};
 
 struct CollectPoints(Vec<(f64, f64)>);
 
@@ -83,7 +83,9 @@ pub mod shape_symbol_output_tests {
         let sym = Symbol::new().symbol_type(SymbolType::Circle).size(0.0);
         let mut points = CollectPoints(vec![]);
         sym.to_custom(&mut points);
-        assert!(points.0.is_empty() || points.0 == vec![] || points.0 == vec![(f64::NAN, f64::NAN)]);
+        assert!(
+            points.0.is_empty() || points.0 == vec![] || points.0 == vec![(f64::NAN, f64::NAN)]
+        );
     }
 
     #[test]
@@ -91,7 +93,9 @@ pub mod shape_symbol_output_tests {
         let sym = Symbol::new().symbol_type(SymbolType::Square).size(f64::NAN);
         let mut points = CollectPoints(vec![]);
         sym.to_custom(&mut points);
-        assert!(points.0.is_empty() || points.0 == vec![] || points.0 == vec![(f64::NAN, f64::NAN)]);
+        assert!(
+            points.0.is_empty() || points.0 == vec![] || points.0 == vec![(f64::NAN, f64::NAN)]
+        );
     }
 
     #[test]
@@ -99,6 +103,8 @@ pub mod shape_symbol_output_tests {
         let sym = Symbol::new().symbol_type(SymbolType::Triangle).size(-100.0);
         let mut points = CollectPoints(vec![]);
         sym.to_custom(&mut points);
-        assert!(points.0.is_empty() || points.0 == vec![] || points.0 == vec![(f64::NAN, f64::NAN)]);
+        assert!(
+            points.0.is_empty() || points.0 == vec![] || points.0 == vec![(f64::NAN, f64::NAN)]
+        );
     }
 }

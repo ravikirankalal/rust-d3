@@ -3,10 +3,10 @@
 // This module aims to provide seeded and unseeded random number generators for common distributions.
 // See: https://github.com/d3/d3-random
 
+use rand::SeedableRng;
 use rand::prelude::*;
 use rand::rngs::StdRng;
-use rand::SeedableRng;
-use rand_distr::{Normal, LogNormal, Exp, Distribution};
+use rand_distr::{Distribution, Exp, LogNormal, Normal};
 
 pub fn random_uniform() -> f64 {
     let mut rng = rand::rng();

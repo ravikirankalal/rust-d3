@@ -11,6 +11,6 @@ pub struct FormatSpecifier {
     pub parentheses: bool,      // accounting negative numbers
     pub precision: Option<usize>,
     pub ty: char,
-    pub locale: Option<String>, // for locale support
+    pub locale: Option<String>,             // for locale support
     pub currency: Option<(String, String)>, // (prefix, suffix)
 }

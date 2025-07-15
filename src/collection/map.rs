@@ -9,10 +9,14 @@ pub struct Map<K, V> {
 
 impl<K: Eq + std::hash::Hash, V> Map<K, V> {
     pub fn new() -> Self {
-        Self { inner: HashMap::new() }
+        Self {
+            inner: HashMap::new(),
+        }
     }
     pub fn with_capacity(cap: usize) -> Self {
-        Self { inner: HashMap::with_capacity(cap) }
+        Self {
+            inner: HashMap::with_capacity(cap),
+        }
     }
     pub fn insert(&mut self, key: K, value: V) {
         self.inner.insert(key, value);

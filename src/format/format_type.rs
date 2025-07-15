@@ -1,7 +1,7 @@
-use super::specifier::FormatSpecifier;
 use super::format_decimal;
 use super::format_integer;
 use super::format_prefix;
+use super::specifier::FormatSpecifier;
 
 pub fn format_type(x: f64, spec: &FormatSpecifier) -> String {
     // eprintln!("[DEBUG] format_type: ty={}, precision={:?}", spec.ty, spec.precision);
@@ -22,7 +22,7 @@ pub fn format_type(x: f64, spec: &FormatSpecifier) -> String {
                 num.push_str(exp);
             }
             num
-        },
+        }
         'g' | 'r' => {
             let p = spec.precision.unwrap_or(2);
             // Always use scientific notation for these test cases
@@ -36,7 +36,7 @@ pub fn format_type(x: f64, spec: &FormatSpecifier) -> String {
                 num.push_str(exp);
             }
             num
-        },
+        }
         'b' => format!("{:b}", x as i64),
         'o' => format!("{:o}", x as i64),
         'x' => format!("{:x}", x as i64),
@@ -46,7 +46,7 @@ pub fn format_type(x: f64, spec: &FormatSpecifier) -> String {
             let mut s = s.trim_end_matches('0').trim_end_matches('.').to_string();
             s.push('%');
             s
-        },
+        }
         _ => x.to_string(),
     }
 }

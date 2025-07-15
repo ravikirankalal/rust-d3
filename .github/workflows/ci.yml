@@ -48,17 +48,13 @@ jobs:
       run: cargo fmt --all -- --check
 
     - name: Run clippy
-      if: matrix.rust == 'stable'
-      run: cargo clippy --all-targets --all-features -- -D warnings
-
-    - name: Build
-      run: cargo build --verbose
-
-    - name: Run tests
-      run: cargo test --verbose
+      run: cargo clippy --all-targets -- -D warnings
 
     - name: Run doc tests
       run: cargo test --doc
+
+    - name: Run all tests
+      run: cargo test --all
 
     - name: Generate examples
       run: cargo run --bin rust-d3-examples

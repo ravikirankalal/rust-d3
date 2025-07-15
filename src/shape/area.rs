@@ -1,7 +1,7 @@
 // d3-shape: area generator (SVG path string)
 // Supports x/x0/x1/y/y0/y1/defined/curve
 
-use crate::shape::curve::{Curve, LinearCurve, BasisCurve, CardinalCurve, MonotoneCurve};
+use crate::shape::curve::{BasisCurve, CardinalCurve, Curve, LinearCurve, MonotoneCurve};
 
 pub struct Area<X0, X1, Y0, Y1, D, T, C>
 where
@@ -21,7 +21,17 @@ where
     _phantom: std::marker::PhantomData<T>,
 }
 
-impl<T> Area<fn(&T, usize) -> f64, fn(&T, usize) -> f64, fn(&T, usize) -> f64, fn(&T, usize) -> f64, fn(&T, usize) -> bool, T, LinearCurve> {
+impl<T>
+    Area<
+        fn(&T, usize) -> f64,
+        fn(&T, usize) -> f64,
+        fn(&T, usize) -> f64,
+        fn(&T, usize) -> f64,
+        fn(&T, usize) -> bool,
+        T,
+        LinearCurve,
+    >
+{
     pub fn new() -> Self {
         Self {
             x0: |d, _| d as *const T as usize as f64,
@@ -60,36 +70,118 @@ where
     C: crate::shape::curve::Curve + Default + Clone,
 {
     pub fn x0<X0b>(self, x0: X0b) -> Area<X0b, X1, Y0, Y1, D, T, C>
-    where X0b: Fn(&T, usize) -> f64 {
-        Area { x0, x1: self.x1, y0: self.y0, y1: self.y1, defined: self.defined, curve: self.curve.clone(), _phantom: std::marker::PhantomData }
+    where
+        X0b: Fn(&T, usize) -> f64,
+    {
+        Area {
+            x0,
+            x1: self.x1,
+            y0: self.y0,
+            y1: self.y1,
+            defined: self.defined,
+            curve: self.curve.clone(),
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn x1<X1b>(self, x1: X1b) -> Area<X0, X1b, Y0, Y1, D, T, C>
-    where X1b: Fn(&T, usize) -> f64 {
-        Area { x0: self.x0, x1, y0: self.y0, y1: self.y1, defined: self.defined, curve: self.curve.clone(), _phantom: std::marker::PhantomData }
+    where
+        X1b: Fn(&T, usize) -> f64,
+    {
+        Area {
+            x0: self.x0,
+            x1,
+            y0: self.y0,
+            y1: self.y1,
+            defined: self.defined,
+            curve: self.curve.clone(),
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn y0<Y0b>(self, y0: Y0b) -> Area<X0, X1, Y0b, Y1, D, T, C>
-    where Y0b: Fn(&T, usize) -> f64 {
-        Area { x0: self.x0, x1: self.x1, y0, y1: self.y1, defined: self.defined, curve: self.curve.clone(), _phantom: std::marker::PhantomData }
+    where
+        Y0b: Fn(&T, usize) -> f64,
+    {
+        Area {
+            x0: self.x0,
+            x1: self.x1,
+            y0,
+            y1: self.y1,
+            defined: self.defined,
+            curve: self.curve.clone(),
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn y1<Y1b>(self, y1: Y1b) -> Area<X0, X1, Y0, Y1b, D, T, C>
-    where Y1b: Fn(&T, usize) -> f64 {
-        Area { x0: self.x0, x1: self.x1, y0: self.y0, y1, defined: self.defined, curve: self.curve.clone(), _phantom: std::marker::PhantomData }
+    where
+        Y1b: Fn(&T, usize) -> f64,
+    {
+        Area {
+            x0: self.x0,
+            x1: self.x1,
+            y0: self.y0,
+            y1,
+            defined: self.defined,
+            curve: self.curve.clone(),
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn defined<Db>(self, defined: Db) -> Area<X0, X1, Y0, Y1, Db, T, C>
-    where Db: Fn(&T, usize) -> bool {
-        Area { x0: self.x0, x1: self.x1, y0: self.y0, y1: self.y1, defined, curve: self.curve.clone(), _phantom: std::marker::PhantomData }
+    where
+        Db: Fn(&T, usize) -> bool,
+    {
+        Area {
+            x0: self.x0,
+            x1: self.x1,
+            y0: self.y0,
+            y1: self.y1,
+            defined,
+            curve: self.curve.clone(),
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn curve<C2: Curve + Default + Clone>(self, curve: C2) -> Area<X0, X1, Y0, Y1, D, T, C2> {
-        Area { x0: self.x0, x1: self.x1, y0: self.y0, y1: self.y1, defined: self.defined, curve, _phantom: std::marker::PhantomData }
+        Area {
+            x0: self.x0,
+            x1: self.x1,
+            y0: self.y0,
+            y1: self.y1,
+            defined: self.defined,
+            curve,
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn basis_curve(self) -> Area<X0, X1, Y0, Y1, D, T, BasisCurve> {
-        Area { x0: self.x0, x1: self.x1, y0: self.y0, y1: self.y1, defined: self.defined, curve: BasisCurve::default(), _phantom: std::marker::PhantomData }
+        Area {
+            x0: self.x0,
+            x1: self.x1,
+            y0: self.y0,
+            y1: self.y1,
+            defined: self.defined,
+            curve: BasisCurve::default(),
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn cardinal_curve(self) -> Area<X0, X1, Y0, Y1, D, T, CardinalCurve> {
-        Area { x0: self.x0, x1: self.x1, y0: self.y0, y1: self.y1, defined: self.defined, curve: CardinalCurve::default(), _phantom: std::marker::PhantomData }
+        Area {
+            x0: self.x0,
+            x1: self.x1,
+            y0: self.y0,
+            y1: self.y1,
+            defined: self.defined,
+            curve: CardinalCurve::default(),
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn monotone_curve(self) -> Area<X0, X1, Y0, Y1, D, T, MonotoneCurve> {
-        Area { x0: self.x0, x1: self.x1, y0: self.y0, y1: self.y1, defined: self.defined, curve: MonotoneCurve::default(), _phantom: std::marker::PhantomData }
+        Area {
+            x0: self.x0,
+            x1: self.x1,
+            y0: self.y0,
+            y1: self.y1,
+            defined: self.defined,
+            curve: MonotoneCurve::default(),
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn generate_to<O: AreaOutput>(&self, data: &[T], out: &mut O) {
         let mut first = true;
@@ -119,17 +211,25 @@ where
         let mut top: Vec<(f64, f64)> = Vec::new();
         let mut bottom: Vec<(f64, f64)> = Vec::new();
         for (i, d) in data.iter().enumerate() {
-            if !(self.defined)(d, i) { continue; }
+            if !(self.defined)(d, i) {
+                continue;
+            }
             let x1 = (self.x1)(d, i);
             let y1 = (self.y1)(d, i);
-            if x1.is_nan() || y1.is_nan() { continue; }
+            if x1.is_nan() || y1.is_nan() {
+                continue;
+            }
             top.push((x1, y1));
         }
         for (i, d) in data.iter().enumerate().rev() {
-            if !(self.defined)(d, i) { continue; }
+            if !(self.defined)(d, i) {
+                continue;
+            }
             let x0 = (self.x0)(d, i);
             let y0 = (self.y0)(d, i);
-            if x0.is_nan() || y0.is_nan() { continue; }
+            if x0.is_nan() || y0.is_nan() {
+                continue;
+            }
             bottom.push((x0, y0));
         }
         if top.is_empty() || bottom.is_empty() {
@@ -151,7 +251,9 @@ where
         path
     }
     pub fn x<Xb>(self, x: Xb) -> Area<Xb, Xb, Y0, Y1, D, T, C>
-    where Xb: Fn(&T, usize) -> f64 + Clone {
+    where
+        Xb: Fn(&T, usize) -> f64 + Clone,
+    {
         Area {
             x0: x.clone(),
             x1: x,
@@ -163,7 +265,9 @@ where
         }
     }
     pub fn y<Yb>(self, y: Yb) -> Area<X0, X1, Yb, Yb, D, T, C>
-    where Yb: Fn(&T, usize) -> f64 + Clone {
+    where
+        Yb: Fn(&T, usize) -> f64 + Clone,
+    {
         Area {
             x0: self.x0,
             x1: self.x1,

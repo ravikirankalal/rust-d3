@@ -4,9 +4,13 @@
 pub struct RadialLine;
 
 impl RadialLine {
-    pub fn new() -> Self { RadialLine }
+    pub fn new() -> Self {
+        RadialLine
+    }
     pub fn path(&self, points: &[(f64, f64)]) -> String {
-        if points.is_empty() { return String::new(); }
+        if points.is_empty() {
+            return String::new();
+        }
         let mut d = String::new();
         for (i, &(r, a)) in points.iter().enumerate() {
             let x = r * a.cos();

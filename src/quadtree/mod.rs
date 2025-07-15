@@ -15,7 +15,11 @@ pub struct Quadtree<T> {
 
 impl<T> Quadtree<T> {
     pub fn new(bounds: (f64, f64, f64, f64)) -> Self {
-        Self { bounds, root: None, bucket_size: 4 }
+        Self {
+            bounds,
+            root: None,
+            bucket_size: 4,
+        }
     }
     pub fn clear(&mut self) {
         self.root = None;
@@ -42,22 +46,44 @@ impl<T> Quadtree<T> {
                     Node::Leaf(pts)
                 } else {
                     // Subdivide
-                    let mut children: Box<[Option<Node<T>>; 4]> = Box::new([None, None, None, None]);
+                    let mut children: Box<[Option<Node<T>>; 4]> =
+                        Box::new([None, None, None, None]);
                     for (px, py, pv) in pts.drain(..) {
                         let idx = Self::child_index(bounds, px, py);
                         let child_bounds = Self::child_bounds(bounds, idx);
-                        children[idx] = Some(Self::insert_rec(children[idx].take(), child_bounds, px, py, pv, bucket_size));
+                        children[idx] = Some(Self::insert_rec(
+                            children[idx].take(),
+                            child_bounds,
+                            px,
+                            py,
+                            pv,
+                            bucket_size,
+                        ));
                     }
                     let idx = Self::child_index(bounds, x, y);
                     let child_bounds = Self::child_bounds(bounds, idx);
-                    children[idx] = Some(Self::insert_rec(children[idx].take(), child_bounds, x, y, value, bucket_size));
+                    children[idx] = Some(Self::insert_rec(
+                        children[idx].take(),
+                        child_bounds,
+                        x,
+                        y,
+                        value,
+                        bucket_size,
+                    ));
                     Node::Internal(children)
                 }
             }
             Some(Node::Internal(mut children)) => {
                 let idx = Self::child_index(bounds, x, y);
                 let child_bounds = Self::child_bounds(bounds, idx);
-                children[idx] = Some(Self::insert_rec(children[idx].take(), child_bounds, x, y, value, bucket_size));
+                children[idx] = Some(Self::insert_rec(
+                    children[idx].take(),
+                    child_bounds,
+                    x,
+                    y,
+                    value,
+                    bucket_size,
+                ));
                 Node::Internal(children)
             }
         }
@@ -97,14 +123,27 @@ impl<T> Quadtree<T> {
         fn visit_rec<T, F: FnMut(&(f64, f64, T))>(node: &Option<Node<T>>, f: &mut F) {
             match node {
                 None => (),
-                Some(Node::Leaf(pts)) => for p in pts { f(p); },
-                Some(Node::Internal(children)) => for c in children.iter() { visit_rec(c, f); },
+                Some(Node::Leaf(pts)) => {
+                    for p in pts {
+                        f(p);
+                    }
+                }
+                Some(Node::Internal(children)) => {
+                    for c in children.iter() {
+                        visit_rec(c, f);
+                    }
+                }
             }
         }
         visit_rec(&self.root, &mut f);
     }
     pub fn find<'a>(&'a self, x: f64, y: f64, radius: f64) -> Option<&'a (f64, f64, T)> {
-        fn find_rec<'a, T>(node: &'a Option<Node<T>>, x: f64, y: f64, r2: f64) -> Option<&'a (f64, f64, T)> {
+        fn find_rec<'a, T>(
+            node: &'a Option<Node<T>>,
+            x: f64,
+            y: f64,
+            r2: f64,
+        ) -> Option<&'a (f64, f64, T)> {
             match node {
                 None => None,
                 Some(Node::Leaf(pts)) => pts.iter().find(|(px, py, _)| {
@@ -152,8 +191,15 @@ impl<T> Quadtree<T> {
         remove_rec(&mut self.root, x, y, radius * radius)
     }
     pub fn query_range<'a>(&'a self, bounds: (f64, f64, f64, f64)) -> Vec<&'a (f64, f64, T)> {
-        fn query_rec<'a, T>(node: &'a Option<Node<T>>, node_bounds: (f64, f64, f64, f64), bounds: (f64, f64, f64, f64), out: &mut Vec<&'a (f64, f64, T)>) {
-            if !rects_intersect(node_bounds, bounds) { return; }
+        fn query_rec<'a, T>(
+            node: &'a Option<Node<T>>,
+            node_bounds: (f64, f64, f64, f64),
+            bounds: (f64, f64, f64, f64),
+            out: &mut Vec<&'a (f64, f64, T)>,
+        ) {
+            if !rects_intersect(node_bounds, bounds) {
+                return;
+            }
             match node {
                 None => (),
                 Some(Node::Leaf(pts)) => {

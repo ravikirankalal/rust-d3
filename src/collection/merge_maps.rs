@@ -3,7 +3,10 @@
 
 use std::collections::HashMap;
 
-pub fn merge_maps<K: Eq + std::hash::Hash + Clone, V: Clone>(a: &HashMap<K, V>, b: &HashMap<K, V>) -> HashMap<K, V> {
+pub fn merge_maps<K: Eq + std::hash::Hash + Clone, V: Clone>(
+    a: &HashMap<K, V>,
+    b: &HashMap<K, V>,
+) -> HashMap<K, V> {
     let mut merged = a.clone();
     for (k, v) in b.iter() {
         merged.insert(k.clone(), v.clone());

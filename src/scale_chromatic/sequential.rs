@@ -13,12 +13,12 @@ pub fn interpolate_viridis(t: f64) -> &'static str {
 
 /// Viridis color palette (7 steps)
 pub const VIRIDIS: [&str; 7] = [
-    "#440154", "#31688e", "#35b779", "#fde725", "#b5de2b", "#21918c", "#3f4788"
+    "#440154", "#31688e", "#35b779", "#fde725", "#b5de2b", "#21918c", "#3f4788",
 ];
 
 /// Plasma color palette (7 steps)
 pub const PLASMA: [&str; 7] = [
-    "#0d0887", "#6a00a8", "#cb4679", "#f89441", "#f0f921", "#b12a90", "#ed7953"
+    "#0d0887", "#6a00a8", "#cb4679", "#f89441", "#f0f921", "#b12a90", "#ed7953",
 ];
 
 /// Interpolate Plasma (0.0-1.0)

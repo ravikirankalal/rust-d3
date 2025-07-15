@@ -1,10 +1,10 @@
 // Axis module tests moved from src/axis/mod.rs
 // These tests cover D3 parity for axis construction, tick generation, layout, and custom options
 
-use rust_d3::axis::*;
-use rust_d3::scale::{ScaleLinear, ScaleLog, ScaleTime, ScaleBand, ScalePoint};
 use chrono::NaiveDate;
-use rust_d3::axis::axis_structs::{GridStyle, TitleStyle, TickLabelStyle, AxisLineStyle};
+use rust_d3::axis::axis_structs::{AxisLineStyle, GridStyle, TickLabelStyle, TitleStyle};
+use rust_d3::axis::*;
+use rust_d3::scale::{ScaleBand, ScaleLinear, ScaleLog, ScalePoint, ScaleTime};
 
 #[test]
 fn test_linear_axis_ticks() {
@@ -31,8 +31,14 @@ fn test_log_axis_ticks() {
 
 #[test]
 fn test_time_axis_ticks() {
-    let start = NaiveDate::from_ymd_opt(2020, 1, 1).unwrap().and_hms_opt(0, 0, 0).unwrap();
-    let end = NaiveDate::from_ymd_opt(2020, 1, 1).unwrap().and_hms_opt(0, 0, 4).unwrap();
+    let start = NaiveDate::from_ymd_opt(2020, 1, 1)
+        .unwrap()
+        .and_hms_opt(0, 0, 0)
+        .unwrap();
+    let end = NaiveDate::from_ymd_opt(2020, 1, 1)
+        .unwrap()
+        .and_hms_opt(0, 0, 4)
+        .unwrap();
     let scale = ScaleTime::new([start, end], [0.0, 100.0]);
     let axis = Axis::new(scale, AxisOrientation::Bottom).tick_count(5);
     let ticks = axis.ticks();
@@ -66,8 +72,7 @@ fn test_point_axis_ticks() {
 #[test]
 fn test_linear_axis_custom_ticks() {
     let scale = ScaleLinear::new([0.0, 10.0], [0.0, 100.0]);
-    let axis = Axis::new(scale, AxisOrientation::Bottom)
-        .tick_values(vec![2.0, 5.0, 8.0]);
+    let axis = Axis::new(scale, AxisOrientation::Bottom).tick_values(vec![2.0, 5.0, 8.0]);
     let ticks = axis.ticks();
     assert_eq!(ticks.len(), 3);
     assert!((ticks[0].value - 2.0).abs() < 1e-6);
@@ -117,7 +122,11 @@ fn test_axis_grid_and_style() {
     let scale = ScaleLinear::new([0.0, 5.0], [0.0, 50.0]);
     let axis = Axis::new(scale, AxisOrientation::Right)
         .grid(true)
-        .grid_style(GridStyle { color: "#f00".to_string(), width: 2.0, dasharray: Some("2,2".to_string()) });
+        .grid_style(GridStyle {
+            color: "#f00".to_string(),
+            width: 2.0,
+            dasharray: Some("2,2".to_string()),
+        });
     assert!(axis.grid);
     assert_eq!(axis.grid_style.as_ref().unwrap().color, "#f00");
 }
@@ -127,7 +136,11 @@ fn test_axis_title_and_style() {
     let scale = ScaleLinear::new([0.0, 1.0], [0.0, 10.0]);
     let axis = Axis::new(scale, AxisOrientation::Top)
         .title("Test Axis")
-        .title_style(TitleStyle { font: "Arial".to_string(), color: "#00f".to_string(), position: Some((5.0, 5.0)) });
+        .title_style(TitleStyle {
+            font: "Arial".to_string(),
+            color: "#00f".to_string(),
+            position: Some((5.0, 5.0)),
+        });
     assert_eq!(axis.title.as_deref(), Some("Test Axis"));
     assert_eq!(axis.title_style.as_ref().unwrap().font, "Arial");
 }
@@ -147,7 +160,11 @@ fn test_axis_tick_label_angle_and_style() {
     let scale = ScaleLinear::new([0.0, 1.0], [0.0, 10.0]);
     let axis = Axis::new(scale, AxisOrientation::Left)
         .tick_label_angle(45.0)
-        .tick_label_style(TickLabelStyle { font: "Verdana".to_string(), color: "#333".to_string(), padding: Some(2.0) });
+        .tick_label_style(TickLabelStyle {
+            font: "Verdana".to_string(),
+            color: "#333".to_string(),
+            padding: Some(2.0),
+        });
     assert_eq!(axis.tick_label_angle.unwrap(), 45.0);
     assert_eq!(axis.tick_label_style.as_ref().unwrap().font, "Verdana");
 }
@@ -155,8 +172,11 @@ fn test_axis_tick_label_angle_and_style() {
 #[test]
 fn test_axis_line_style() {
     let scale = ScaleLinear::new([0.0, 1.0], [0.0, 10.0]);
-    let axis = Axis::new(scale, AxisOrientation::Top)
-        .axis_line_style(AxisLineStyle { color: "#abc".to_string(), width: 1.5, dasharray: None });
+    let axis = Axis::new(scale, AxisOrientation::Top).axis_line_style(AxisLineStyle {
+        color: "#abc".to_string(),
+        width: 1.5,
+        dasharray: None,
+    });
     assert_eq!(axis.axis_line_style.as_ref().unwrap().color, "#abc");
     assert_eq!(axis.axis_line_style.as_ref().unwrap().width, 1.5);
 }
@@ -165,10 +185,13 @@ fn test_axis_line_style() {
 fn test_axis_on_render_hook() {
     let scale = ScaleLinear::new([0.0, 1.0], [0.0, 10.0]);
     let mut called = false;
-    let axis = Axis::new(scale, AxisOrientation::Bottom)
-        .on_render(|| { called = true; });
+    let axis = Axis::new(scale, AxisOrientation::Bottom).on_render(|| {
+        called = true;
+    });
     // Simulate calling the hook
-    if let Some(hook) = &axis.on_render { hook(); }
+    if let Some(hook) = &axis.on_render {
+        hook();
+    }
     assert!(called);
 }
 

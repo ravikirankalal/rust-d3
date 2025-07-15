@@ -15,7 +15,15 @@ where
     _phantom: std::marker::PhantomData<T>,
 }
 
-impl<T> Line<fn(&T, usize) -> f64, fn(&T, usize) -> f64, fn(&T, usize) -> bool, T, crate::shape::curve::LinearCurve> {
+impl<T>
+    Line<
+        fn(&T, usize) -> f64,
+        fn(&T, usize) -> f64,
+        fn(&T, usize) -> bool,
+        T,
+        crate::shape::curve::LinearCurve,
+    >
+{
     pub fn new() -> Self {
         Self {
             x: |d, _| d as *const T as usize as f64, // placeholder, user must set
@@ -53,31 +61,76 @@ where
     where
         X2: Fn(&T, usize) -> f64,
     {
-        Line { x, y: self.y, defined: self.defined, curve: self.curve.clone(), _phantom: std::marker::PhantomData }
+        Line {
+            x,
+            y: self.y,
+            defined: self.defined,
+            curve: self.curve.clone(),
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn y<Y2>(self, y: Y2) -> Line<X, Y2, D, T, C>
     where
         Y2: Fn(&T, usize) -> f64,
     {
-        Line { x: self.x, y, defined: self.defined, curve: self.curve.clone(), _phantom: std::marker::PhantomData }
+        Line {
+            x: self.x,
+            y,
+            defined: self.defined,
+            curve: self.curve.clone(),
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn defined<D2>(self, defined: D2) -> Line<X, Y, D2, T, C>
     where
         D2: Fn(&T, usize) -> bool,
     {
-        Line { x: self.x, y: self.y, defined, curve: self.curve.clone(), _phantom: std::marker::PhantomData }
+        Line {
+            x: self.x,
+            y: self.y,
+            defined,
+            curve: self.curve.clone(),
+            _phantom: std::marker::PhantomData,
+        }
     }
-    pub fn curve<C2: crate::shape::curve::Curve + Default + Clone>(self, curve: C2) -> Line<X, Y, D, T, C2> {
-        Line { x: self.x, y: self.y, defined: self.defined, curve, _phantom: std::marker::PhantomData }
+    pub fn curve<C2: crate::shape::curve::Curve + Default + Clone>(
+        self,
+        curve: C2,
+    ) -> Line<X, Y, D, T, C2> {
+        Line {
+            x: self.x,
+            y: self.y,
+            defined: self.defined,
+            curve,
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn basis_curve(self) -> Line<X, Y, D, T, crate::shape::curve::BasisCurve> {
-        Line { x: self.x, y: self.y, defined: self.defined, curve: crate::shape::curve::BasisCurve::default(), _phantom: std::marker::PhantomData }
+        Line {
+            x: self.x,
+            y: self.y,
+            defined: self.defined,
+            curve: crate::shape::curve::BasisCurve::default(),
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn cardinal_curve(self) -> Line<X, Y, D, T, crate::shape::curve::CardinalCurve> {
-        Line { x: self.x, y: self.y, defined: self.defined, curve: crate::shape::curve::CardinalCurve::default(), _phantom: std::marker::PhantomData }
+        Line {
+            x: self.x,
+            y: self.y,
+            defined: self.defined,
+            curve: crate::shape::curve::CardinalCurve::default(),
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn monotone_curve(self) -> Line<X, Y, D, T, crate::shape::curve::MonotoneCurve> {
-        Line { x: self.x, y: self.y, defined: self.defined, curve: crate::shape::curve::MonotoneCurve::default(), _phantom: std::marker::PhantomData }
+        Line {
+            x: self.x,
+            y: self.y,
+            defined: self.defined,
+            curve: crate::shape::curve::MonotoneCurve::default(),
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn generate_to<O: LineOutput>(&self, data: &[T], out: &mut O) {
         let mut first = true;

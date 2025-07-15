@@ -27,7 +27,10 @@ fn test_contour_generator_thresholds() {
 #[test]
 fn test_contour_density_basic() {
     let data = vec![vec![10.0, 10.0], vec![20.0, 20.0], vec![30.0, 30.0]];
-    let density = contour_density().size([40, 40]).bandwidth(5.0).thresholds(vec![0.01, 0.05, 0.1]);
+    let density = contour_density()
+        .size([40, 40])
+        .bandwidth(5.0)
+        .thresholds(vec![0.01, 0.05, 0.1]);
     let features = density.compute(&data);
     assert_eq!(features.len(), 3);
     for f in features.iter() {
@@ -39,7 +42,10 @@ fn test_contour_density_basic() {
 #[test]
 fn test_contour_density_empty_data() {
     let data: Vec<Vec<f64>> = vec![];
-    let density = contour_density().size([10, 10]).bandwidth(2.0).thresholds(vec![0.01, 0.1]);
+    let density = contour_density()
+        .size([10, 10])
+        .bandwidth(2.0)
+        .thresholds(vec![0.01, 0.1]);
     let features = density.compute(&data);
     assert_eq!(features.len(), 0);
 }
@@ -93,8 +99,16 @@ fn test_contour_generator_no_contours() {
 
 #[test]
 fn test_contour_density_multiple_points() {
-    let data = vec![vec![5.0, 5.0], vec![15.0, 15.0], vec![25.0, 25.0], vec![35.0, 35.0]];
-    let density = contour_density().size([40, 40]).bandwidth(8.0).thresholds(vec![0.01, 0.05]);
+    let data = vec![
+        vec![5.0, 5.0],
+        vec![15.0, 15.0],
+        vec![25.0, 25.0],
+        vec![35.0, 35.0],
+    ];
+    let density = contour_density()
+        .size([40, 40])
+        .bandwidth(8.0)
+        .thresholds(vec![0.01, 0.05]);
     let features = density.compute(&data);
     assert_eq!(features.len(), 2);
     for f in features.iter() {
@@ -106,7 +120,10 @@ fn test_contour_density_multiple_points() {
 #[test]
 fn test_contour_density_high_bandwidth() {
     let data = vec![vec![10.0, 10.0], vec![30.0, 30.0]];
-    let density = contour_density().size([40, 40]).bandwidth(50.0).thresholds(vec![0.01]);
+    let density = contour_density()
+        .size([40, 40])
+        .bandwidth(50.0)
+        .thresholds(vec![0.01]);
     let features = density.compute(&data);
     assert_eq!(features.len(), 1);
     let f = &features[0];

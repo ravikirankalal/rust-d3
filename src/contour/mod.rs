@@ -62,13 +62,34 @@ impl ContourDensity {
             smooth: Box::new(smooth_linear),
         }
     }
-    pub fn x<F: 'static + Fn(&[f64]) -> f64>(mut self, f: F) -> Self { self.x = Box::new(f); self }
-    pub fn y<F: 'static + Fn(&[f64]) -> f64>(mut self, f: F) -> Self { self.y = Box::new(f); self }
-    pub fn value<F: 'static + Fn(&[f64]) -> f64>(mut self, f: F) -> Self { self.value = Box::new(f); self }
-    pub fn weight<F: 'static + Fn(&[f64]) -> f64>(mut self, f: F) -> Self { self.weight = Box::new(f); self }
-    pub fn bandwidth(mut self, b: f64) -> Self { self.bandwidth = b; self }
-    pub fn thresholds(mut self, t: impl Into<Thresholds> + 'static) -> Self { self.thresholds = t.into(); self }
-    pub fn size(mut self, s: [usize; 2]) -> Self { self.size = s; self }
+    pub fn x<F: 'static + Fn(&[f64]) -> f64>(mut self, f: F) -> Self {
+        self.x = Box::new(f);
+        self
+    }
+    pub fn y<F: 'static + Fn(&[f64]) -> f64>(mut self, f: F) -> Self {
+        self.y = Box::new(f);
+        self
+    }
+    pub fn value<F: 'static + Fn(&[f64]) -> f64>(mut self, f: F) -> Self {
+        self.value = Box::new(f);
+        self
+    }
+    pub fn weight<F: 'static + Fn(&[f64]) -> f64>(mut self, f: F) -> Self {
+        self.weight = Box::new(f);
+        self
+    }
+    pub fn bandwidth(mut self, b: f64) -> Self {
+        self.bandwidth = b;
+        self
+    }
+    pub fn thresholds(mut self, t: impl Into<Thresholds> + 'static) -> Self {
+        self.thresholds = t.into();
+        self
+    }
+    pub fn size(mut self, s: [usize; 2]) -> Self {
+        self.size = s;
+        self
+    }
     pub fn smooth(mut self, s: bool) -> Self {
         self.smooth = if s {
             Box::new(smooth_linear)
@@ -87,13 +108,19 @@ impl ContourDensity {
     pub fn compute(&self, data: &[Vec<f64>]) -> Vec<crate::geojson::GeoJsonFeature> {
         let [width, height] = self.size;
         let n = data.len();
-        if n == 0 { return vec![]; }
+        if n == 0 {
+            return vec![];
+        }
         let mut grid = vec![0.0; width * height];
         let bw = self.bandwidth;
         let bw2 = bw * bw;
         let kernel = |dx: f64, dy: f64| {
             let r2 = dx * dx + dy * dy;
-            if r2 > bw2 { 0.0 } else { (1.0 - r2 / bw2).max(0.0) }
+            if r2 > bw2 {
+                0.0
+            } else {
+                (1.0 - r2 / bw2).max(0.0)
+            }
         };
         // Compute density grid
         for j in 0..height {
@@ -117,13 +144,19 @@ impl ContourDensity {
         let tz = match &self.thresholds {
             Thresholds::Count(count) => {
                 let e = extent(&grid).unwrap();
-                ticks(nice(e[0], e[1], *count).0, nice(e[0], e[1], *count).1, *count)
-            },
+                ticks(
+                    nice(e[0], e[1], *count).0,
+                    nice(e[0], e[1], *count).1,
+                    *count,
+                )
+            }
             Thresholds::Values(v) => v.clone(),
         };
         // Use marching squares to extract contours
         let generator = ContourGenerator::new().size([width, height]);
-        tz.into_iter().map(|value| generator.contour(&grid, value)).collect()
+        tz.into_iter()
+            .map(|value| generator.contour(&grid, value))
+            .collect()
     }
 }
 
@@ -287,8 +320,13 @@ impl ContourGenerator {
         match t.into() {
             crate::contour::Thresholds::Count(count) => {
                 self.threshold = Box::new(move |values: &[f64]| {
-                    let e = crate::array::extent::extent(values).expect("Extent could not be calculated");
-                    let mut tz = crate::array::ticks::ticks(crate::array::nice::nice(e[0], e[1], count).0, crate::array::nice::nice(e[0], e[1], count).1, count);
+                    let e = crate::array::extent::extent(values)
+                        .expect("Extent could not be calculated");
+                    let mut tz = crate::array::ticks::ticks(
+                        crate::array::nice::nice(e[0], e[1], count).0,
+                        crate::array::nice::nice(e[0], e[1], count).1,
+                        count,
+                    );
                     while let Some(&last) = tz.last() {
                         if last >= e[1] {
                             tz.pop();

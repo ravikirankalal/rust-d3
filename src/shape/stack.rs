@@ -20,7 +20,15 @@ pub struct StackSeries {
     pub values: Vec<(f64, f64)>, // (start, end) for each datum
 }
 
-impl<T> Stack<fn(&T) -> Vec<String>, fn(&T, &str) -> f64, fn(&[String]) -> Vec<String>, fn(&[f64]) -> Vec<f64>, T> {
+impl<T>
+    Stack<
+        fn(&T) -> Vec<String>,
+        fn(&T, &str) -> f64,
+        fn(&[String]) -> Vec<String>,
+        fn(&[f64]) -> Vec<f64>,
+        T,
+    >
+{
     pub fn new() -> Self {
         Self {
             keys: |_d| vec![],
@@ -50,23 +58,57 @@ where
     F: Fn(&[f64]) -> Vec<f64>,
 {
     pub fn keys<K2>(self, keys: K2) -> Stack<K2, V, O, F, T>
-    where K2: Fn(&T) -> Vec<String> {
-        Stack { keys, value: self.value, order: self.order, offset: self.offset, _phantom: std::marker::PhantomData }
+    where
+        K2: Fn(&T) -> Vec<String>,
+    {
+        Stack {
+            keys,
+            value: self.value,
+            order: self.order,
+            offset: self.offset,
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn value<V2>(self, value: V2) -> Stack<K, V2, O, F, T>
-    where V2: Fn(&T, &str) -> f64 {
-        Stack { keys: self.keys, value, order: self.order, offset: self.offset, _phantom: std::marker::PhantomData }
+    where
+        V2: Fn(&T, &str) -> f64,
+    {
+        Stack {
+            keys: self.keys,
+            value,
+            order: self.order,
+            offset: self.offset,
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn order<O2>(self, order: O2) -> Stack<K, V, O2, F, T>
-    where O2: Fn(&[String]) -> Vec<String> {
-        Stack { keys: self.keys, value: self.value, order: Some(order), offset: self.offset, _phantom: std::marker::PhantomData }
+    where
+        O2: Fn(&[String]) -> Vec<String>,
+    {
+        Stack {
+            keys: self.keys,
+            value: self.value,
+            order: Some(order),
+            offset: self.offset,
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn offset<F2>(self, offset: F2) -> Stack<K, V, O, F2, T>
-    where F2: Fn(&[f64]) -> Vec<f64> {
-        Stack { keys: self.keys, value: self.value, order: self.order, offset: Some(offset), _phantom: std::marker::PhantomData }
+    where
+        F2: Fn(&[f64]) -> Vec<f64>,
+    {
+        Stack {
+            keys: self.keys,
+            value: self.value,
+            order: self.order,
+            offset: Some(offset),
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn generate(&self, data: &[T]) -> Vec<StackSeries> {
-        if data.is_empty() { return vec![]; }
+        if data.is_empty() {
+            return vec![];
+        }
         let keys = (self.keys)(&data[0]);
         let order = if let Some(ref o) = self.order {
             o(&keys)
@@ -74,7 +116,13 @@ where
             keys.clone()
         };
         let n = data.len();
-        let mut series: Vec<StackSeries> = order.iter().map(|k| StackSeries { key: k.clone(), values: vec![(0.0, 0.0); n] }).collect();
+        let mut series: Vec<StackSeries> = order
+            .iter()
+            .map(|k| StackSeries {
+                key: k.clone(),
+                values: vec![(0.0, 0.0); n],
+            })
+            .collect();
         for (i, d) in data.iter().enumerate() {
             let mut acc = 0.0;
             for (j, k) in order.iter().enumerate() {
@@ -105,12 +153,10 @@ mod tests {
         let data = vec![vec![1.0, 2.0], vec![3.0, 4.0]];
         let stack = Stack::new()
             .keys(|_d| vec!["a".to_string(), "b".to_string()])
-            .value(|d: &Vec<f64>, k| {
-                match k {
-                    "a" => d[0],
-                    "b" => d[1],
-                    _ => 0.0
-                }
+            .value(|d: &Vec<f64>, k| match k {
+                "a" => d[0],
+                "b" => d[1],
+                _ => 0.0,
             });
         let series = stack.generate(&data);
         assert_eq!(series.len(), 2);

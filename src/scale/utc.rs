@@ -1,6 +1,6 @@
 // d3-scale: scaleUtc (UTC time scale)
 
-use chrono::{DateTime, Utc, TimeZone, Duration};
+use chrono::{DateTime, Duration, TimeZone, Utc};
 
 #[derive(Debug, Clone)]
 pub struct ScaleUtc {
@@ -12,10 +12,19 @@ pub struct ScaleUtc {
 
 impl ScaleUtc {
     pub fn new(domain: [DateTime<Utc>; 2], range: [f64; 2]) -> Self {
-        Self { domain, range, clamp: false, nice: false }
+        Self {
+            domain,
+            range,
+            clamp: false,
+            nice: false,
+        }
     }
-    pub fn domain(&self) -> [DateTime<Utc>; 2] { self.domain }
-    pub fn range(&self) -> [f64; 2] { self.range }
+    pub fn domain(&self) -> [DateTime<Utc>; 2] {
+        self.domain
+    }
+    pub fn range(&self) -> [f64; 2] {
+        self.range
+    }
     pub fn clamp(mut self, clamp: bool) -> Self {
         self.clamp = clamp;
         self
@@ -25,24 +34,38 @@ impl ScaleUtc {
         self
     }
     pub fn scale(&self, t: DateTime<Utc>) -> f64 {
-        let (d0, d1) = (self.domain[0].timestamp() as f64, self.domain[1].timestamp() as f64);
+        let (d0, d1) = (
+            self.domain[0].timestamp() as f64,
+            self.domain[1].timestamp() as f64,
+        );
         let (r0, r1) = (self.range[0], self.range[1]);
         let mut v = t.timestamp() as f64;
         if self.clamp {
             v = v.max(d0).min(d1);
         }
-        if (d1 - d0).abs() < std::f64::EPSILON { return r0; }
+        if (d1 - d0).abs() < std::f64::EPSILON {
+            return r0;
+        }
         r0 + (r1 - r0) * (v - d0) / (d1 - d0)
     }
     pub fn invert(&self, r: f64) -> DateTime<Utc> {
-        let (d0, d1) = (self.domain[0].timestamp() as f64, self.domain[1].timestamp() as f64);
+        let (d0, d1) = (
+            self.domain[0].timestamp() as f64,
+            self.domain[1].timestamp() as f64,
+        );
         let (r0, r1) = (self.range[0], self.range[1]);
-        let mut v = if (r1 - r0).abs() < std::f64::EPSILON { d0 } else { d0 + (d1 - d0) * (r - r0) / (r1 - r0) };
+        let mut v = if (r1 - r0).abs() < std::f64::EPSILON {
+            d0
+        } else {
+            d0 + (d1 - d0) * (r - r0) / (r1 - r0)
+        };
         if self.clamp {
             v = v.max(d0).min(d1);
         }
         // Use unwrap_or_else to avoid panic if timestamp is out of range
-        Utc.timestamp_opt(v as i64, 0).single().unwrap_or_else(|| self.domain[0])
+        Utc.timestamp_opt(v as i64, 0)
+            .single()
+            .unwrap_or_else(|| self.domain[0])
     }
     pub fn ticks(&self, count: usize) -> Vec<DateTime<Utc>> {
         let (d0, d1) = (self.domain[0], self.domain[1]);

@@ -16,23 +16,13 @@ impl Hsl {
     pub fn brighter(&self, k: Option<f32>) -> Self {
         let k = k.unwrap_or(1.0);
         let t = 1.0 / 0.7_f32.powf(k);
-        Hsl::new(
-            self.h,
-            self.s,
-            (self.l * t).min(100.0),
-            self.opacity,
-        )
+        Hsl::new(self.h, self.s, (self.l * t).min(100.0), self.opacity)
     }
 
     pub fn darker(&self, k: Option<f32>) -> Self {
         let k = k.unwrap_or(1.0);
         let t = 0.7_f32.powf(k);
-        Hsl::new(
-            self.h,
-            self.s,
-            (self.l * t).max(0.0),
-            self.opacity,
-        )
+        Hsl::new(self.h, self.s, (self.l * t).max(0.0), self.opacity)
     }
 }
 
@@ -41,7 +31,11 @@ impl fmt::Display for Hsl {
         if self.opacity == 1.0 {
             write!(f, "hsl({},{}%,{}%)", self.h, self.s, self.l)
         } else {
-            write!(f, "hsla({},{}%,{}%,{})", self.h, self.s, self.l, self.opacity)
+            write!(
+                f,
+                "hsla({},{}%,{}%,{})",
+                self.h, self.s, self.l, self.opacity
+            )
         }
     }
 }

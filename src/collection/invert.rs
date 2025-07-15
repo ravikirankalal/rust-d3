@@ -3,7 +3,9 @@
 
 use std::collections::HashMap;
 
-pub fn invert<K: Eq + std::hash::Hash, V: Eq + std::hash::Hash + Clone>(map: &HashMap<K, V>) -> HashMap<V, K>
+pub fn invert<K: Eq + std::hash::Hash, V: Eq + std::hash::Hash + Clone>(
+    map: &HashMap<K, V>,
+) -> HashMap<V, K>
 where
     K: Clone,
 {

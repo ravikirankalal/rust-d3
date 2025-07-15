@@ -10,6 +10,10 @@ pub struct Tick {
 
 impl Tick {
     pub fn new(value: f64, label: String, position: f64) -> Self {
-        Self { value, label, position }
+        Self {
+            value,
+            label,
+            position,
+        }
     }
 }

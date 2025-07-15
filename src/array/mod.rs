@@ -1,42 +1,42 @@
-pub mod max;
-pub mod min;
+pub mod ascending;
+pub mod bisect;
+pub mod blur;
+pub mod cross;
+pub mod descending;
+pub mod deviation;
+pub mod difference;
 pub mod extent;
+pub mod flat_group;
+pub mod fsum;
+pub mod greatest;
+pub mod greatest_index;
+pub mod group;
+pub mod histogram;
+pub mod intersection;
+pub mod least;
+pub mod least_index;
+pub mod max;
 pub mod mean;
 pub mod median;
-pub mod sum;
-pub mod deviation;
-pub mod variance;
-pub mod quantile;
-pub mod histogram;
-pub mod bisect;
-pub mod ascending;
-pub mod descending;
-pub mod range;
 pub mod merge;
+pub mod min;
+pub mod nice;
+pub mod pairs;
+pub mod quantile;
+pub mod range;
+pub mod scan;
 pub mod shuffle;
+pub mod sum;
+pub mod symmetric_difference;
 pub mod tick_step;
 pub mod ticks;
-pub mod nice;
-pub mod scan;
-pub mod group;
-pub mod flat_group;
-pub mod pairs;
-pub mod zip;
-pub mod cross;
-pub mod least;
-pub mod greatest;
-pub mod least_index;
-pub mod greatest_index;
-pub mod fsum;
-pub mod blur;
 pub mod union;
-pub mod intersection;
-pub mod difference;
-pub mod symmetric_difference;
-pub use union::union;
-pub use intersection::intersection;
+pub mod variance;
+pub mod zip;
 pub use difference::difference;
+pub use intersection::intersection;
 pub use symmetric_difference::symmetric_difference;
+pub use union::union;
 pub mod sort;
 pub mod sort_by;
 pub mod summarize;
@@ -46,50 +46,50 @@ pub use sort_by::sort_by;
 pub use summarize::summarize;
 pub use transform::transform;
 pub mod intern;
-pub use intern::{intern_set, intern_map};
-pub mod transpose;
+pub use intern::{intern_map, intern_set};
 pub mod bisector;
 pub mod quickselect;
+pub mod transpose;
 
 #[cfg(test)]
 mod tests {
-    use super::max::max;
-    use super::min::min;
+    use super::ascending::ascending;
+    use super::bisect::{bisect_left, bisect_right};
+    use super::blur::blur1d;
+    use super::cross::cross;
+    use super::descending::descending;
+    use super::deviation::deviation;
     use super::extent::extent;
+    use super::flat_group::flat_group;
+    use super::fsum::fsum;
+    use super::greatest::greatest;
+    use super::greatest_index::greatest_index;
+    use super::group::group;
+    use super::histogram::histogram;
+    use super::intern::{intern_map, intern_set};
+    use super::least::least;
+    use super::least_index::least_index;
+    use super::max::max;
     use super::mean::mean;
     use super::median::median;
-    use super::sum::sum;
-    use super::deviation::deviation;
-    use super::variance::variance;
-    use super::quantile::quantile;
-    use super::histogram::histogram;
-    use super::bisect::{bisect_left, bisect_right};
-    use super::ascending::ascending;
-    use super::descending::descending;
-    use super::range::range;
     use super::merge::merge;
+    use super::min::min;
+    use super::nice::nice;
+    use super::pairs::pairs;
+    use super::quantile::quantile;
+    use super::range::range;
+    use super::scan::scan;
     use super::shuffle::shuffle;
+    use super::sort::sort;
+    use super::sort_by::sort_by;
+    use super::sum::sum;
+    use super::summarize::summarize;
     use super::tick_step::tick_step;
     use super::ticks::ticks;
-    use super::nice::nice;
-    use super::scan::scan;
-    use super::group::group;
-    use super::flat_group::flat_group;
-    use super::pairs::pairs;
+    use super::transform::transform;
+    use super::variance::variance;
     use super::zip::zip;
-    use super::cross::cross;
-    use super::least::least;
-    use super::greatest::greatest;
-    use super::least_index::least_index;
-    use super::greatest_index::greatest_index;
-    use super::fsum::fsum;
-    use super::blur::blur1d;
-    use super::{union, intersection, difference, symmetric_difference};
-    use super::sort::{sort};
-    use super::sort_by::{sort_by};
-    use super::summarize::{summarize};
-    use super::transform::{transform};
-    use super::intern::{intern_set, intern_map};
+    use super::{difference, intersection, symmetric_difference, union};
     use std::cmp::Ordering;
     use std::collections::HashMap;
 
@@ -146,7 +146,10 @@ mod tests {
 
     #[test]
     fn test_deviation() {
-        assert_eq!(deviation(&[1.0, 2.0, 3.0, 4.0, 5.0]), Some(1.5811388300841898));
+        assert_eq!(
+            deviation(&[1.0, 2.0, 3.0, 4.0, 5.0]),
+            Some(1.5811388300841898)
+        );
         assert_eq!(deviation(&[2.0, 2.0, 2.0]), Some(0.0));
         assert_eq!(deviation(&[1.0, 2.0]), Some(0.7071067811865476));
         assert_eq!(deviation(&[10.0]), None);
@@ -309,7 +312,10 @@ mod tests {
         println!("ticks(0.0, 5.0, 5) = {:?}", actual);
         assert_eq!(actual, vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0]);
         assert_eq!(ticks(5.0, 0.0, 5), vec![5.0, 4.0, 3.0, 2.0, 1.0, 0.0]);
-        assert_eq!(ticks(0.0, 1.0, 10), vec![0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]);
+        assert_eq!(
+            ticks(0.0, 1.0, 10),
+            vec![0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+        );
         assert_eq!(ticks(0.0, 0.0, 10), vec![0.0]);
     }
 
@@ -345,23 +351,53 @@ mod tests {
         }
 
         let people = vec![
-            Person { name: "Alice".to_string(), age: 30 },
-            Person { name: "Bob".to_string(), age: 25 },
-            Person { name: "Charlie".to_string(), age: 30 },
-            Person { name: "David".to_string(), age: 25 },
+            Person {
+                name: "Alice".to_string(),
+                age: 30,
+            },
+            Person {
+                name: "Bob".to_string(),
+                age: 25,
+            },
+            Person {
+                name: "Charlie".to_string(),
+                age: 30,
+            },
+            Person {
+                name: "David".to_string(),
+                age: 25,
+            },
         ];
 
         let grouped_by_age = group(&people, |p| p.age);
 
         let mut expected_map: HashMap<u32, Vec<Person>> = HashMap::new();
-        expected_map.insert(30, vec![
-            Person { name: "Alice".to_string(), age: 30 },
-            Person { name: "Charlie".to_string(), age: 30 },
-        ]);
-        expected_map.insert(25, vec![
-            Person { name: "Bob".to_string(), age: 25 },
-            Person { name: "David".to_string(), age: 25 },
-        ]);
+        expected_map.insert(
+            30,
+            vec![
+                Person {
+                    name: "Alice".to_string(),
+                    age: 30,
+                },
+                Person {
+                    name: "Charlie".to_string(),
+                    age: 30,
+                },
+            ],
+        );
+        expected_map.insert(
+            25,
+            vec![
+                Person {
+                    name: "Bob".to_string(),
+                    age: 25,
+                },
+                Person {
+                    name: "David".to_string(),
+                    age: 25,
+                },
+            ],
+        );
 
         assert_eq!(grouped_by_age, expected_map);
 
@@ -379,23 +415,53 @@ mod tests {
         }
 
         let people = vec![
-            Person { name: "Alice".to_string(), age: 30 },
-            Person { name: "Bob".to_string(), age: 25 },
-            Person { name: "Charlie".to_string(), age: 30 },
-            Person { name: "David".to_string(), age: 25 },
+            Person {
+                name: "Alice".to_string(),
+                age: 30,
+            },
+            Person {
+                name: "Bob".to_string(),
+                age: 25,
+            },
+            Person {
+                name: "Charlie".to_string(),
+                age: 30,
+            },
+            Person {
+                name: "David".to_string(),
+                age: 25,
+            },
         ];
 
         let flat_grouped_by_age = flat_group(&people, |p| p.age);
 
         let mut expected_vec: Vec<(u32, Vec<Person>)> = vec![
-            (30, vec![
-                Person { name: "Alice".to_string(), age: 30 },
-                Person { name: "Charlie".to_string(), age: 30 },
-            ]),
-            (25, vec![
-                Person { name: "Bob".to_string(), age: 25 },
-                Person { name: "David".to_string(), age: 25 },
-            ]),
+            (
+                30,
+                vec![
+                    Person {
+                        name: "Alice".to_string(),
+                        age: 30,
+                    },
+                    Person {
+                        name: "Charlie".to_string(),
+                        age: 30,
+                    },
+                ],
+            ),
+            (
+                25,
+                vec![
+                    Person {
+                        name: "Bob".to_string(),
+                        age: 25,
+                    },
+                    Person {
+                        name: "David".to_string(),
+                        age: 25,
+                    },
+                ],
+            ),
         ];
 
         // Sort both for comparison as HashMap iteration order is not guaranteed
@@ -462,8 +528,14 @@ mod tests {
     #[test]
     fn test_least() {
         #[derive(Debug, PartialEq, Clone)]
-        struct Item { value: f64 }
-        let items = vec![Item { value: 3.0 }, Item { value: 1.0 }, Item { value: 2.0 }];
+        struct Item {
+            value: f64,
+        }
+        let items = vec![
+            Item { value: 3.0 },
+            Item { value: 1.0 },
+            Item { value: 2.0 },
+        ];
         assert_eq!(least(&items, |item| item.value), Some(Item { value: 1.0 }));
 
         let empty_items: Vec<Item> = vec![];
@@ -473,9 +545,18 @@ mod tests {
     #[test]
     fn test_greatest() {
         #[derive(Debug, PartialEq, Clone)]
-        struct Item { value: f64 }
-        let items = vec![Item { value: 3.0 }, Item { value: 1.0 }, Item { value: 2.0 }];
-        assert_eq!(greatest(&items, |item| item.value), Some(Item { value: 3.0 }));
+        struct Item {
+            value: f64,
+        }
+        let items = vec![
+            Item { value: 3.0 },
+            Item { value: 1.0 },
+            Item { value: 2.0 },
+        ];
+        assert_eq!(
+            greatest(&items, |item| item.value),
+            Some(Item { value: 3.0 })
+        );
 
         let empty_items: Vec<Item> = vec![];
         assert_eq!(greatest(&empty_items, |item| item.value), None);
@@ -484,8 +565,14 @@ mod tests {
     #[test]
     fn test_least_index() {
         #[derive(Debug, PartialEq, Clone)]
-        struct Item { value: f64 }
-        let items = vec![Item { value: 3.0 }, Item { value: 1.0 }, Item { value: 2.0 }];
+        struct Item {
+            value: f64,
+        }
+        let items = vec![
+            Item { value: 3.0 },
+            Item { value: 1.0 },
+            Item { value: 2.0 },
+        ];
         assert_eq!(least_index(&items, |item| item.value), Some(1));
 
         let empty_items: Vec<Item> = vec![];
@@ -495,8 +582,14 @@ mod tests {
     #[test]
     fn test_greatest_index() {
         #[derive(Debug, PartialEq, Clone)]
-        struct Item { value: f64 }
-        let items = vec![Item { value: 3.0 }, Item { value: 1.0 }, Item { value: 2.0 }];
+        struct Item {
+            value: f64,
+        }
+        let items = vec![
+            Item { value: 3.0 },
+            Item { value: 1.0 },
+            Item { value: 2.0 },
+        ];
         assert_eq!(greatest_index(&items, |item| item.value), Some(0));
 
         let empty_items: Vec<Item> = vec![];
@@ -506,7 +599,10 @@ mod tests {
     #[test]
     fn test_fsum() {
         assert_eq!(fsum(&[0.1, 0.2, 0.3]), 0.6);
-        assert_eq!(fsum(&[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]), 5.5);
+        assert_eq!(
+            fsum(&[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]),
+            5.5
+        );
         assert_eq!(fsum(&[]), 0.0);
         assert_eq!(fsum(&[1.0]), 1.0);
     }
@@ -517,7 +613,12 @@ mod tests {
         let blurred = blur1d(&input, 1);
         let expected = vec![1.5, 2.0, 3.0, 4.0, 4.5];
         for (b, e) in blurred.iter().zip(expected.iter()) {
-            assert!((b - e).abs() < 1e-6, "blurred value {} != expected {}", b, e);
+            assert!(
+                (b - e).abs() < 1e-6,
+                "blurred value {} != expected {}",
+                b,
+                e
+            );
         }
     }
 
@@ -560,7 +661,7 @@ mod tests {
 
     #[test]
     fn test_intern() {
-        use std::collections::{HashSet, HashMap};
+        use std::collections::{HashMap, HashSet};
         let mut set = HashSet::new();
         let a = intern_set(&mut set, "foo".to_string()).clone();
         let b = intern_set(&mut set, "foo".to_string()).clone();
@@ -577,4 +678,3 @@ mod tests {
         assert_eq!(v3, 7);
     }
 }
-

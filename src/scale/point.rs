@@ -8,18 +8,28 @@ pub struct ScalePoint<T: Clone> {
 
 impl<T: Clone + PartialEq> ScalePoint<T> {
     pub fn new(domain: Vec<T>, range: [f64; 2], align: f64) -> Self {
-        Self { domain, range, align }
+        Self {
+            domain,
+            range,
+            align,
+        }
     }
     pub fn scale(&self, x: &T) -> Option<f64> {
         let n = self.domain.len();
-        if n == 0 { return None; }
+        if n == 0 {
+            return None;
+        }
         let step = if n > 1 {
             (self.range[1] - self.range[0]) / (n as f64 - 1.0)
-        } else { 0.0 };
-        let start = self.range[0] + (self.range[1] - self.range[0] - step * (n as f64 - 1.0)) * self.align;
-        self.domain.iter().position(|v| v == x).map(|i| {
-            start + i as f64 * step
-        })
+        } else {
+            0.0
+        };
+        let start =
+            self.range[0] + (self.range[1] - self.range[0] - step * (n as f64 - 1.0)) * self.align;
+        self.domain
+            .iter()
+            .position(|v| v == x)
+            .map(|i| start + i as f64 * step)
     }
 }
 

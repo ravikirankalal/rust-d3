@@ -3,13 +3,13 @@
 
 pub mod format;
 pub use format::{
-    time_format_with_locale, time_parse_with_locale, iso_format, default_format, multi_format
+    default_format, iso_format, multi_format, time_format_with_locale, time_parse_with_locale,
 };
 pub mod locale;
 pub use locale::TimeLocale;
 
-use chrono::{NaiveDateTime, Utc, Datelike, Duration};
 use chrono::TimeZone;
+use chrono::{Datelike, Duration, NaiveDateTime, Utc};
 
 // Stubs for D3 time formatting and intervals
 pub fn time_format_stub(_specifier: &str) -> impl Fn(&str) -> String {
@@ -18,10 +18,18 @@ pub fn time_format_stub(_specifier: &str) -> impl Fn(&str) -> String {
 
 pub struct TimeIntervalStub;
 impl TimeIntervalStub {
-    pub fn floor(&self, _date: &str) -> String { String::from("[floor stub]") }
-    pub fn ceil(&self, _date: &str) -> String { String::from("[ceil stub]") }
-    pub fn offset(&self, _date: &str, _step: i32) -> String { String::from("[offset stub]") }
-    pub fn range(&self, _start: &str, _stop: &str, _step: i32) -> Vec<String> { vec![String::from("[range stub]")] }
+    pub fn floor(&self, _date: &str) -> String {
+        String::from("[floor stub]")
+    }
+    pub fn ceil(&self, _date: &str) -> String {
+        String::from("[ceil stub]")
+    }
+    pub fn offset(&self, _date: &str, _step: i32) -> String {
+        String::from("[offset stub]")
+    }
+    pub fn range(&self, _start: &str, _stop: &str, _step: i32) -> Vec<String> {
+        vec![String::from("[range stub]")]
+    }
 }
 
 // UTC and local formatters (stubs)
@@ -30,7 +38,12 @@ pub fn utc_format(spec: &str, date: &chrono::NaiveDateTime) -> String {
 }
 
 pub fn local_format(spec: &str, date: &chrono::NaiveDateTime) -> String {
-    format::time_format_with_locale::<chrono::Local>(spec, date, &locale::TimeLocale::default(), false)
+    format::time_format_with_locale::<chrono::Local>(
+        spec,
+        date,
+        &locale::TimeLocale::default(),
+        false,
+    )
 }
 
 // Interval traits and stubs
@@ -39,16 +52,29 @@ pub trait TimeInterval {
     fn ceil(&self, date: NaiveDateTime) -> NaiveDateTime;
     fn offset(&self, date: NaiveDateTime, step: i32) -> NaiveDateTime;
     fn range(&self, start: NaiveDateTime, stop: NaiveDateTime, step: i32) -> Vec<NaiveDateTime>;
-    fn count(&self, _start: NaiveDateTime, _stop: NaiveDateTime) -> i32 { 0 }
-    fn every(&self, _step: i32) -> Option<Self> where Self: Sized { None }
+    fn count(&self, _start: NaiveDateTime, _stop: NaiveDateTime) -> i32 {
+        0
+    }
+    fn every(&self, _step: i32) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        None
+    }
 }
 
 #[derive(Default, Clone)]
 pub struct Second;
 impl TimeInterval for Second {
-    fn floor(&self, date: NaiveDateTime) -> NaiveDateTime { date - Duration::nanoseconds(date.and_utc().timestamp_subsec_nanos() as i64 % 1_000_000_000) }
-    fn ceil(&self, date: NaiveDateTime) -> NaiveDateTime { self.floor(date) + Duration::nanoseconds(1_000_000_000) }
-    fn offset(&self, date: NaiveDateTime, step: i32) -> NaiveDateTime { date + Duration::nanoseconds(1_000_000_000 * step as i64) }
+    fn floor(&self, date: NaiveDateTime) -> NaiveDateTime {
+        date - Duration::nanoseconds(date.and_utc().timestamp_subsec_nanos() as i64 % 1_000_000_000)
+    }
+    fn ceil(&self, date: NaiveDateTime) -> NaiveDateTime {
+        self.floor(date) + Duration::nanoseconds(1_000_000_000)
+    }
+    fn offset(&self, date: NaiveDateTime, step: i32) -> NaiveDateTime {
+        date + Duration::nanoseconds(1_000_000_000 * step as i64)
+    }
     fn range(&self, start: NaiveDateTime, stop: NaiveDateTime, step: i32) -> Vec<NaiveDateTime> {
         let mut v = Vec::new();
         let mut d = self.floor(start);
@@ -63,9 +89,17 @@ impl TimeInterval for Second {
 #[derive(Default, Clone)]
 pub struct Minute;
 impl TimeInterval for Minute {
-    fn floor(&self, date: NaiveDateTime) -> NaiveDateTime { date - Duration::nanoseconds(date.and_utc().timestamp_subsec_nanos() as i64 % 60_000_000_000) }
-    fn ceil(&self, date: NaiveDateTime) -> NaiveDateTime { self.floor(date) + Duration::nanoseconds(60_000_000_000) }
-    fn offset(&self, date: NaiveDateTime, step: i32) -> NaiveDateTime { date + Duration::nanoseconds(60_000_000_000 * step as i64) }
+    fn floor(&self, date: NaiveDateTime) -> NaiveDateTime {
+        date - Duration::nanoseconds(
+            date.and_utc().timestamp_subsec_nanos() as i64 % 60_000_000_000,
+        )
+    }
+    fn ceil(&self, date: NaiveDateTime) -> NaiveDateTime {
+        self.floor(date) + Duration::nanoseconds(60_000_000_000)
+    }
+    fn offset(&self, date: NaiveDateTime, step: i32) -> NaiveDateTime {
+        date + Duration::nanoseconds(60_000_000_000 * step as i64)
+    }
     fn range(&self, start: NaiveDateTime, stop: NaiveDateTime, step: i32) -> Vec<NaiveDateTime> {
         let mut v = Vec::new();
         let mut d = self.floor(start);
@@ -80,9 +114,17 @@ impl TimeInterval for Minute {
 #[derive(Default, Clone)]
 pub struct Hour;
 impl TimeInterval for Hour {
-    fn floor(&self, date: NaiveDateTime) -> NaiveDateTime { date - Duration::nanoseconds(date.and_utc().timestamp_subsec_nanos() as i64 % 3_600_000_000_000) }
-    fn ceil(&self, date: NaiveDateTime) -> NaiveDateTime { self.floor(date) + Duration::nanoseconds(3_600_000_000_000) }
-    fn offset(&self, date: NaiveDateTime, step: i32) -> NaiveDateTime { date + Duration::nanoseconds(3_600_000_000_000 * step as i64) }
+    fn floor(&self, date: NaiveDateTime) -> NaiveDateTime {
+        date - Duration::nanoseconds(
+            date.and_utc().timestamp_subsec_nanos() as i64 % 3_600_000_000_000,
+        )
+    }
+    fn ceil(&self, date: NaiveDateTime) -> NaiveDateTime {
+        self.floor(date) + Duration::nanoseconds(3_600_000_000_000)
+    }
+    fn offset(&self, date: NaiveDateTime, step: i32) -> NaiveDateTime {
+        date + Duration::nanoseconds(3_600_000_000_000 * step as i64)
+    }
     fn range(&self, start: NaiveDateTime, stop: NaiveDateTime, step: i32) -> Vec<NaiveDateTime> {
         let mut v = Vec::new();
         let mut d = self.floor(start);
@@ -99,7 +141,10 @@ impl TimeInterval for Hour {
 pub struct Day;
 impl TimeInterval for Day {
     fn floor(&self, date: NaiveDateTime) -> NaiveDateTime {
-        chrono::NaiveDate::from_ymd_opt(date.year(), date.month(), date.day()).unwrap().and_hms_opt(0, 0, 0).unwrap()
+        chrono::NaiveDate::from_ymd_opt(date.year(), date.month(), date.day())
+            .unwrap()
+            .and_hms_opt(0, 0, 0)
+            .unwrap()
     }
     fn ceil(&self, date: NaiveDateTime) -> NaiveDateTime {
         self.floor(date) + chrono::Duration::try_days(1).unwrap()
@@ -176,7 +221,10 @@ impl TimeInterval for Week {
 pub struct Month;
 impl TimeInterval for Month {
     fn floor(&self, date: NaiveDateTime) -> NaiveDateTime {
-        chrono::NaiveDate::from_ymd_opt(date.year(), date.month(), 1).unwrap().and_hms_opt(0, 0, 0).unwrap()
+        chrono::NaiveDate::from_ymd_opt(date.year(), date.month(), 1)
+            .unwrap()
+            .and_hms_opt(0, 0, 0)
+            .unwrap()
     }
     fn ceil(&self, date: NaiveDateTime) -> NaiveDateTime {
         let mut year = date.year();
@@ -185,7 +233,10 @@ impl TimeInterval for Month {
             year += 1;
             month = 1;
         }
-        chrono::NaiveDate::from_ymd_opt(year, month, 1).unwrap().and_hms_opt(0, 0, 0).unwrap()
+        chrono::NaiveDate::from_ymd_opt(year, month, 1)
+            .unwrap()
+            .and_hms_opt(0, 0, 0)
+            .unwrap()
     }
     fn offset(&self, date: NaiveDateTime, step: i32) -> NaiveDateTime {
         let mut year = date.year();
@@ -198,7 +249,10 @@ impl TimeInterval for Month {
             year -= 1;
             month += 12;
         }
-        chrono::NaiveDate::from_ymd_opt(year, month as u32, 1).unwrap().and_hms_opt(0, 0, 0).unwrap()
+        chrono::NaiveDate::from_ymd_opt(year, month as u32, 1)
+            .unwrap()
+            .and_hms_opt(0, 0, 0)
+            .unwrap()
     }
     fn range(&self, start: NaiveDateTime, stop: NaiveDateTime, step: i32) -> Vec<NaiveDateTime> {
         let mut v = Vec::new();
@@ -216,13 +270,22 @@ impl TimeInterval for Month {
 pub struct Year;
 impl TimeInterval for Year {
     fn floor(&self, date: NaiveDateTime) -> NaiveDateTime {
-        chrono::NaiveDate::from_ymd_opt(date.year(), 1, 1).unwrap().and_hms_opt(0, 0, 0).unwrap()
+        chrono::NaiveDate::from_ymd_opt(date.year(), 1, 1)
+            .unwrap()
+            .and_hms_opt(0, 0, 0)
+            .unwrap()
     }
     fn ceil(&self, date: NaiveDateTime) -> NaiveDateTime {
-        chrono::NaiveDate::from_ymd_opt(date.year() + 1, 1, 1).unwrap().and_hms_opt(0, 0, 0).unwrap()
+        chrono::NaiveDate::from_ymd_opt(date.year() + 1, 1, 1)
+            .unwrap()
+            .and_hms_opt(0, 0, 0)
+            .unwrap()
     }
     fn offset(&self, date: NaiveDateTime, step: i32) -> NaiveDateTime {
-        chrono::NaiveDate::from_ymd_opt(date.year() + step, 1, 1).unwrap().and_hms_opt(0, 0, 0).unwrap()
+        chrono::NaiveDate::from_ymd_opt(date.year() + step, 1, 1)
+            .unwrap()
+            .and_hms_opt(0, 0, 0)
+            .unwrap()
     }
     fn range(&self, start: NaiveDateTime, stop: NaiveDateTime, step: i32) -> Vec<NaiveDateTime> {
         let mut v = Vec::new();
@@ -239,8 +302,13 @@ impl TimeInterval for Year {
 
 /// Returns an interval that advances by the given step, or None if step < 1.
 pub fn time_every<I: TimeInterval + Default>(step: i32) -> Option<Every<I>> {
-    if step < 1 { return None; }
-    Some(Every { interval: I::default(), step })
+    if step < 1 {
+        return None;
+    }
+    Some(Every {
+        interval: I::default(),
+        step,
+    })
 }
 
 /// An interval that advances by a given step (e.g., every 2 days).
@@ -253,18 +321,18 @@ impl<I: TimeInterval + Clone> TimeInterval for Every<I> {
     fn floor(&self, date: NaiveDateTime) -> NaiveDateTime {
         let base = self.interval.floor(date);
         let mut count = 0;
-        while self.interval.offset(self.interval.floor(date), -self.step * count) < base {
+        while self
+            .interval
+            .offset(self.interval.floor(date), -self.step * count)
+            < base
+        {
             count += 1;
         }
         self.interval.offset(base, self.step * count)
     }
     fn ceil(&self, date: NaiveDateTime) -> NaiveDateTime {
         let f = self.floor(date);
-        if f < date {
-            self.offset(f, 1)
-        } else {
-            f
-        }
+        if f < date { self.offset(f, 1) } else { f }
     }
     fn offset(&self, date: NaiveDateTime, step: i32) -> NaiveDateTime {
         self.interval.offset(date, self.step * step)
@@ -287,8 +355,18 @@ impl<I: TimeInterval + Clone> TimeInterval for Every<I> {
         }
         count
     }
-    fn every(&self, step: i32) -> Option<Self> where Self: Sized {
-        if step < 1 { None } else { Some(Self { interval: self.interval.clone(), step: self.step * step }) }
+    fn every(&self, step: i32) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if step < 1 {
+            None
+        } else {
+            Some(Self {
+                interval: self.interval.clone(),
+                step: self.step * step,
+            })
+        }
     }
 }
 
@@ -352,7 +430,12 @@ macro_rules! week_start_interval {
             fn offset(&self, date: NaiveDateTime, step: i32) -> NaiveDateTime {
                 date + chrono::Duration::try_days(7 * step as i64).unwrap()
             }
-            fn range(&self, start: NaiveDateTime, stop: NaiveDateTime, step: i32) -> Vec<NaiveDateTime> {
+            fn range(
+                &self,
+                start: NaiveDateTime,
+                stop: NaiveDateTime,
+                step: i32,
+            ) -> Vec<NaiveDateTime> {
                 let mut v = Vec::new();
                 let mut d = self.floor(start);
                 while d < stop {
@@ -375,36 +458,80 @@ week_start_interval!(Saturday, 6);
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::{NaiveDate, Utc, TimeZone};
+    use chrono::{NaiveDate, TimeZone, Utc};
     #[test]
     fn test_day_interval() {
         let day = Day;
-        let d = NaiveDate::from_ymd_opt(2025, 7, 8).unwrap().and_hms_opt(15, 30, 0).unwrap();
-        assert_eq!(day.floor(d), NaiveDate::from_ymd_opt(2025, 7, 8).unwrap().and_hms_opt(0, 0, 0).unwrap());
+        let d = NaiveDate::from_ymd_opt(2025, 7, 8)
+            .unwrap()
+            .and_hms_opt(15, 30, 0)
+            .unwrap();
+        assert_eq!(
+            day.floor(d),
+            NaiveDate::from_ymd_opt(2025, 7, 8)
+                .unwrap()
+                .and_hms_opt(0, 0, 0)
+                .unwrap()
+        );
     }
     #[test]
     fn test_utc_day_interval() {
         let utc_day = UtcDay;
-        let d = Utc.with_ymd_and_hms(2025, 7, 8, 15, 30, 0).unwrap().naive_utc();
-        assert_eq!(utc_day.floor(d), Utc.with_ymd_and_hms(2025, 7, 8, 0, 0, 0).unwrap().naive_utc());
+        let d = Utc
+            .with_ymd_and_hms(2025, 7, 8, 15, 30, 0)
+            .unwrap()
+            .naive_utc();
+        assert_eq!(
+            utc_day.floor(d),
+            Utc.with_ymd_and_hms(2025, 7, 8, 0, 0, 0)
+                .unwrap()
+                .naive_utc()
+        );
     }
     #[test]
     fn test_week_interval() {
         let week = Week;
-        let d = NaiveDate::from_ymd_opt(2025, 7, 8).unwrap().and_hms_opt(15, 30, 0).unwrap();
-        assert_eq!(week.floor(d), NaiveDate::from_ymd_opt(2025, 7, 6).unwrap().and_hms_opt(0, 0, 0).unwrap());
+        let d = NaiveDate::from_ymd_opt(2025, 7, 8)
+            .unwrap()
+            .and_hms_opt(15, 30, 0)
+            .unwrap();
+        assert_eq!(
+            week.floor(d),
+            NaiveDate::from_ymd_opt(2025, 7, 6)
+                .unwrap()
+                .and_hms_opt(0, 0, 0)
+                .unwrap()
+        );
     }
     #[test]
     fn test_month_interval() {
         let month = Month;
-        let d = NaiveDate::from_ymd_opt(2025, 7, 8).unwrap().and_hms_opt(15, 30, 0).unwrap();
-        assert_eq!(month.floor(d), NaiveDate::from_ymd_opt(2025, 7, 1).unwrap().and_hms_opt(0, 0, 0).unwrap());
+        let d = NaiveDate::from_ymd_opt(2025, 7, 8)
+            .unwrap()
+            .and_hms_opt(15, 30, 0)
+            .unwrap();
+        assert_eq!(
+            month.floor(d),
+            NaiveDate::from_ymd_opt(2025, 7, 1)
+                .unwrap()
+                .and_hms_opt(0, 0, 0)
+                .unwrap()
+        );
     }
     #[test]
     fn test_year_interval() {
         let year = Year;
-        let d = NaiveDate::from_ymd_opt(2025, 7, 8).unwrap().and_hms_opt(15, 30, 0).unwrap();
-        assert_eq!(year.floor(d), NaiveDate::from_ymd_opt(2025, 1, 1).unwrap().and_hms_opt(0, 0, 0).unwrap());
+        let d = NaiveDate::from_ymd_opt(2025, 7, 8)
+            .unwrap()
+            .and_hms_opt(15, 30, 0)
+            .unwrap();
+        assert_eq!(
+            year.floor(d),
+            NaiveDate::from_ymd_opt(2025, 1, 1)
+                .unwrap()
+                .and_hms_opt(0, 0, 0)
+                .unwrap()
+        );
     }
     #[test]
     fn test_time_format_stub() {
@@ -417,13 +544,22 @@ mod tests {
         assert_eq!(interval.floor("2025-07-08"), "[floor stub]");
         assert_eq!(interval.ceil("2025-07-08"), "[ceil stub]");
         assert_eq!(interval.offset("2025-07-08", 1), "[offset stub]");
-        assert_eq!(interval.range("2025-07-08", "2025-07-09", 1), vec!["[range stub]".to_string()]);
+        assert_eq!(
+            interval.range("2025-07-08", "2025-07-09", 1),
+            vec!["[range stub]".to_string()]
+        );
     }
     #[test]
     fn test_every_day() {
         let every_2_days = Day::every(2).unwrap();
-        let start = NaiveDate::from_ymd_opt(2025, 7, 1).unwrap().and_hms_opt(0, 0, 0).unwrap();
-        let stop = NaiveDate::from_ymd_opt(2025, 7, 8).unwrap().and_hms_opt(0, 0, 0).unwrap();
+        let start = NaiveDate::from_ymd_opt(2025, 7, 1)
+            .unwrap()
+            .and_hms_opt(0, 0, 0)
+            .unwrap();
+        let stop = NaiveDate::from_ymd_opt(2025, 7, 8)
+            .unwrap()
+            .and_hms_opt(0, 0, 0)
+            .unwrap();
         let range = every_2_days.range(start, stop, 1);
         assert_eq!(range.len(), 4);
         assert_eq!(range[0], start);
@@ -434,8 +570,14 @@ mod tests {
     #[test]
     fn test_time_every_fn() {
         let every_3_weeks = time_every::<Week>(3).unwrap();
-        let start = NaiveDate::from_ymd_opt(2025, 7, 6).unwrap().and_hms_opt(0, 0, 0).unwrap();
-        let stop = NaiveDate::from_ymd_opt(2025, 8, 17).unwrap().and_hms_opt(0, 0, 0).unwrap();
+        let start = NaiveDate::from_ymd_opt(2025, 7, 6)
+            .unwrap()
+            .and_hms_opt(0, 0, 0)
+            .unwrap();
+        let stop = NaiveDate::from_ymd_opt(2025, 8, 17)
+            .unwrap()
+            .and_hms_opt(0, 0, 0)
+            .unwrap();
         let range = every_3_weeks.range(start, stop, 1);
         assert_eq!(range.len(), 2);
         assert_eq!(range[0], start);
@@ -444,19 +586,46 @@ mod tests {
     #[test]
     fn test_monday_interval() {
         let monday = Monday;
-        let d = NaiveDate::from_ymd_opt(2025, 7, 8).unwrap().and_hms_opt(15, 30, 0).unwrap(); // Tuesday
-        assert_eq!(monday.floor(d), NaiveDate::from_ymd_opt(2025, 7, 7).unwrap().and_hms_opt(0, 0, 0).unwrap());
+        let d = NaiveDate::from_ymd_opt(2025, 7, 8)
+            .unwrap()
+            .and_hms_opt(15, 30, 0)
+            .unwrap(); // Tuesday
+        assert_eq!(
+            monday.floor(d),
+            NaiveDate::from_ymd_opt(2025, 7, 7)
+                .unwrap()
+                .and_hms_opt(0, 0, 0)
+                .unwrap()
+        );
     }
     #[test]
     fn test_sunday_interval() {
         let sunday = Sunday;
-        let d = NaiveDate::from_ymd_opt(2025, 7, 8).unwrap().and_hms_opt(15, 30, 0).unwrap(); // Tuesday
-        assert_eq!(sunday.floor(d), NaiveDate::from_ymd_opt(2025, 7, 6).unwrap().and_hms_opt(0, 0, 0).unwrap());
+        let d = NaiveDate::from_ymd_opt(2025, 7, 8)
+            .unwrap()
+            .and_hms_opt(15, 30, 0)
+            .unwrap(); // Tuesday
+        assert_eq!(
+            sunday.floor(d),
+            NaiveDate::from_ymd_opt(2025, 7, 6)
+                .unwrap()
+                .and_hms_opt(0, 0, 0)
+                .unwrap()
+        );
     }
     #[test]
     fn test_thursday_interval() {
         let thursday = Thursday;
-        let d = NaiveDate::from_ymd_opt(2025, 7, 8).unwrap().and_hms_opt(15, 30, 0).unwrap(); // Tuesday
-        assert_eq!(thursday.floor(d), NaiveDate::from_ymd_opt(2025, 7, 3).unwrap().and_hms_opt(0, 0, 0).unwrap());
+        let d = NaiveDate::from_ymd_opt(2025, 7, 8)
+            .unwrap()
+            .and_hms_opt(15, 30, 0)
+            .unwrap(); // Tuesday
+        assert_eq!(
+            thursday.floor(d),
+            NaiveDate::from_ymd_opt(2025, 7, 3)
+                .unwrap()
+                .and_hms_opt(0, 0, 0)
+                .unwrap()
+        );
     }
 }

@@ -9,7 +9,7 @@ pub struct DataJoin {
 
 impl DataJoin {
     /// Create a new DataJoin from a parent selection and new data
-    pub fn new(parent: &Selection, data: &[impl Clone]) -> Self {
+    pub fn new(parent: &Selection, _data: &[impl Clone]) -> Self {
         // Pseudocode: actual logic depends on Selection internals
         // 1. Find existing nodes and match to data
         // 2. update: nodes with data
@@ -19,7 +19,11 @@ impl DataJoin {
         let enter = parent.clone(); // placeholder
         let exit = parent.clone(); // placeholder
         // TODO: implement matching logic
-        DataJoin { update, enter, exit }
+        DataJoin {
+            update,
+            enter,
+            exit,
+        }
     }
 
     /// Get the enter selection

@@ -14,15 +14,15 @@ pub struct Axis<S> {
     pub tick_size_outer: f64,
     pub tick_padding: f64,
     pub tick_arguments: Option<Vec<f64>>, // For D3-like tickArguments
-    pub offset: f64, // For pixel offset (D3 parity)
-    pub locale: Option<String>, // For locale-aware formatting
-    pub grid: bool, // Show grid lines
-    pub grid_style: Option<GridStyle>, // Grid line styling
-    pub title: Option<String>, // Axis title
-    pub title_style: Option<TitleStyle>, // Axis title styling
-    pub minor_ticks: Option<Vec<f64>>, // Minor tick values
-    pub minor_tick_size: Option<f64>, // Minor tick size
-    pub tick_label_angle: Option<f64>, // Tick label rotation angle
+    pub offset: f64,                      // For pixel offset (D3 parity)
+    pub locale: Option<String>,           // For locale-aware formatting
+    pub grid: bool,                       // Show grid lines
+    pub grid_style: Option<GridStyle>,    // Grid line styling
+    pub title: Option<String>,            // Axis title
+    pub title_style: Option<TitleStyle>,  // Axis title styling
+    pub minor_ticks: Option<Vec<f64>>,    // Minor tick values
+    pub minor_tick_size: Option<f64>,     // Minor tick size
+    pub tick_label_angle: Option<f64>,    // Tick label rotation angle
     pub tick_label_style: Option<TickLabelStyle>, // Tick label styling
     pub axis_line_style: Option<AxisLineStyle>, // Axis line styling
     pub on_render: Option<Box<dyn Fn()>>, // Event hook: before/after render

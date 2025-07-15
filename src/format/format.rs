@@ -1,9 +1,15 @@
-use super::parse_specifier::parse_specifier;
-use super::format_type::format_type;
 use super::format_grouping::format_grouping;
+use super::format_type::format_type;
 use super::locale::Locale;
+use super::parse_specifier::parse_specifier;
 
-fn apply_fill_align_width(s: &str, fs: &super::specifier::FormatSpecifier, _is_negative: bool, _sign_char: Option<char>, parentheses: bool) -> String {
+fn apply_fill_align_width(
+    s: &str,
+    fs: &super::specifier::FormatSpecifier,
+    _is_negative: bool,
+    _sign_char: Option<char>,
+    parentheses: bool,
+) -> String {
     let mut s = s.to_string();
     // Add sign if needed (skip if using parentheses)
     if !parentheses {
@@ -27,8 +33,13 @@ fn apply_fill_align_width(s: &str, fs: &super::specifier::FormatSpecifier, _is_n
             '^' => {
                 let left = pad / 2;
                 let right = pad - left;
-                s = format!("{}{}{}", fill.to_string().repeat(left), s, fill.to_string().repeat(right));
-            },
+                s = format!(
+                    "{}{}{}",
+                    fill.to_string().repeat(left),
+                    s,
+                    fill.to_string().repeat(right)
+                );
+            }
             '=' => {
                 // Pad after sign (if present)
                 if !parentheses && _sign_char.is_some() && s.chars().count() > 1 {
@@ -38,7 +49,7 @@ fn apply_fill_align_width(s: &str, fs: &super::specifier::FormatSpecifier, _is_n
                 } else {
                     s = format!("{}{}", fill.to_string().repeat(pad), s);
                 }
-            },
+            }
             _ => s = format!("{}{}", fill.to_string().repeat(pad), s),
         }
         // eprintln!("[DEBUG] after padding: s='{}', len={}", s, s.chars().count());
@@ -48,7 +59,11 @@ fn apply_fill_align_width(s: &str, fs: &super::specifier::FormatSpecifier, _is_n
 
 pub fn format(spec: &str, x: f64) -> String {
     let fs = parse_specifier(spec);
-    let locale = fs.locale.as_ref().map(|tag| Locale::from_tag(tag)).unwrap_or(Locale::default());
+    let locale = fs
+        .locale
+        .as_ref()
+        .map(|tag| Locale::from_tag(tag))
+        .unwrap_or(Locale::default());
     let mut s = format_type(x, &fs);
     // Grouping: comma or underscore
     if fs.comma {

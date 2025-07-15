@@ -45,12 +45,27 @@ mod tests {
     #[test]
     fn test_nest_entries() {
         #[derive(Debug, PartialEq, Eq, Hash)]
-        struct Person { name: &'static str, age: u32 }
+        struct Person {
+            name: &'static str,
+            age: u32,
+        }
         let people = vec![
-            Person { name: "Alice", age: 30 },
-            Person { name: "Bob", age: 25 },
-            Person { name: "Charlie", age: 30 },
-            Person { name: "David", age: 25 },
+            Person {
+                name: "Alice",
+                age: 30,
+            },
+            Person {
+                name: "Bob",
+                age: 25,
+            },
+            Person {
+                name: "Charlie",
+                age: 30,
+            },
+            Person {
+                name: "David",
+                age: 25,
+            },
         ];
         let n = nest(|p: &Person| p.age);
         let grouped = n.entries(&people);

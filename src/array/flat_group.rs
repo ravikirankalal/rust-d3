@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::hash::Hash;
 
-pub fn flat_group<T, K, F>(array: &[T], key_fn: F) -> Vec<(K, Vec<T>)> 
+pub fn flat_group<T, K, F>(array: &[T], key_fn: F) -> Vec<(K, Vec<T>)>
 where
     T: Clone,
     K: Eq + Hash,

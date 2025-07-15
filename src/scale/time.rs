@@ -1,9 +1,6 @@
 // d3-scale: ScaleTime
-use chrono::{NaiveDateTime, Duration};
-use crate::time::{
-    TimeInterval, Second, Minute, Hour, Day, Week, Month, Year,
-    utc_format
-};
+use crate::time::{Day, Hour, Minute, Month, Second, TimeInterval, Week, Year, utc_format};
+use chrono::{Duration, NaiveDateTime};
 
 #[derive(Debug, Clone)]
 pub struct ScaleTime {
@@ -16,78 +13,78 @@ pub struct ScaleTime {
 
 impl ScaleTime {
     pub fn new(domain: [NaiveDateTime; 2], range: [f64; 2]) -> Self {
-        Self { 
-            domain, 
-            range, 
+        Self {
+            domain,
+            range,
             clamp: false,
             interpolate: linear_interpolate,
             unknown: None,
         }
     }
-    
+
     pub fn scale(&self, x: NaiveDateTime) -> f64 {
         let mut x_millis = x.and_utc().timestamp_millis() as f64;
         let domain_start = self.domain[0].and_utc().timestamp_millis() as f64;
         let domain_end = self.domain[1].and_utc().timestamp_millis() as f64;
-        
+
         if self.clamp {
             x_millis = x_millis.max(domain_start).min(domain_end);
         }
-        
+
         let t = (x_millis - domain_start) / (domain_end - domain_start);
         (self.interpolate)(self.range[0], self.range[1], t)
     }
-    
+
     pub fn invert(&self, y: f64) -> NaiveDateTime {
         let t = (y - self.range[0]) / (self.range[1] - self.range[0]);
         let domain_start = self.domain[0].and_utc().timestamp_millis() as f64;
         let domain_end = self.domain[1].and_utc().timestamp_millis() as f64;
-        
+
         let millis = domain_start + t * (domain_end - domain_start);
         let mut result_millis = millis;
-        
+
         if self.clamp {
             result_millis = result_millis.max(domain_start).min(domain_end);
         }
-        
+
         chrono::DateTime::<chrono::Utc>::from_timestamp(
-            (result_millis / 1000.0) as i64, 
-            ((result_millis % 1000.0) * 1_000_000.0) as u32
+            (result_millis / 1000.0) as i64,
+            ((result_millis % 1000.0) * 1_000_000.0) as u32,
         )
         .unwrap_or_else(|| self.domain[0].and_utc())
         .naive_utc()
     }
-    
+
     pub fn domain(&self) -> [NaiveDateTime; 2] {
         self.domain
     }
-    
+
     pub fn range(&self) -> [f64; 2] {
         self.range
     }
-    
+
     pub fn clamp(mut self, clamp: bool) -> Self {
         self.clamp = clamp;
         self
     }
-    
+
     pub fn interpolate(mut self, interpolate: fn(f64, f64, f64) -> f64) -> Self {
         self.interpolate = interpolate;
         self
     }
-    
+
     pub fn unknown(mut self, value: f64) -> Self {
         self.unknown = Some(value);
         self
     }
-    
+
     pub fn ticks(&self, count: usize) -> Vec<NaiveDateTime> {
         let start = self.domain[0];
         let stop = self.domain[1];
-        
+
         // Choose appropriate time interval based on domain span
         let interval = self.tick_interval(count);
-        
+
         match interval {
             TimeTickInterval::Second(step) => {
                 let sec = Second;
@@ -96,42 +93,42 @@ impl ScaleTime {
                 } else {
                     sec.range(start, stop, step as i32)
                 }
-            },
+            }
             TimeTickInterval::Minute(step) => {
                 let min = Minute;
                 min.range(start, stop, step as i32)
-            },
+            }
             TimeTickInterval::Hour(step) => {
                 let hour = Hour;
                 hour.range(start, stop, step as i32)
-            },
+            }
             TimeTickInterval::Day(step) => {
                 let day = Day;
                 day.range(start, stop, step as i32)
-            },
+            }
             TimeTickInterval::Week(step) => {
                 let week = Week;
                 week.range(start, stop, step as i32)
-            },
+            }
             TimeTickInterval::Month(step) => {
                 let month = Month;
                 month.range(start, stop, step as i32)
-            },
+            }
             TimeTickInterval::Year(step) => {
                 let year = Year;
                 year.range(start, stop, step as i32)
-            },
+            }
         }
     }
-    
+
     fn tick_interval(&self, count: usize) -> TimeTickInterval {
         let start = self.domain[0];
         let stop = self.domain[1];
         let duration = stop.signed_duration_since(start);
-        
+
         let total_seconds = duration.num_seconds();
         let target_interval = total_seconds / count as i64;
-        
+
         // Choose appropriate interval based on target interval
         if target_interval < 1 {
             TimeTickInterval::Second(1)
@@ -157,26 +154,29 @@ impl ScaleTime {
             TimeTickInterval::Year(Self::nice_step(years, &[1, 2, 5, 10]))
         }
     }
-    
+
     fn nice_step(target: i64, steps: &[i64]) -> i64 {
-        steps.iter()
+        steps
+            .iter()
             .find(|&&step| step >= target)
             .copied()
             .unwrap_or(*steps.last().unwrap())
     }
-    
-    pub fn tick_format(&self, count: usize, specifier: Option<&str>) -> impl Fn(&NaiveDateTime) -> String {
+
+    pub fn tick_format(
+        &self,
+        count: usize,
+        specifier: Option<&str>,
+    ) -> impl Fn(&NaiveDateTime) -> String {
         let spec = specifier.unwrap_or(self.default_format_specifier(count));
         let spec = spec.to_string();
-        
-        move |d| {
-            utc_format(&spec, d)
-        }
+
+        move |d| utc_format(&spec, d)
     }
-    
+
     fn default_format_specifier(&self, count: usize) -> &str {
         let interval = self.tick_interval(count);
-        
+
         match interval {
             TimeTickInterval::Second(_) => "%H:%M:%S",
             TimeTickInterval::Minute(_) => "%H:%M",
@@ -187,50 +187,50 @@ impl ScaleTime {
             TimeTickInterval::Year(_) => "%Y",
         }
     }
-    
+
     pub fn nice(&mut self, count: Option<usize>) {
         let count = count.unwrap_or(10);
         let interval = self.tick_interval(count);
-        
+
         match interval {
             TimeTickInterval::Second(_) => {
                 let sec = Second;
                 self.domain[0] = sec.floor(self.domain[0]);
                 self.domain[1] = sec.ceil(self.domain[1]);
-            },
+            }
             TimeTickInterval::Minute(_) => {
                 let min = Minute;
                 self.domain[0] = min.floor(self.domain[0]);
                 self.domain[1] = min.ceil(self.domain[1]);
-            },
+            }
             TimeTickInterval::Hour(_) => {
                 let hour = Hour;
                 self.domain[0] = hour.floor(self.domain[0]);
                 self.domain[1] = hour.ceil(self.domain[1]);
-            },
+            }
             TimeTickInterval::Day(_) => {
                 let day = Day;
                 self.domain[0] = day.floor(self.domain[0]);
                 self.domain[1] = day.ceil(self.domain[1]);
-            },
+            }
             TimeTickInterval::Week(_) => {
                 let week = Week;
                 self.domain[0] = week.floor(self.domain[0]);
                 self.domain[1] = week.ceil(self.domain[1]);
-            },
+            }
             TimeTickInterval::Month(_) => {
                 let month = Month;
                 self.domain[0] = month.floor(self.domain[0]);
                 self.domain[1] = month.ceil(self.domain[1]);
-            },
+            }
             TimeTickInterval::Year(_) => {
                 let year = Year;
                 self.domain[0] = year.floor(self.domain[0]);
                 self.domain[1] = year.ceil(self.domain[1]);
-            },
+            }
         }
     }
-    
+
     pub fn copy(&self) -> Self {
         Self {
             domain: self.domain,
@@ -240,7 +240,7 @@ impl ScaleTime {
             unknown: self.unknown,
         }
     }
-    
+
     pub fn range_round(mut self, range: [f64; 2]) -> Self {
         self.range = range;
         self.interpolate = round_interpolate;

@@ -44,7 +44,9 @@ mod tests {
         root.add_child(Node::new(1));
         root.add_child(Node::new(2));
         let mut count = 0;
-        root.each(&mut | _n | { count += 1; });
+        root.each(&mut |_n| {
+            count += 1;
+        });
         assert_eq!(count, 3);
     }
 

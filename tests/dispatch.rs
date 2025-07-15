@@ -1,5 +1,5 @@
-use std::sync::{Arc, Mutex};
 use rust_d3::dispatch::Dispatch;
+use std::sync::{Arc, Mutex};
 
 #[tokio::test]
 async fn test_dispatch_event() {
@@ -9,7 +9,8 @@ async fn test_dispatch_event() {
     d.on("foo", move || {
         let mut flag = called_clone.lock().unwrap();
         *flag = true;
-    }).await;
+    })
+    .await;
     d.call("foo").await;
     assert!(*called.lock().unwrap());
 }
@@ -23,11 +24,13 @@ async fn test_dispatch_multiple_listeners() {
     d.on("bar", move || {
         let mut c = count1.lock().unwrap();
         *c += 1;
-    }).await;
+    })
+    .await;
     d.on("bar", move || {
         let mut c = count2.lock().unwrap();
         *c += 1;
-    }).await;
+    })
+    .await;
     d.call("bar").await;
     assert_eq!(*count.lock().unwrap(), 2);
 }
@@ -37,10 +40,12 @@ async fn test_dispatch_on_with_handle_and_off_handle() {
     let called = Arc::new(Mutex::new(0));
     let called_clone = called.clone();
     let d = Dispatch::new();
-    let handle = d.on_with_handle("foo", move |_| {
-        let mut flag = called_clone.lock().unwrap();
-        *flag += 1;
-    }).await;
+    let handle = d
+        .on_with_handle("foo", move |_| {
+            let mut flag = called_clone.lock().unwrap();
+            *flag += 1;
+        })
+        .await;
     d.call("foo").await;
     d.off_handle("foo", &handle).await;
     d.call("foo").await;
@@ -59,7 +64,8 @@ async fn test_dispatch_event_object() {
                 *flag += *val;
             }
         }
-    }).await;
+    })
+    .await;
     d.call_with("foo", 7).await;
     assert_eq!(*called.lock().unwrap(), 7);
 }
@@ -74,11 +80,13 @@ async fn test_dispatch_multiple_and_payload() {
     d.on("bar", move || {
         let mut c = count1.lock().unwrap();
         *c += payload;
-    }).await;
+    })
+    .await;
     d.on("bar", move || {
         let mut c = count2.lock().unwrap();
         *c += 1;
-    }).await;
+    })
+    .await;
     d.call_with("bar", payload).await;
     assert_eq!(*count.lock().unwrap(), 43);
 }
@@ -93,11 +101,13 @@ async fn test_dispatch_multiple_events() {
     d.on("foo", move || {
         let mut f = foo_clone.lock().unwrap();
         *f += 1;
-    }).await;
+    })
+    .await;
     d.on("bar", move || {
         let mut b = bar_clone.lock().unwrap();
         *b += 2;
-    }).await;
+    })
+    .await;
     d.call("foo").await;
     d.call("bar").await;
     assert_eq!(*foo.lock().unwrap(), 1);
@@ -141,7 +151,8 @@ async fn test_dispatch_off_namespace() {
     d.on("foo.bar", move || {
         let mut flag = called_clone.lock().unwrap();
         *flag += 1;
-    }).await;
+    })
+    .await;
     d.on("foo.baz", || {}).await;
     d.on("foo", || {}).await;
     d.off_namespace("bar").await;
@@ -167,7 +178,8 @@ async fn test_dispatch_integration_selection() {
     d.on("custom", move || {
         let mut flag = called_clone.lock().unwrap();
         *flag = true;
-    }).await;
+    })
+    .await;
     // In a real integration, you might call dispatcher.call("custom") inside a transition or selection event
     d.call("custom").await;
     assert!(*called.lock().unwrap());

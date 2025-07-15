@@ -15,7 +15,8 @@ pub fn range(start: f64, stop: f64, step: f64) -> Vec<f64> {
             result.push(current);
             current += step;
         }
-    } else { // step < 0.0
+    } else {
+        // step < 0.0
         while current > stop {
             result.push(current);
             current += step;

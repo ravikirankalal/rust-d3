@@ -65,7 +65,10 @@ use std::f64::consts::PI;
 
 fn symbol_circle(size: f64) -> String {
     let r = (size / PI).sqrt();
-    let path = format!("M{},0A{},{} 0 1,1 {},0A{},{} 0 1,1 {},0Z", r, r, r, -r, r, r, r);
+    let path = format!(
+        "M{},0A{},{} 0 1,1 {},0A{},{} 0 1,1 {},0Z",
+        r, r, r, -r, r, r, r
+    );
     println!("[symbol_circle] size: {} r: {} path: {}", size, r, path);
     path
 }
@@ -76,7 +79,14 @@ fn symbol_cross(size: f64) -> String {
     // D3 cross: vertical and horizontal bar
     format!(
         "M{},{}H{}V{}H{}V{}H{}V{}Z",
-        -3.0*r, -r, -r, r, 3.0*r, r, r, -r
+        -3.0 * r,
+        -r,
+        -r,
+        r,
+        3.0 * r,
+        r,
+        r,
+        -r
     )
 }
 
@@ -115,7 +125,7 @@ fn symbol_star(size: f64) -> String {
 fn symbol_triangle(size: f64) -> String {
     let y = -((size / (3.0f64).sqrt()) as f64).sqrt();
     let x = y * (3.0f64).sqrt();
-    format!("M0,{}L{},{}L{},{}Z", y, x, -y/2.0, -x, -y/2.0)
+    format!("M0,{}L{},{}L{},{}Z", y, x, -y / 2.0, -x, -y / 2.0)
 }
 
 fn symbol_wye(size: f64) -> String {
@@ -123,7 +133,10 @@ fn symbol_wye(size: f64) -> String {
     let a = s / 2.0;
     let b = a * (3.0f64).sqrt();
     // D3's wye is a 3-armed shape; here is a simple approximation
-    format!("M0,{}L{},{}M0,{}L{},{}M0,{}L{},{}Z", -b, a, b, -b, -a, b, b, 0.0, -b)
+    format!(
+        "M0,{}L{},{}M0,{}L{},{}M0,{}L{},{}Z",
+        -b, a, b, -b, -a, b, b, 0.0, -b
+    )
 }
 
 pub trait SymbolOutput {
@@ -157,7 +170,7 @@ impl Symbol {
                 out.arc_to(r, r, -r);
                 out.arc_to(r, r, r);
                 out.close();
-            },
+            }
             SymbolType::Square => {
                 let w = self.size.sqrt() / 2.0;
                 out.move_to(-w, -w);
@@ -165,7 +178,7 @@ impl Symbol {
                 out.line_to(w, w);
                 out.line_to(-w, w);
                 out.close();
-            },
+            }
             SymbolType::Diamond => {
                 let y = (self.size / (2.0 * (3.0f64).sqrt())).sqrt();
                 let x = y * (3.0f64).sqrt();
@@ -174,32 +187,32 @@ impl Symbol {
                 out.line_to(0.0, y);
                 out.line_to(-x, 0.0);
                 out.close();
-            },
+            }
             SymbolType::Triangle => {
                 let y = -((self.size / (3.0f64).sqrt()) as f64).sqrt();
                 let x = y * (3.0f64).sqrt();
                 out.move_to(0.0, y);
-                out.line_to(x, -y/2.0);
-                out.line_to(-x, -y/2.0);
+                out.line_to(x, -y / 2.0);
+                out.line_to(-x, -y / 2.0);
                 out.close();
-            },
+            }
             SymbolType::Cross => {
                 let s = (self.size / 5.0).sqrt();
                 let r = s / 2.0;
-                out.move_to(-3.0*r, -r);
+                out.move_to(-3.0 * r, -r);
                 out.line_to(-r, -r);
-                out.line_to(-r, -3.0*r);
-                out.line_to(r, -3.0*r);
+                out.line_to(-r, -3.0 * r);
+                out.line_to(r, -3.0 * r);
                 out.line_to(r, -r);
-                out.line_to(3.0*r, -r);
-                out.line_to(3.0*r, r);
+                out.line_to(3.0 * r, -r);
+                out.line_to(3.0 * r, r);
                 out.line_to(r, r);
-                out.line_to(r, 3.0*r);
-                out.line_to(-r, 3.0*r);
+                out.line_to(r, 3.0 * r);
+                out.line_to(-r, 3.0 * r);
                 out.line_to(-r, r);
-                out.line_to(-3.0*r, r);
+                out.line_to(-3.0 * r, r);
                 out.close();
-            },
+            }
             SymbolType::Star => {
                 let ka = 0.8908130915292852;
                 let kr = (1.0 / 2.0) * (1.0 + (5.0f64).sqrt());
@@ -217,7 +230,7 @@ impl Symbol {
                     }
                 }
                 out.close();
-            },
+            }
             SymbolType::Wye => {
                 let s = (self.size / (3.0f64.sqrt() * 6.0)).sqrt();
                 let a = s / 2.0;
@@ -227,7 +240,7 @@ impl Symbol {
                     out.line_to(dx, dy);
                 }
                 out.close();
-            },
+            }
         }
     }
 }

@@ -1,5 +1,5 @@
 // Tests for advanced d3-shape curve types
-use rust_d3::shape::{Line, Area, CardinalCurve, MonotoneCurve, Symbol, SymbolType};
+use rust_d3::shape::{Area, CardinalCurve, Line, MonotoneCurve, Symbol, SymbolType};
 
 #[cfg(test)]
 pub mod shape_curve_tests {
@@ -63,14 +63,22 @@ pub mod shape_curve_tests {
                 .y(|d: &(f64, f64), _| d.1)
                 .curve(curve.clone());
             let path = line.generate(&data);
-            assert!(path.contains('C'), "Cardinal curve with tension {} should use 'C' cubic commands, got: {}", tension, path);
+            assert!(
+                path.contains('C'),
+                "Cardinal curve with tension {} should use 'C' cubic commands, got: {}",
+                tension,
+                path
+            );
         }
     }
 
     #[test]
     fn test_cardinal_curve_short_input() {
         let data = vec![(0.0, 0.0)];
-        let line = Line::new().x(|d: &(f64, f64), _| d.0).y(|d: &(f64, f64), _| d.1).cardinal_curve();
+        let line = Line::new()
+            .x(|d: &(f64, f64), _| d.0)
+            .y(|d: &(f64, f64), _| d.1)
+            .cardinal_curve();
         let path = line.generate(&data);
         assert!(path.starts_with("M"));
         assert!(!path.contains('C'));
@@ -84,7 +92,11 @@ pub mod shape_curve_tests {
             .y(|d: &(f64, f64), _| d.1)
             .monotone_curve();
         let path = line.generate(&data);
-        assert!(path.contains('C'), "Monotone curve should use 'C' cubic commands, got: {}", path);
+        assert!(
+            path.contains('C'),
+            "Monotone curve should use 'C' cubic commands, got: {}",
+            path
+        );
     }
 
     #[test]
@@ -100,12 +112,7 @@ pub mod shape_curve_tests {
 
     #[test]
     fn test_curve_with_nan_and_defined() {
-        let data = vec![
-            (0.0, 0.0),
-            (1.0, f64::NAN),
-            (2.0, 2.0),
-            (3.0, 3.0),
-        ];
+        let data = vec![(0.0, 0.0), (1.0, f64::NAN), (2.0, 2.0), (3.0, 3.0)];
         let line = Line::new()
             .x(|d: &(f64, f64), _| d.0)
             .y(|d: &(f64, f64), _| d.1)
@@ -167,7 +174,10 @@ pub mod shape_curve_tests {
             .monotone_curve();
         let path = line.generate(&data);
         if !(path.is_empty() || path == "M") {
-            println!("FAIL: path for all-NaN input: '{}'; expected empty or 'M'", path);
+            println!(
+                "FAIL: path for all-NaN input: '{}'; expected empty or 'M'",
+                path
+            );
         }
         assert!(path.is_empty() || path == "M");
     }
@@ -217,7 +227,10 @@ pub mod shape_curve_tests {
             .monotone_curve();
         let path = area.generate(&data);
         if !(path.is_empty() || path == "M") {
-            println!("FAIL: area path for all-NaN input: '{}'; expected empty or 'M'", path);
+            println!(
+                "FAIL: area path for all-NaN input: '{}'; expected empty or 'M'",
+                path
+            );
         }
         assert!(path.is_empty() || path == "M");
     }

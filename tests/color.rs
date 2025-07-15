@@ -1,37 +1,67 @@
 use rust_d3::color::Color;
-use rust_d3::color::rgb::Rgb;
+use rust_d3::color::hcl::Hcl;
 use rust_d3::color::hsl::Hsl;
 use rust_d3::color::lab::Lab;
-use rust_d3::color::hcl::Hcl;
+use rust_d3::color::rgb::Rgb;
 
 #[test]
 fn test_color_from_str_rgb() {
-    assert_eq!("rgb(255,0,0)".parse::<Color>().unwrap(), Color::Rgb(Rgb::new(255, 0, 0, 1.0)));
-    assert_eq!("rgb(0, 128, 255)".parse::<Color>().unwrap(), Color::Rgb(Rgb::new(0, 128, 255, 1.0)));
+    assert_eq!(
+        "rgb(255,0,0)".parse::<Color>().unwrap(),
+        Color::Rgb(Rgb::new(255, 0, 0, 1.0))
+    );
+    assert_eq!(
+        "rgb(0, 128, 255)".parse::<Color>().unwrap(),
+        Color::Rgb(Rgb::new(0, 128, 255, 1.0))
+    );
 }
 
 #[test]
 fn test_color_from_str_rgba() {
-    assert_eq!("rgba(255,0,0,0.5)".parse::<Color>().unwrap(), Color::Rgb(Rgb::new(255, 0, 0, 0.5)));
-    assert_eq!("rgba(0, 128, 255, 1.0)".parse::<Color>().unwrap(), Color::Rgb(Rgb::new(0, 128, 255, 1.0)));
+    assert_eq!(
+        "rgba(255,0,0,0.5)".parse::<Color>().unwrap(),
+        Color::Rgb(Rgb::new(255, 0, 0, 0.5))
+    );
+    assert_eq!(
+        "rgba(0, 128, 255, 1.0)".parse::<Color>().unwrap(),
+        Color::Rgb(Rgb::new(0, 128, 255, 1.0))
+    );
 }
 
 #[test]
 fn test_color_from_str_hex() {
-    assert_eq!("#ff0000".parse::<Color>().unwrap(), Color::Rgb(Rgb::new(255, 0, 0, 1.0)));
-    assert_eq!("#0080ff".parse::<Color>().unwrap(), Color::Rgb(Rgb::new(0, 128, 255, 1.0)));
+    assert_eq!(
+        "#ff0000".parse::<Color>().unwrap(),
+        Color::Rgb(Rgb::new(255, 0, 0, 1.0))
+    );
+    assert_eq!(
+        "#0080ff".parse::<Color>().unwrap(),
+        Color::Rgb(Rgb::new(0, 128, 255, 1.0))
+    );
 }
 
 #[test]
 fn test_color_from_str_hsl() {
-    assert_eq!("hsl(0,100%,50%)".parse::<Color>().unwrap(), Color::Hsl(Hsl::new(0.0, 100.0, 50.0, 1.0)));
-    assert_eq!("hsl(120,50%,75%)".parse::<Color>().unwrap(), Color::Hsl(Hsl::new(120.0, 50.0, 75.0, 1.0)));
+    assert_eq!(
+        "hsl(0,100%,50%)".parse::<Color>().unwrap(),
+        Color::Hsl(Hsl::new(0.0, 100.0, 50.0, 1.0))
+    );
+    assert_eq!(
+        "hsl(120,50%,75%)".parse::<Color>().unwrap(),
+        Color::Hsl(Hsl::new(120.0, 50.0, 75.0, 1.0))
+    );
 }
 
 #[test]
 fn test_color_from_str_hsla() {
-    assert_eq!("hsla(0,100%,50%,0.5)".parse::<Color>().unwrap(), Color::Hsl(Hsl::new(0.0, 100.0, 50.0, 0.5)));
-    assert_eq!("hsla(120,50%,75%,1.0)".parse::<Color>().unwrap(), Color::Hsl(Hsl::new(120.0, 50.0, 75.0, 1.0)));
+    assert_eq!(
+        "hsla(0,100%,50%,0.5)".parse::<Color>().unwrap(),
+        Color::Hsl(Hsl::new(0.0, 100.0, 50.0, 0.5))
+    );
+    assert_eq!(
+        "hsla(120,50%,75%,1.0)".parse::<Color>().unwrap(),
+        Color::Hsl(Hsl::new(120.0, 50.0, 75.0, 1.0))
+    );
 }
 
 #[test]
@@ -215,7 +245,10 @@ fn test_clamp_rgb() {
 
     let color_overflow = Color::Rgb(Rgb::new(200, 200, 200, -0.5)); // Test with negative opacity
     let clamped_color_overflow = color_overflow.clamp();
-    assert_eq!(clamped_color_overflow, Color::Rgb(Rgb::new(200, 200, 200, 0.0)));
+    assert_eq!(
+        clamped_color_overflow,
+        Color::Rgb(Rgb::new(200, 200, 200, 0.0))
+    );
 }
 
 #[test]
@@ -229,7 +262,10 @@ fn test_clamp_hsl() {
 fn test_clamp_lab() {
     let color = Color::Lab(Lab::new(120.0, -200.0, 200.0, 2.0));
     let clamped_color = color.clamp();
-    assert_eq!(clamped_color, Color::Lab(Lab::new(100.0, -200.0, 200.0, 1.0)));
+    assert_eq!(
+        clamped_color,
+        Color::Lab(Lab::new(100.0, -200.0, 200.0, 1.0))
+    );
 }
 
 #[test]

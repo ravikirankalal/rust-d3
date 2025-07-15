@@ -1,4 +1,4 @@
-use rust_d3::contour::marching_squares::{marching_case, marching_segments, cell_mask};
+use rust_d3::contour::marching_squares::{cell_mask, marching_case, marching_segments};
 
 #[test]
 fn test_marching_case() {

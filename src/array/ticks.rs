@@ -6,7 +6,11 @@ pub fn ticks(start: f64, stop: f64, count: usize) -> Vec<f64> {
         return vec![start];
     }
     let reverse = start > stop;
-    let (s, e) = if reverse { (stop, start) } else { (start, stop) };
+    let (s, e) = if reverse {
+        (stop, start)
+    } else {
+        (start, stop)
+    };
     let mut ticks = Vec::with_capacity(count + 1);
     let n = count;
     for i in 0..=n {

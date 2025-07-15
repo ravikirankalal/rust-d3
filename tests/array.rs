@@ -1,7 +1,7 @@
 // array.rs
 // Tests for transpose, bisector, and quickselect
 
-use rust_d3::array::{transpose, bisector, quickselect};
+use rust_d3::array::{bisector, quickselect, transpose};
 
 #[test]
 fn test_transpose() {

@@ -8,7 +8,11 @@ pub struct ScaleSymlog {
 
 impl ScaleSymlog {
     pub fn new(domain: [f64; 2], range: [f64; 2], constant: f64) -> Self {
-        Self { domain, range, constant }
+        Self {
+            domain,
+            range,
+            constant,
+        }
     }
     fn symlog(&self, x: f64) -> f64 {
         let c = self.constant;

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
-use std::hash::Hash;
 use std::collections::HashSet;
+use std::hash::Hash;
 
 pub fn retain_keys<K, V, I>(map: &mut HashMap<K, V>, keys: I)
 where

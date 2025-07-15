@@ -1,6 +1,6 @@
 use rust_d3::timer::Timer;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::thread;
 use std::time::Duration;
 
@@ -8,9 +8,12 @@ use std::time::Duration;
 fn test_timer_tick() {
     let count = Arc::new(AtomicUsize::new(0));
     let count_clone = count.clone();
-    let mut timer = Timer::new(move || {
-        count_clone.fetch_add(1, Ordering::SeqCst);
-    }, 5);
+    let mut timer = Timer::new(
+        move || {
+            count_clone.fetch_add(1, Ordering::SeqCst);
+        },
+        5,
+    );
     timer.start();
     thread::sleep(Duration::from_millis(20));
     timer.stop();
@@ -21,9 +24,12 @@ fn test_timer_tick() {
 fn test_timer_stop() {
     let count = Arc::new(AtomicUsize::new(0));
     let count_clone = count.clone();
-    let mut timer = Timer::new(move || {
-        count_clone.fetch_add(1, Ordering::SeqCst);
-    }, 5);
+    let mut timer = Timer::new(
+        move || {
+            count_clone.fetch_add(1, Ordering::SeqCst);
+        },
+        5,
+    );
     timer.start();
     thread::sleep(Duration::from_millis(15));
     timer.stop();
@@ -36,9 +42,12 @@ fn test_timer_stop() {
 fn test_timer_restart() {
     let count = Arc::new(AtomicUsize::new(0));
     let count_clone = count.clone();
-    let mut timer = Timer::new(move || {
-        count_clone.fetch_add(1, Ordering::SeqCst);
-    }, 2);
+    let mut timer = Timer::new(
+        move || {
+            count_clone.fetch_add(1, Ordering::SeqCst);
+        },
+        2,
+    );
     timer.start();
     thread::sleep(Duration::from_millis(6));
     timer.restart();
@@ -51,9 +60,12 @@ fn test_timer_restart() {
 fn test_timer_delay() {
     let count = Arc::new(AtomicUsize::new(0));
     let count_clone = count.clone();
-    let mut timer = Timer::new(move || {
-        count_clone.fetch_add(1, Ordering::SeqCst);
-    }, 2);
+    let mut timer = Timer::new(
+        move || {
+            count_clone.fetch_add(1, Ordering::SeqCst);
+        },
+        2,
+    );
     timer.start();
     thread::sleep(Duration::from_millis(5));
     let before = count.load(Ordering::SeqCst);
@@ -61,7 +73,10 @@ fn test_timer_delay() {
     thread::sleep(Duration::from_millis(15));
     timer.stop();
     let after = count.load(Ordering::SeqCst);
-    assert!(after > before, "Timer should continue ticking after delay change");
+    assert!(
+        after > before,
+        "Timer should continue ticking after delay change"
+    );
 }
 
 #[test]
@@ -78,9 +93,12 @@ fn test_timer_is_running() {
 fn test_timer_double_stop_and_restart() {
     let count = Arc::new(AtomicUsize::new(0));
     let count_clone = count.clone();
-    let mut timer = Timer::new(move || {
-        count_clone.fetch_add(1, Ordering::SeqCst);
-    }, 2);
+    let mut timer = Timer::new(
+        move || {
+            count_clone.fetch_add(1, Ordering::SeqCst);
+        },
+        2,
+    );
     timer.start();
     thread::sleep(Duration::from_millis(5));
     timer.stop();
@@ -95,9 +113,12 @@ fn test_timer_double_stop_and_restart() {
 fn test_timer_zero_delay() {
     let count = Arc::new(AtomicUsize::new(0));
     let count_clone = count.clone();
-    let mut timer = Timer::new(move || {
-        count_clone.fetch_add(1, Ordering::SeqCst);
-    }, 0);
+    let mut timer = Timer::new(
+        move || {
+            count_clone.fetch_add(1, Ordering::SeqCst);
+        },
+        0,
+    );
     timer.start();
     thread::sleep(Duration::from_millis(5));
     timer.stop();
@@ -122,9 +143,12 @@ fn test_timer_active_and_now() {
 fn test_timer_flush_tick_once() {
     let count = Arc::new(AtomicUsize::new(0));
     let count_clone = count.clone();
-    let mut timer = Timer::new(move || {
-        count_clone.fetch_add(1, Ordering::SeqCst);
-    }, 1000);
+    let mut timer = Timer::new(
+        move || {
+            count_clone.fetch_add(1, Ordering::SeqCst);
+        },
+        1000,
+    );
     timer.start();
     // Should not tick yet
     assert_eq!(count.load(Ordering::SeqCst), 0);
@@ -139,9 +163,12 @@ fn test_timer_flush_tick_once() {
 fn test_timer_schedule() {
     let count = Arc::new(AtomicUsize::new(0));
     let count_clone = count.clone();
-    Timer::schedule(move || {
-        count_clone.fetch_add(1, Ordering::SeqCst);
-    }, 5);
+    Timer::schedule(
+        move || {
+            count_clone.fetch_add(1, Ordering::SeqCst);
+        },
+        5,
+    );
     std::thread::sleep(std::time::Duration::from_millis(10));
     assert_eq!(count.load(Ordering::SeqCst), 1);
 }
@@ -165,9 +192,12 @@ fn test_timer_long_delay_no_early_tick() {
     for _ in 0..10 {
         let count = Arc::new(AtomicUsize::new(0));
         let count_clone = count.clone();
-        let mut timer = Timer::new(move || {
-            count_clone.fetch_add(1, Ordering::SeqCst);
-        }, 200); // 200ms delay
+        let mut timer = Timer::new(
+            move || {
+                count_clone.fetch_add(1, Ordering::SeqCst);
+            },
+            200,
+        ); // 200ms delay
         timer.start();
         thread::sleep(Duration::from_millis(10));
         timer.stop();
@@ -175,16 +205,22 @@ fn test_timer_long_delay_no_early_tick() {
             failures += 1;
         }
     }
-    assert!(failures <= 1, "Timer ticked early in more than 1 out of 10 runs");
+    assert!(
+        failures <= 1,
+        "Timer ticked early in more than 1 out of 10 runs"
+    );
 }
 
 #[test]
 fn test_timer_restart_after_stop() {
     let count = Arc::new(AtomicUsize::new(0));
     let count_clone = count.clone();
-    let mut timer = Timer::new(move || {
-        count_clone.fetch_add(1, Ordering::SeqCst);
-    }, 2);
+    let mut timer = Timer::new(
+        move || {
+            count_clone.fetch_add(1, Ordering::SeqCst);
+        },
+        2,
+    );
     timer.start();
     thread::sleep(Duration::from_millis(5));
     timer.stop();
@@ -192,44 +228,80 @@ fn test_timer_restart_after_stop() {
     timer.start();
     thread::sleep(Duration::from_millis(5));
     timer.stop();
-    assert!(count.load(Ordering::SeqCst) > after, "Timer should tick again after restart");
+    assert!(
+        count.load(Ordering::SeqCst) > after,
+        "Timer should tick again after restart"
+    );
 }
 
 #[test]
 fn test_multiple_timers_independent() {
     let a = Arc::new(AtomicUsize::new(0));
     let b = Arc::new(AtomicUsize::new(0));
-    let mut t1 = Timer::new({ let a = a.clone(); move || { a.fetch_add(1, Ordering::SeqCst); } }, 2);
-    let mut t2 = Timer::new({ let b = b.clone(); move || { b.fetch_add(1, Ordering::SeqCst); } }, 2);
+    let mut t1 = Timer::new(
+        {
+            let a = a.clone();
+            move || {
+                a.fetch_add(1, Ordering::SeqCst);
+            }
+        },
+        2,
+    );
+    let mut t2 = Timer::new(
+        {
+            let b = b.clone();
+            move || {
+                b.fetch_add(1, Ordering::SeqCst);
+            }
+        },
+        2,
+    );
     t1.start();
     t2.start();
     thread::sleep(Duration::from_millis(10));
     t1.stop();
     t2.stop();
-    assert!(a.load(Ordering::SeqCst) > 0 && b.load(Ordering::SeqCst) > 0, "Both timers should tick independently");
+    assert!(
+        a.load(Ordering::SeqCst) > 0 && b.load(Ordering::SeqCst) > 0,
+        "Both timers should tick independently"
+    );
 }
 
 #[test]
 fn test_timer_schedule_one_shot() {
     let count = Arc::new(AtomicUsize::new(0));
     let count_clone = count.clone();
-    Timer::schedule(move || {
-        count_clone.fetch_add(1, Ordering::SeqCst);
-    }, 5);
+    Timer::schedule(
+        move || {
+            count_clone.fetch_add(1, Ordering::SeqCst);
+        },
+        5,
+    );
     thread::sleep(Duration::from_millis(20));
-    assert_eq!(count.load(Ordering::SeqCst), 1, "Schedule should only tick once");
+    assert_eq!(
+        count.load(Ordering::SeqCst),
+        1,
+        "Schedule should only tick once"
+    );
 }
 
 #[test]
 fn test_timer_tick_once_does_not_start() {
     let count = Arc::new(AtomicUsize::new(0));
     let count_clone = count.clone();
-    let timer = Timer::new(move || {
-        count_clone.fetch_add(1, Ordering::SeqCst);
-    }, 1000);
+    let timer = Timer::new(
+        move || {
+            count_clone.fetch_add(1, Ordering::SeqCst);
+        },
+        1000,
+    );
     timer.tick_once();
     thread::sleep(Duration::from_millis(10));
-    assert_eq!(count.load(Ordering::SeqCst), 1, "tick_once should only tick once and not start timer");
+    assert_eq!(
+        count.load(Ordering::SeqCst),
+        1,
+        "tick_once should only tick once and not start timer"
+    );
     assert!(!timer.is_running());
 }
 

@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use std::cmp::Ord;
+use std::collections::HashMap;
 
 pub fn map_to_vec<K, V>(map: &HashMap<K, V>) -> Vec<V>
 where

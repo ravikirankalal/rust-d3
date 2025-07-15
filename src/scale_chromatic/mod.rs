@@ -1,14 +1,14 @@
 //! d3-scale-chromatic: Color schemes and interpolators
 
 pub mod categorical;
-pub mod sequential;
 pub mod diverging;
 pub mod perceptual;
+pub mod sequential;
 
 pub use categorical::*;
-pub use sequential::*;
 pub use diverging::*;
-pub use perceptual::{inferno, magma, plasma, cividis, turbo, cubehelix};
+pub use perceptual::{cividis, cubehelix, inferno, magma, plasma, turbo};
+pub use sequential::*;
 
 #[cfg(test)]
 mod perceptual_tests;

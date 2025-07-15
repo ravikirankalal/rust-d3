@@ -2,7 +2,7 @@
 
 #[cfg(test)]
 mod tests {
-    use crate::{polygon_area, polygon_centroid, polygon_length, polygon_contains, polygon_hull};
+    use crate::{polygon_area, polygon_centroid, polygon_contains, polygon_hull, polygon_length};
 
     #[test]
     fn test_polygon_area_triangle() {

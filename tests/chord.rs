@@ -1,10 +1,5 @@
-use rust_d3::chord::{
-    Chord,
-    ChordLayout,
-    Group,
-    Subgroup,
-};
 use rust_d3::chord::path::{ArcGenerator, RibbonGenerator};
+use rust_d3::chord::{Chord, ChordLayout, Group, Subgroup};
 
 #[test]
 fn test_basic_chord_layout() {
@@ -41,17 +36,17 @@ fn test_basic_chord_layout() {
     assert_eq!(chords.len(), 9); // 3x3 matrix, all non-zero
 
     // Check a specific chord (e.g., from 0 to 1)
-    let chord_0_1 = chords.iter().find(|c| c.source.index == 0 && c.source.subindex == 1).unwrap();
+    let chord_0_1 = chords
+        .iter()
+        .find(|c| c.source.index == 0 && c.source.subindex == 1)
+        .unwrap();
     assert_eq!(chord_0_1.source.value, 12.0);
     assert_eq!(chord_0_1.target.value, 21.0); // Flow from 1 to 0
 }
 
 #[test]
 fn test_pad_angle() {
-    let matrix = vec![
-        vec![1.0, 0.0],
-        vec![0.0, 1.0],
-    ];
+    let matrix = vec![vec![1.0, 0.0], vec![0.0, 1.0]];
 
     let chord_layout = ChordLayout::new().pad_angle(0.1);
     let groups = chord_layout.groups(matrix.clone());
@@ -61,10 +56,7 @@ fn test_pad_angle() {
 
 #[test]
 fn test_sort_groups() {
-    let matrix = vec![
-        vec![10.0, 0.0],
-        vec![0.0, 1.0],
-    ];
+    let matrix = vec![vec![10.0, 0.0], vec![0.0, 1.0]];
 
     // Sort by value descending (default behavior) - D3 default is by index ascending
     let chord_layout_default = ChordLayout::new();
@@ -73,7 +65,9 @@ fn test_sort_groups() {
     assert_eq!(groups_default[1].index, 1); // Group 1 has value 1
 
     // Sort by value ascending
-    let chord_layout_asc = ChordLayout::new().sort_groups(Some(Box::new(|a, b| a.value.partial_cmp(&b.value).unwrap())));
+    let chord_layout_asc = ChordLayout::new().sort_groups(Some(Box::new(|a, b| {
+        a.value.partial_cmp(&b.value).unwrap()
+    })));
     let groups_asc = chord_layout_asc.groups(matrix.clone());
     assert_eq!(groups_asc[0].index, 1); // Group 1 has value 1
     assert_eq!(groups_asc[1].index, 0); // Group 0 has value 10
@@ -90,9 +84,10 @@ fn test_sort_subgroups() {
     // Default sort (by value descending)
     let chord_layout_default = ChordLayout::new();
     let chords_default = chord_layout_default.chords(matrix.clone());
-    
+
     // Find chords originating from group 0
-    let chords_from_0: Vec<&Chord> = chords_default.iter()
+    let chords_from_0: Vec<&Chord> = chords_default
+        .iter()
         .filter(|c| c.source.index == 0)
         .collect();
 
@@ -101,13 +96,13 @@ fn test_sort_subgroups() {
     assert_eq!(chords_from_0[1].source.subindex, 2); // Value 1.0
 
     // Custom sort (by subindex ascending)
-    let chord_layout_asc = ChordLayout::new().sort_subgroups(Some(Box::new(|a, b| a.subindex.cmp(&b.subindex))));
+    let chord_layout_asc =
+        ChordLayout::new().sort_subgroups(Some(Box::new(|a, b| a.subindex.cmp(&b.subindex))));
     let chords_asc = chord_layout_asc.chords(matrix.clone());
 
-    let chords_from_0_asc: Vec<&Chord> = chords_asc.iter()
-        .filter(|c| c.source.index == 0)
-        .collect();
-    
+    let chords_from_0_asc: Vec<&Chord> =
+        chords_asc.iter().filter(|c| c.source.index == 0).collect();
+
     assert_eq!(chords_from_0_asc[0].source.subindex, 1); // Value 5.0
     assert_eq!(chords_from_0_asc[1].source.subindex, 2); // Value 1.0
 }
@@ -125,7 +120,9 @@ fn test_sort_chords() {
     let _chords_default = chord_layout_default.chords(matrix.clone());
 
     // Custom sort (by source value ascending)
-    let chord_layout_asc = ChordLayout::new().sort_chords(Some(Box::new(|a, b| a.source.value.partial_cmp(&b.source.value).unwrap())));
+    let chord_layout_asc = ChordLayout::new().sort_chords(Some(Box::new(|a, b| {
+        a.source.value.partial_cmp(&b.source.value).unwrap()
+    })));
     let chords_asc = chord_layout_asc.chords(matrix.clone());
 
     // Expect chord with source value 1.0 to come before 5.0, then 10.0
@@ -226,8 +223,8 @@ fn test_ribbon_generator_functional_radius() {
         target: target_subgroup,
     };
 
-    let ribbon_gen = RibbonGenerator::new()
-        .radius_fn(Box::new(|c| 100.0 + c.source.value + c.target.value)); // Example: radius depends on chord values
+    let ribbon_gen =
+        RibbonGenerator::new().radius_fn(Box::new(|c| 100.0 + c.source.value + c.target.value)); // Example: radius depends on chord values
     let path = ribbon_gen.path(&chord);
 
     assert!(!path.is_empty());

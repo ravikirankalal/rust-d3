@@ -11,10 +11,13 @@
 //! ```
 //!
 
-use std::sync::{Arc, Mutex, atomic::{AtomicBool, Ordering}};
-use std::time::{Duration, Instant};
-use std::thread;
 use std::collections::HashMap;
+use std::sync::{
+    Arc, Mutex,
+    atomic::{AtomicBool, Ordering},
+};
+use std::thread;
+use std::time::{Duration, Instant};
 
 lazy_static::lazy_static! {
     pub static ref GLOBAL_TIMERS: Mutex<HashMap<usize, Arc<Timer>>> = Mutex::new(HashMap::new());
@@ -56,7 +59,10 @@ impl Timer {
             handle: None,
             id,
         };
-        GLOBAL_TIMERS.lock().unwrap().insert(id, Arc::new(timer.clone_for_registry()));
+        GLOBAL_TIMERS
+            .lock()
+            .unwrap()
+            .insert(id, Arc::new(timer.clone_for_registry()));
         timer
     }
     fn clone_for_registry(&self) -> Self {
@@ -207,7 +213,11 @@ impl AsyncTimer {
             }
             GLOBAL_TIMERS.lock().unwrap().remove(&id);
         });
-        AsyncTimer { running, handle: Some(handle), id }
+        AsyncTimer {
+            running,
+            handle: Some(handle),
+            id,
+        }
     }
     pub async fn stop(&mut self) {
         self.running.store(false, Ordering::SeqCst);

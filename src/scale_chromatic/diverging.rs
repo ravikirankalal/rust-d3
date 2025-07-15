@@ -12,6 +12,4 @@ pub fn interpolate_rdyblu(t: f64) -> &'static str {
 }
 
 /// RdYlBu color palette (5 steps)
-pub const RDYLBU: [&str; 5] = [
-    "#d73027", "#fee090", "#ffffbf", "#4575b4", "#313695"
-];
+pub const RDYLBU: [&str; 5] = ["#d73027", "#fee090", "#ffffbf", "#4575b4", "#313695"];

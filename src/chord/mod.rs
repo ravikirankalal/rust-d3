@@ -46,17 +46,26 @@ impl ChordLayout {
         self
     }
 
-    pub fn sort_groups(mut self, compare: Option<Box<dyn Fn(&Group, &Group) -> std::cmp::Ordering>>) -> Self {
+    pub fn sort_groups(
+        mut self,
+        compare: Option<Box<dyn Fn(&Group, &Group) -> std::cmp::Ordering>>,
+    ) -> Self {
         self.sort_groups = compare;
         self
     }
 
-    pub fn sort_subgroups(mut self, compare: Option<Box<dyn Fn(&Subgroup, &Subgroup) -> std::cmp::Ordering>>) -> Self {
+    pub fn sort_subgroups(
+        mut self,
+        compare: Option<Box<dyn Fn(&Subgroup, &Subgroup) -> std::cmp::Ordering>>,
+    ) -> Self {
         self.sort_subgroups = compare;
         self
     }
 
-    pub fn sort_chords(mut self, compare: Option<Box<dyn Fn(&Chord, &Chord) -> std::cmp::Ordering>>) -> Self {
+    pub fn sort_chords(
+        mut self,
+        compare: Option<Box<dyn Fn(&Chord, &Chord) -> std::cmp::Ordering>>,
+    ) -> Self {
         self.sort_chords = compare;
         self
     }
@@ -148,7 +157,11 @@ impl ChordLayout {
             let group_value = groups[i].value;
 
             let mut current_angle = group_start_angle;
-            let angle_per_value = if group_value == 0.0 { 0.0 } else { (group_end_angle - group_start_angle) / group_value };
+            let angle_per_value = if group_value == 0.0 {
+                0.0
+            } else {
+                (group_end_angle - group_start_angle) / group_value
+            };
 
             for j in 0..n {
                 let subgroup = &mut subgroups[i][j];
@@ -161,7 +174,8 @@ impl ChordLayout {
         // Create Chord objects
         for i in 0..n {
             for j in 0..n {
-                if matrix[i][j] > 0.0 { // Changed condition
+                if matrix[i][j] > 0.0 {
+                    // Changed condition
                     chords.push(Chord {
                         source: subgroups[i][j].clone(),
                         target: subgroups[j][i].clone(),

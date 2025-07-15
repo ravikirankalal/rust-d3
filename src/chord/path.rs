@@ -1,6 +1,6 @@
 // src/chord/path.rs
 
-use super::{Group, Chord, Subgroup};
+use super::{Chord, Group, Subgroup};
 use std::f64::consts::PI;
 
 pub struct ArcGenerator {
@@ -55,17 +55,31 @@ impl ArcGenerator {
         let x4 = inner_radius * start_angle.cos();
         let y4 = inner_radius * start_angle.sin();
 
-        let large_arc_flag = if (end_angle - start_angle).abs() > PI { 1 } else { 0 };
+        let large_arc_flag = if (end_angle - start_angle).abs() > PI {
+            1
+        } else {
+            0
+        };
 
         format!(
             "M{:.6},{:.6}
             A{:.6},{:.6},0,{:?},1,{:.6},{:.6}
             L{:.6},{:.6}
             A{:.6},{:.6},0,{:?},0,{:.6},{:.6}Z",
-            x1, y1,
-            outer_radius, outer_radius, large_arc_flag, x2, y2,
-            x3, y3,
-            inner_radius, inner_radius, large_arc_flag, x4, y4
+            x1,
+            y1,
+            outer_radius,
+            outer_radius,
+            large_arc_flag,
+            x2,
+            y2,
+            x3,
+            y3,
+            inner_radius,
+            inner_radius,
+            large_arc_flag,
+            x4,
+            y4
         )
     }
 }
@@ -122,13 +136,35 @@ impl RibbonGenerator {
     pub fn path(&self, chord: &Chord) -> String {
         let radius = self.radius.as_ref().map_or(0.0, |f| f(chord));
 
-        let source_start_angle = self.start_angle.as_ref().map_or(chord.source.start_angle, |f| f(&chord.source)) - PI / 2.0;
-        let source_end_angle = self.end_angle.as_ref().map_or(chord.source.end_angle, |f| f(&chord.source)) - PI / 2.0;
-        let target_start_angle = self.start_angle.as_ref().map_or(chord.target.start_angle, |f| f(&chord.target)) - PI / 2.0;
-        let target_end_angle = self.end_angle.as_ref().map_or(chord.target.end_angle, |f| f(&chord.target)) - PI / 2.0;
+        let source_start_angle = self
+            .start_angle
+            .as_ref()
+            .map_or(chord.source.start_angle, |f| f(&chord.source))
+            - PI / 2.0;
+        let source_end_angle = self
+            .end_angle
+            .as_ref()
+            .map_or(chord.source.end_angle, |f| f(&chord.source))
+            - PI / 2.0;
+        let target_start_angle = self
+            .start_angle
+            .as_ref()
+            .map_or(chord.target.start_angle, |f| f(&chord.target))
+            - PI / 2.0;
+        let target_end_angle = self
+            .end_angle
+            .as_ref()
+            .map_or(chord.target.end_angle, |f| f(&chord.target))
+            - PI / 2.0;
 
-        let source_radius = self.source_radius.as_ref().map_or(radius, |f| f(&chord.source));
-        let target_radius = self.target_radius.as_ref().map_or(radius, |f| f(&chord.target));
+        let source_radius = self
+            .source_radius
+            .as_ref()
+            .map_or(radius, |f| f(&chord.source));
+        let target_radius = self
+            .target_radius
+            .as_ref()
+            .map_or(radius, |f| f(&chord.target));
 
         let sx1 = source_radius * source_start_angle.cos();
         let sy1 = source_radius * source_start_angle.sin();
@@ -142,8 +178,16 @@ impl RibbonGenerator {
         let tx2 = target_radius * target_end_angle.cos();
         let ty2 = target_radius * target_end_angle.sin();
 
-        let source_large_arc_flag = if (source_end_angle - source_start_angle).abs() > PI { 1 } else { 0 };
-        let target_large_arc_flag = if (target_end_angle - target_start_angle).abs() > PI { 1 } else { 0 };
+        let source_large_arc_flag = if (source_end_angle - source_start_angle).abs() > PI {
+            1
+        } else {
+            0
+        };
+        let target_large_arc_flag = if (target_end_angle - target_start_angle).abs() > PI {
+            1
+        } else {
+            0
+        };
 
         format!(
             "M{:.6},{:.6}
@@ -151,11 +195,22 @@ impl RibbonGenerator {
             Q0,0,{:.6},{:.6}
             A{:.6},{:.6},0,{:?},1,{:.6},{:.6}
             Q0,0,{:.6},{:.6}Z",
-            sx1, sy1,
-            source_radius, source_radius, source_large_arc_flag, sx2, sy2,
-            tx1, ty1,
-            target_radius, target_radius, target_large_arc_flag, tx2, ty2,
-            sx1, sy1
+            sx1,
+            sy1,
+            source_radius,
+            source_radius,
+            source_large_arc_flag,
+            sx2,
+            sy2,
+            tx1,
+            ty1,
+            target_radius,
+            target_radius,
+            target_large_arc_flag,
+            tx2,
+            ty2,
+            sx1,
+            sy1
         )
     }
 }

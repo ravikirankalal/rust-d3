@@ -26,7 +26,9 @@ pub struct PieSlice<'a, T> {
     pub data: &'a T,
 }
 
-impl<T> Pie<fn(&T) -> f64, fn(&T, &T) -> std::cmp::Ordering, fn() -> f64, fn() -> f64, fn() -> f64, T> {
+impl<T>
+    Pie<fn(&T) -> f64, fn(&T, &T) -> std::cmp::Ordering, fn() -> f64, fn() -> f64, fn() -> f64, T>
+{
     pub fn new() -> Self {
         Self {
             value: |_d| 1.0,
@@ -58,24 +60,69 @@ where
     PA: Fn() -> f64,
 {
     pub fn value<V2>(self, value: V2) -> Pie<V2, S, SA, EA, PA, T>
-    where V2: Fn(&T) -> f64 {
-        Pie { value, sort: self.sort, start_angle: self.start_angle, end_angle: self.end_angle, pad_angle: self.pad_angle, _phantom: std::marker::PhantomData }
+    where
+        V2: Fn(&T) -> f64,
+    {
+        Pie {
+            value,
+            sort: self.sort,
+            start_angle: self.start_angle,
+            end_angle: self.end_angle,
+            pad_angle: self.pad_angle,
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn sort<S2>(self, sort: S2) -> Pie<V, S2, SA, EA, PA, T>
-    where S2: Fn(&T, &T) -> std::cmp::Ordering {
-        Pie { value: self.value, sort: Some(sort), start_angle: self.start_angle, end_angle: self.end_angle, pad_angle: self.pad_angle, _phantom: std::marker::PhantomData }
+    where
+        S2: Fn(&T, &T) -> std::cmp::Ordering,
+    {
+        Pie {
+            value: self.value,
+            sort: Some(sort),
+            start_angle: self.start_angle,
+            end_angle: self.end_angle,
+            pad_angle: self.pad_angle,
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn start_angle<SA2>(self, start_angle: SA2) -> Pie<V, S, SA2, EA, PA, T>
-    where SA2: Fn() -> f64 {
-        Pie { value: self.value, sort: self.sort, start_angle, end_angle: self.end_angle, pad_angle: self.pad_angle, _phantom: std::marker::PhantomData }
+    where
+        SA2: Fn() -> f64,
+    {
+        Pie {
+            value: self.value,
+            sort: self.sort,
+            start_angle,
+            end_angle: self.end_angle,
+            pad_angle: self.pad_angle,
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn end_angle<EA2>(self, end_angle: EA2) -> Pie<V, S, SA, EA2, PA, T>
-    where EA2: Fn() -> f64 {
-        Pie { value: self.value, sort: self.sort, start_angle: self.start_angle, end_angle, pad_angle: self.pad_angle, _phantom: std::marker::PhantomData }
+    where
+        EA2: Fn() -> f64,
+    {
+        Pie {
+            value: self.value,
+            sort: self.sort,
+            start_angle: self.start_angle,
+            end_angle,
+            pad_angle: self.pad_angle,
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn pad_angle<PA2>(self, pad_angle: PA2) -> Pie<V, S, SA, EA, PA2, T>
-    where PA2: Fn() -> f64 {
-        Pie { value: self.value, sort: self.sort, start_angle: self.start_angle, end_angle: self.end_angle, pad_angle, _phantom: std::marker::PhantomData }
+    where
+        PA2: Fn() -> f64,
+    {
+        Pie {
+            value: self.value,
+            sort: self.sort,
+            start_angle: self.start_angle,
+            end_angle: self.end_angle,
+            pad_angle,
+            _phantom: std::marker::PhantomData,
+        }
     }
     pub fn generate<'a>(&self, data: &'a [T]) -> Vec<PieSlice<'a, T>> {
         let mut indexed: Vec<(usize, &T)> = data.iter().enumerate().collect();
@@ -92,7 +139,11 @@ where
         let mut current_angle = start_angle;
         let mut result = Vec::with_capacity(n);
         for ((orig_idx, datum), value) in indexed.into_iter().zip(values.into_iter()) {
-            let angle = if total > 0.0 { value.max(0.0) / total * angle_range } else { 0.0 };
+            let angle = if total > 0.0 {
+                value.max(0.0) / total * angle_range
+            } else {
+                0.0
+            };
             let sa = current_angle;
             let ea = sa + angle;
             result.push(PieSlice {

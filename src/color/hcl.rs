@@ -18,23 +18,13 @@ impl Hcl {
     pub fn brighter(&self, k: Option<f32>) -> Self {
         let k = k.unwrap_or(1.0);
         let l = self.l + 18.0 * k;
-        Hcl::new(
-            self.h,
-            self.c,
-            l.min(100.0),
-            self.opacity,
-        )
+        Hcl::new(self.h, self.c, l.min(100.0), self.opacity)
     }
 
     pub fn darker(&self, k: Option<f32>) -> Self {
         let k = k.unwrap_or(1.0);
         let l = self.l - 18.0 * k;
-        Hcl::new(
-            self.h,
-            self.c,
-            l.max(0.0),
-            self.opacity,
-        )
+        Hcl::new(self.h, self.c, l.max(0.0), self.opacity)
     }
 
     pub fn opacity(&self, value: f32) -> Self {

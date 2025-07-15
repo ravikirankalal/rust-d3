@@ -3,7 +3,10 @@
 
 use std::collections::HashMap;
 
-pub fn map_values<K: Eq + std::hash::Hash + Clone, V, U, F>(map: &HashMap<K, V>, f: F) -> HashMap<K, U>
+pub fn map_values<K: Eq + std::hash::Hash + Clone, V, U, F>(
+    map: &HashMap<K, V>,
+    f: F,
+) -> HashMap<K, U>
 where
     F: Fn(&V) -> U,
 {

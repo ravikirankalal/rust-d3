@@ -59,7 +59,12 @@ impl<T> Node<T> {
         if self.children.is_empty() {
             self.height = 0;
         } else {
-            self.height = 1 + self.children.iter_mut().map(|c| c.compute_heights()).max().unwrap_or(0);
+            self.height = 1 + self
+                .children
+                .iter_mut()
+                .map(|c| c.compute_heights())
+                .max()
+                .unwrap_or(0);
         }
         self.height
     }

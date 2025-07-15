@@ -32,7 +32,11 @@ pub fn hex_to_hsl(hex: &str) -> (f64, f64, f64) {
         s = 0.0;
     } else {
         let d = max - min;
-        s = if l > 0.5 { d / (2.0 - max - min) } else { d / (max + min) };
+        s = if l > 0.5 {
+            d / (2.0 - max - min)
+        } else {
+            d / (max + min)
+        };
         h = if max == r {
             (g - b) / d + if g < b { 6.0 } else { 0.0 }
         } else if max == g {
@@ -46,21 +50,40 @@ pub fn hex_to_hsl(hex: &str) -> (f64, f64, f64) {
 
 /// Convert HSL to RGB hex string
 pub fn hsl_to_hex(h: f64, s: f64, l: f64) -> String {
-    let q = if l < 0.5 { l * (1.0 + s) } else { l + s - l * s };
+    let q = if l < 0.5 {
+        l * (1.0 + s)
+    } else {
+        l + s - l * s
+    };
     let p = 2.0 * l - q;
     fn hue_to_rgb(p: f64, q: f64, t: f64) -> f64 {
         let mut t = t;
-        if t < 0.0 { t += 1.0; }
-        if t > 1.0 { t -= 1.0; }
-        if t < 1.0/6.0 { return p + (q - p) * 6.0 * t; }
-        if t < 1.0/2.0 { return q; }
-        if t < 2.0/3.0 { return p + (q - p) * (2.0/3.0 - t) * 6.0; }
+        if t < 0.0 {
+            t += 1.0;
+        }
+        if t > 1.0 {
+            t -= 1.0;
+        }
+        if t < 1.0 / 6.0 {
+            return p + (q - p) * 6.0 * t;
+        }
+        if t < 1.0 / 2.0 {
+            return q;
+        }
+        if t < 2.0 / 3.0 {
+            return p + (q - p) * (2.0 / 3.0 - t) * 6.0;
+        }
         p
     }
-    let r = hue_to_rgb(p, q, h + 1.0/3.0);
+    let r = hue_to_rgb(p, q, h + 1.0 / 3.0);
     let g = hue_to_rgb(p, q, h);
-    let b = hue_to_rgb(p, q, h - 1.0/3.0);
-    format!("#{:02x}{:02x}{:02x}", (r * 255.0) as u8, (g * 255.0) as u8, (b * 255.0) as u8)
+    let b = hue_to_rgb(p, q, h - 1.0 / 3.0);
+    format!(
+        "#{:02x}{:02x}{:02x}",
+        (r * 255.0) as u8,
+        (g * 255.0) as u8,
+        (b * 255.0) as u8
+    )
 }
 
 /// Interpolate between two HSL colors (hex strings, e.g. "#ff0000")

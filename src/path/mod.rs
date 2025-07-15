@@ -10,7 +10,9 @@ pub struct Path {
 
 impl Path {
     pub fn new() -> Self {
-        Path { data: String::new() }
+        Path {
+            data: String::new(),
+        }
     }
     pub fn move_to(&mut self, x: f64, y: f64) {
         if !self.data.is_empty() {
@@ -37,14 +39,32 @@ impl Path {
         if !self.data.is_empty() {
             self.data.push(' ');
         }
-        self.data.push_str(&format!("C{} {} {} {} {} {}", cp1x, cp1y, cp2x, cp2y, x, y));
+        self.data
+            .push_str(&format!("C{} {} {} {} {} {}", cp1x, cp1y, cp2x, cp2y, x, y));
     }
-    pub fn arc(&mut self, rx: f64, ry: f64, x_axis_rotation: f64, large_arc: bool, sweep: bool, x: f64, y: f64) {
+    pub fn arc(
+        &mut self,
+        rx: f64,
+        ry: f64,
+        x_axis_rotation: f64,
+        large_arc: bool,
+        sweep: bool,
+        x: f64,
+        y: f64,
+    ) {
         if !self.data.is_empty() {
             self.data.push(' ');
         }
-        self.data.push_str(&format!("A{} {} {} {} {} {} {}", rx, ry, x_axis_rotation,
-            if large_arc {1} else {0}, if sweep {1} else {0}, x, y));
+        self.data.push_str(&format!(
+            "A{} {} {} {} {} {} {}",
+            rx,
+            ry,
+            x_axis_rotation,
+            if large_arc { 1 } else { 0 },
+            if sweep { 1 } else { 0 },
+            x,
+            y
+        ));
     }
     // TODO: Implement arc, etc.
     pub fn to_string(&self) -> &str {

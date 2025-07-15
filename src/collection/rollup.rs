@@ -14,7 +14,10 @@ where
         let k = key_fn(v);
         groups.entry(k).or_default().push(v);
     }
-    groups.into_iter().map(|(k, vs)| (k, reduce_fn(&vs))).collect()
+    groups
+        .into_iter()
+        .map(|(k, vs)| (k, reduce_fn(&vs)))
+        .collect()
 }
 
 #[cfg(test)]

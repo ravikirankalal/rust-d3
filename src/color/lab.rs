@@ -16,23 +16,13 @@ impl Lab {
     pub fn brighter(&self, k: Option<f32>) -> Self {
         let k = k.unwrap_or(1.0);
         let t = 1.0 / 0.7_f32.powf(k);
-        Lab::new(
-            (self.l * t).min(100.0),
-            self.a,
-            self.b,
-            self.opacity,
-        )
+        Lab::new((self.l * t).min(100.0), self.a, self.b, self.opacity)
     }
 
     pub fn darker(&self, k: Option<f32>) -> Self {
         let k = k.unwrap_or(1.0);
         let t = 0.7_f32.powf(k);
-        Lab::new(
-            (self.l * t).max(0.0),
-            self.a,
-            self.b,
-            self.opacity,
-        )
+        Lab::new((self.l * t).max(0.0), self.a, self.b, self.opacity)
     }
 
     pub fn interpolate(&self, other: &Lab, t: f32) -> Self {

@@ -3,11 +3,17 @@
 
 use std::collections::HashMap;
 
-pub fn filter_map<K: Eq + std::hash::Hash + Clone, V: Clone, F>(map: &HashMap<K, V>, pred: F) -> HashMap<K, V>
+pub fn filter_map<K: Eq + std::hash::Hash + Clone, V: Clone, F>(
+    map: &HashMap<K, V>,
+    pred: F,
+) -> HashMap<K, V>
 where
     F: Fn(&K, &V) -> bool,
 {
-    map.iter().filter(|(k, v)| pred(k, v)).map(|(k, v)| (k.clone(), v.clone())).collect()
+    map.iter()
+        .filter(|(k, v)| pred(k, v))
+        .map(|(k, v)| (k.clone(), v.clone()))
+        .collect()
 }
 
 #[cfg(test)]

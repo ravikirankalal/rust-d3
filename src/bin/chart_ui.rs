@@ -9,14 +9,14 @@ use rust_d3::scale::ScaleTime;
 use rust_d3::selection::{Arena, Selection};
 use rust_d3::shape::Area;
 use rust_d3::time::format::time_parse;
+use slotmap::SlotMap;
+use std::cell::RefCell;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use std::rc::Rc;
 use tiny_skia::Pixmap;
 use usvg::fontdb;
 use usvg::{Options, Tree};
-use slotmap::SlotMap;
-use std::cell::RefCell;
-use std::rc::Rc;
 
 fn generate_svg_chart() -> String {
     let file = File::open("examples/aapl.csv").expect("Cannot open aapl.csv");
@@ -45,7 +45,9 @@ fn generate_svg_chart() -> String {
     let _n = closes.len();
     let min_close = closes.iter().cloned().fold(f32::INFINITY, f32::min);
     let max_close = closes.iter().cloned().fold(f32::NEG_INFINITY, f32::max);
-    let arena = Rc::new(RefCell::new(Arena { nodes: SlotMap::with_key() }));
+    let arena = Rc::new(RefCell::new(Arena {
+        nodes: SlotMap::with_key(),
+    }));
     let mut svg = Selection::root(Rc::clone(&arena), "svg");
     svg.attr("width", &width.to_string())
         .attr("height", &height.to_string())
@@ -74,7 +76,7 @@ fn generate_svg_chart() -> String {
         .attr("d", &area.generate(&closes))
         .attr("stroke-width", "2");
     let root_key = svg.iter().next().copied().unwrap();
-    
+
     // Append x-axis
     let mut x_axis_group = svg.append("g");
     x_axis_group.attr(
@@ -82,7 +84,8 @@ fn generate_svg_chart() -> String {
         &format!("translate(0,{})", height as i32 - margin_bottom),
     );
     x_axis_group.call(|sel| {
-        axis_bottom(x.clone()).grid(false)
+        axis_bottom(x.clone())
+            .grid(false)
             .tick_count(width / 80)
             .tick_size_inner(6.0)
             .tick_padding(3.0)
@@ -92,7 +95,10 @@ fn generate_svg_chart() -> String {
     let mut y_axis_group = svg.append("g");
     y_axis_group.attr("transform", &format!("translate({},{})", margin_left, 0));
     y_axis_group.call(|sel| {
-        axis_left(y.clone()).grid(false).tick_count(height / 40).render(sel);
+        axis_left(y.clone())
+            .grid(false)
+            .tick_count(height / 40)
+            .render(sel);
     });
     y_axis_group.call(|sel| {
         sel.select_by(".domain").remove();
@@ -100,12 +106,16 @@ fn generate_svg_chart() -> String {
     // Adjust tick lines for x-axis
     y_axis_group.call(|g| {
         g.select_by(".tick")
-        .attr("x2",(width as i32 - margin_left - margin_right).to_string().as_str())
-        .attr("stroke-opacity", "0.1");
-            // .attr("stroke", "#888");
+            .attr(
+                "x2",
+                (width as i32 - margin_left - margin_right)
+                    .to_string()
+                    .as_str(),
+            )
+            .attr("stroke-opacity", "0.1");
+        // .attr("stroke", "#888");
     });
 
-    
     Selection::render_node(&arena, root_key)
 }
 

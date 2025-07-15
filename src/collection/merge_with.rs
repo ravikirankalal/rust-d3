@@ -8,7 +8,8 @@ where
 {
     let mut result = a.clone();
     for (k, v_b) in b.iter() {
-        result.entry(k.clone())
+        result
+            .entry(k.clone())
             .and_modify(|v_a| *v_a = f(k, v_a, v_b))
             .or_insert_with(|| v_b.clone());
     }

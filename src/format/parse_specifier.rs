@@ -85,7 +85,21 @@ pub fn parse_specifier(spec: &str) -> FormatSpecifier {
     }
     // Skip any non-digit, non-dot, non-type chars before width
     while let Some(&c) = chars.peek() {
-        if !c.is_ascii_digit() && c != '.' && c != 'f' && c != 'd' && c != 's' && c != 'e' && c != 'g' && c != 'r' && c != 'b' && c != 'o' && c != 'x' && c != 'X' && c != '%' && c != '\0' {
+        if !c.is_ascii_digit()
+            && c != '.'
+            && c != 'f'
+            && c != 'd'
+            && c != 's'
+            && c != 'e'
+            && c != 'g'
+            && c != 'r'
+            && c != 'b'
+            && c != 'o'
+            && c != 'x'
+            && c != 'X'
+            && c != '%'
+            && c != '\0'
+        {
             chars.next();
         } else {
             break;

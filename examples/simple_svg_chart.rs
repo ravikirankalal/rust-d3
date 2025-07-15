@@ -8,7 +8,9 @@ fn main() {
     let bar_gap = 10;
 
     // Create arena and root SVG node using Selection API
-    let mut arena = Arena { nodes: slotmap::SlotMap::with_key() };
+    let mut arena = Arena {
+        nodes: slotmap::SlotMap::with_key(),
+    };
     let mut svg = Selection::create("svg");
 
     svg.attr("width", &width.to_string())
@@ -18,18 +20,27 @@ fn main() {
         .attr("style", "max-width: 100%; height: auto;");
 
     // Add a rect for each bar.
-    let data_join = svg.append("g")
+    let data_join = svg
+        .append("g")
         .attr("fill", "steelblue")
         .select_all(None)
         .data(&data)
-    .enter().exit().append("rect")
+        .enter()
+        .exit()
+        .append("rect")
         .attr_fn("x", |_, i| (i * (bar_width + bar_gap)).to_string())
         .attr_fn("y", |n, _| {
-            let d = n.data.as_ref().and_then(|s| s.parse::<i32>().ok()).unwrap_or(0);
+            let d = n
+                .data
+                .as_ref()
+                .and_then(|s| s.parse::<i32>().ok())
+                .unwrap_or(0);
             (height - d).to_string()
         })
         .attr("width", &bar_width.to_string())
-        .attr_fn("height", |n, _| n.data.as_ref().cloned().unwrap_or_else(|| "0".to_string()))
+        .attr_fn("height", |n, _| {
+            n.data.as_ref().cloned().unwrap_or_else(|| "0".to_string())
+        })
         .attr("fill", "steelblue");
 
     svg.append("line")

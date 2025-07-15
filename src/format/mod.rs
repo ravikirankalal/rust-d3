@@ -111,7 +111,11 @@ mod tests {
     }
     #[test]
     fn test_format_type() {
-        let spec = FormatSpecifier { precision: Some(2), ty: 'f', ..Default::default() };
+        let spec = FormatSpecifier {
+            precision: Some(2),
+            ty: 'f',
+            ..Default::default()
+        };
         assert_eq!(format_type(123.456, &spec), "123.46");
     }
     #[test]
