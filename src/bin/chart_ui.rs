@@ -77,7 +77,7 @@ fn generate_svg_chart() -> String {
         .attr("stroke-width", "2");
     let root_key = svg.iter().next().copied().unwrap();
 
-    // Append x-axis
+    // // Append x-axis
     let mut x_axis_group = svg.append("g");
     x_axis_group.attr(
         "transform",
@@ -85,36 +85,35 @@ fn generate_svg_chart() -> String {
     );
     x_axis_group.call(|sel| {
         axis_bottom(x.clone())
-            .grid(false)
-            .tick_count(width / 80)
-            .tick_size_outer(6.0)
-            .tick_padding(3.0)
+            .with_ticks((width / 80) as usize)
+            .tick_size(10.0)
             .render(sel);
     });
+
     // Append y-axis
-    let mut y_axis_group = svg.append("g");
-    y_axis_group.attr("transform", &format!("translate({},{})", margin_left, 0));
-    y_axis_group.call(|sel| {
+    svg.append("g")
+    .attr("transform", &format!("translate({},{})", margin_left, 0))
+    .call(|sel| {
         axis_left(y.clone())
-            .grid(false)
-            .tick_count(height / 40)
+            .with_ticks(10)
+            .tick_size(10.0)
             .render(sel);
     });
-    y_axis_group.call(|sel| {
-        sel.select_by(".domain").remove();
-    });
+    // .call(|sel| {
+    //     sel.select_by(".domain").remove();
+    // });
     // Adjust tick lines for x-axis
-    y_axis_group.call(|g| {
-        g.select_by(".tick").clone()
-            .attr(
-                "x2",
-                (width as i32 - margin_left - margin_right)
-                    .to_string()
-                    .as_str(),
-            )
-            .attr("stroke-opacity", "0.1");
-        // .attr("stroke", "#888");
-    });
+    // y_axis_group.call(|g| {
+    //     g.select_by(".tick").clone()
+    //         .attr(
+    //             "x2",
+    //             (width as i32 - margin_left - margin_right)
+    //                 .to_string()
+    //                 .as_str(),
+    //         )
+    //         .attr("stroke-opacity", "0.1");
+    //     // .attr("stroke", "#888");
+    // });
 
     Selection::render_node(&arena, root_key)
 }

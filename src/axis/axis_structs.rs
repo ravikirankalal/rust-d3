@@ -54,6 +54,16 @@ pub struct AxisLineStyle {
     pub dasharray: Option<String>,
 }
 
+impl Default for AxisLineStyle {
+    fn default() -> Self {
+        Self {
+            color: "currentColor".to_string(),
+            width: 1.0,
+            dasharray: None,
+        }
+    }
+}
+
 pub struct AxisLayout {
     pub orientation: AxisOrientation,
     pub ticks: Vec<Tick>,

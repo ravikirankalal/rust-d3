@@ -1,0 +1,15 @@
+{
+  "name": "d3-reference-generator",
+  "version": "1.0.0",
+  "description": "Generate D3 axis reference values for Rust implementation testing",
+  "main": "generate_reference.js",
+  "scripts": {
+    "generate": "node generate_reference.js"
+  },
+  "dependencies": {
+    "d3-scale": "^4.0.0",
+    "d3-axis": "^3.0.0",
+    "d3-time": "^3.0.0",
+    "d3-time-format": "^4.1.0"
+  }
+}

@@ -9,6 +9,16 @@ impl<T: Clone + PartialEq + ToString> super::axis_renderable::AxisRenderable
         if let Some(hook) = &self.on_render {
             hook();
         }
+        // Apply half-pixel offset for crisp lines based on orientation
+        let transform = match self.orientation {
+            AxisOrientation::Bottom | AxisOrientation::Top => {
+                format!("translate({},0)", self.offset)
+            }
+            AxisOrientation::Left | AxisOrientation::Right => {
+                format!("translate(0,{})", self.offset)
+            }
+        };
+        selection.attr("transform", &transform);
         let ticks = self.ticks();
         // Minor ticks
         if let Some(minor_ticks) = &self.minor_ticks {

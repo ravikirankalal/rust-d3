@@ -50,6 +50,10 @@ impl<T: Clone + PartialEq> ScaleBand<T> {
             .position(|v| v == x)
             .map(|i| start + i as f64 * step)
     }
+    
+    pub fn range(&self) -> [f64; 2] {
+        self.range
+    }
 }
 
 #[cfg(test)]

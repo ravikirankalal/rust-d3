@@ -127,21 +127,35 @@ impl Selection {
     /// ```
     pub fn append(&mut self, tag: &str) -> Selection {
         let mut new_keys = Vec::new();
+        
         for &key in &self.keys {
+            let (parent_key, data) = {
+                let arena = self.arena.borrow();
+                let node = &arena.nodes[key];
+                // If the node has a parent and is a placeholder (empty tag), use the parent
+                // Otherwise, use the node itself as the parent
+                if node.tag.is_empty() && node.parent.is_some() {
+                    (node.parent.unwrap(), node.data.clone())
+                } else {
+                    (key, node.data.clone())
+                }
+            };
+            
             let child = Node {
                 tag: tag.to_string(),
                 attributes: HashMap::new(),
                 properties: HashMap::new(),
-                data: None,
+                data: data.clone(),
                 children: vec![],
-                parent: Some(key),
+                parent: Some(parent_key),
                 text: None,
                 event_handlers: HashMap::new(),
             };
             let child_key = self.arena.borrow_mut().nodes.insert(child);
-            self.arena.borrow_mut().nodes[key].children.push(child_key);
+            self.arena.borrow_mut().nodes[parent_key].children.push(child_key);
             new_keys.push(child_key);
         }
+        
         Selection {
             arena: Rc::clone(&self.arena),
             keys: new_keys,
@@ -174,11 +188,12 @@ impl Selection {
             let mut arena = self.arena.borrow_mut();
             for (i, &key) in self.keys.iter().enumerate() {
                 let previous_value = arena.nodes[key].attributes.get(name).cloned();
-                let value = f(&arena.nodes[key], i, previous_value);
+                let node = &arena.nodes[key];
+                let value = f(node, i, previous_value);
                 if value.is_empty() {
                     arena.nodes[key].attributes.remove(name);
                 } else {
-                    arena.nodes[key].attributes.insert(name.to_string(), value);
+                    arena.nodes[key].attributes.insert(name.to_string(), value.clone());
                 }
             }
         }
@@ -188,19 +203,7 @@ impl Selection {
         let mut found = Vec::new();
         let arena = self.arena.borrow();
         for &key in &self.keys {
-            let mut stack = vec![key];
-            while let Some(current_key) = stack.pop() {
-                if let Some(node) = arena.nodes.get(current_key) {
-                    // Skip the current node if it's the root node, we only want descendants
-                    if current_key != key {
-                        if tag.map_or(true, |t| node.tag == t) {
-                            found.push(current_key);
-                        }
-                    }
-                    // Add children to stack for traversal
-                    stack.extend(&node.children);
-                }
-            }
+            self.traverse_children_ordered(&arena, key, &mut found, tag);
         }
         Selection {
             arena: Rc::clone(&self.arena),
@@ -211,6 +214,27 @@ impl Selection {
             exit_keys: None,
         }
     }
+    
+    fn traverse_children_ordered(
+        &self,
+        arena: &Arena,
+        key: NodeKey,
+        found: &mut Vec<NodeKey>,
+        tag: Option<&str>,
+    ) {
+        if let Some(node) = arena.nodes.get(key) {
+            // Process children in order
+            for &child_key in &node.children {
+                if let Some(child_node) = arena.nodes.get(child_key) {
+                    if tag.map_or(true, |t| child_node.tag == t) {
+                        found.push(child_key);
+                    }
+                }
+                // Recursively traverse children
+                self.traverse_children_ordered(arena, child_key, found, tag);
+            }
+        }
+    }
     pub fn data<T: ToString>(&mut self, data: &[T]) -> DataJoin {
         let mut enter_keys = Vec::new();
         let mut update_keys = Vec::new();
@@ -219,6 +243,14 @@ impl Selection {
         let mut node_iter = self.keys.iter().peekable();
         let mut arena = self.arena.borrow_mut();
         let mut _i = 0;
+        
+        // Find the parent node for enter selections
+        let parent_key = if let Some(&first_key) = self.keys.first() {
+            arena.nodes.get(first_key).and_then(|node| node.parent)
+        } else {
+            None
+        };
+        
         while let Some(d) = data_iter.next() {
             if let Some(&node_key) = node_iter.peek() {
                 arena.nodes[*node_key].data = Some(d);
@@ -231,7 +263,7 @@ impl Selection {
                     properties: HashMap::new(),
                     data: Some(d),
                     children: vec![],
-                    parent: None,
+                    parent: parent_key,
                     text: None,
                     event_handlers: HashMap::new(),
                 };
@@ -243,6 +275,7 @@ impl Selection {
         while let Some(&node_key) = node_iter.next() {
             exit_keys.push(node_key);
         }
+        
         self.enter_keys = Some(enter_keys.clone());
         self.update_keys = Some(update_keys.clone());
         self.exit_keys = Some(exit_keys.clone());
@@ -288,6 +321,9 @@ impl Selection {
 
         let mut arena = self.arena.borrow_mut();
 
+        // Find the parent node for enter selections
+        let parent_key = self.keys.first().copied();
+
         // Create data items with keys and indices
         let data_items: Vec<_> = data
             .iter()
@@ -296,34 +332,41 @@ impl Selection {
             .collect();
 
         // Create existing nodes map with keys
+        // Since the node data is already a string, we need to use a different approach
+        // We'll create a map where the key is the node's current data, and we'll match it against
+        // the data items using the key function
         let mut existing_nodes: HashMap<String, (NodeKey, usize)> = HashMap::new();
         for (i, &node_key) in self.keys.iter().enumerate() {
             if let Some(node) = arena.nodes.get(node_key) {
-                let key = node.data.as_ref().unwrap_or(&i.to_string()).clone();
-                existing_nodes.insert(key, (node_key, i));
+                if let Some(ref data) = node.data {
+                    // We need to find which data item this node corresponds to
+                    // We'll use the node's data as the key directly for now
+                    // This assumes that the key function would produce the same key for the same data
+                    existing_nodes.insert(data.clone(), (node_key, i));
+                }
             }
         }
 
         // Process data items to create enter/update selections
-        for (data_key, data_value, _data_index) in data_items {
+        for (data_key, data_value, _data_index) in data_items.into_iter() {
             if let Some((node_key, _)) = existing_nodes.remove(&data_key) {
                 // Update existing node
-                arena.nodes[node_key].data = Some(data_value);
+                arena.nodes[node_key].data = Some(data_value.clone());
                 update_keys.push(node_key);
             } else {
-                // Create placeholder for enter selection
-                let placeholder_node = Node {
+                // Place new data in enter selection
+                let enter_node = Node {
                     tag: "".to_string(),
                     attributes: HashMap::new(),
                     properties: HashMap::new(),
-                    data: Some(data_value),
+                    data: Some(data_value.clone()),
                     children: vec![],
-                    parent: None,
+                    parent: parent_key,
                     text: None,
                     event_handlers: HashMap::new(),
                 };
-                let placeholder_key = arena.nodes.insert(placeholder_node);
-                enter_keys.push(placeholder_key);
+                let enter_key = arena.nodes.insert(enter_node);
+                enter_keys.push(enter_key);
             }
         }
 
@@ -383,14 +426,18 @@ impl Selection {
             // Look for the first real node that could be a parent
             let mut parent_key = None;
 
-            // Search for the first real node (not placeholder) that can serve as parent
+            // Search for the most recently created group/container element
+            let mut found_keys = Vec::new();
             for (key, node) in arena.nodes.iter() {
                 if !node.tag.is_empty()
                     && (node.tag == "g" || node.tag == "svg" || node.tag == "div")
                 {
-                    parent_key = Some(key);
-                    break;
+                    found_keys.push(key);
                 }
+            }
+            // Get the last (most recent) one
+            if let Some(&key) = found_keys.last() {
+                parent_key = Some(key);
             }
 
             if let Some(parent_key) = parent_key {
@@ -463,54 +510,14 @@ impl Selection {
     pub fn remove(&mut self) -> &mut Self {
         {
             let mut arena = self.arena.borrow_mut();
-            println!("[REMOVE] Selection keys: {:?}", self.keys);
             for &key in &self.keys {
-                // Debug: print node and parent before removal
-                if let Some(node) = arena.nodes.get(key) {
-                    println!(
-                        "[REMOVE] Removing node: tag={}, class={:?}, key={:?}",
-                        node.tag,
-                        node.attributes.get("class"),
-                        key
-                    );
-                    if let Some(parent_key) = node.parent {
-                        if let Some(parent) = arena.nodes.get(parent_key) {
-                            println!(
-                                "[REMOVE] Parent before: key={:?}, children={:?}",
-                                parent_key, parent.children
-                            );
-                        }
-                    }
-                }
                 // Always update parent children list, but only if parent is still valid
                 if let Some(parent_key) = arena.nodes.get(key).and_then(|n| n.parent) {
                     if let Some(parent) = arena.nodes.get_mut(parent_key) {
-                        println!(
-                            "[REMOVE] Parent children before retain: {:?}",
-                            parent.children
-                        );
-                        println!("[REMOVE] Key to remove: {:?}", key);
-                        for (i, &c) in parent.children.iter().enumerate() {
-                            println!("[REMOVE] Child {} key: {:?}", i, c);
-                        }
-                        parent.children.retain(|&c| {
-                            let should_keep = c != key;
-                            if !should_keep {
-                                println!("[REMOVE] Removing child key: {:?}", c);
-                            }
-                            should_keep
-                        });
-                        println!(
-                            "[REMOVE] Parent children after retain: {:?}",
-                            parent.children
-                        );
+                        parent.children.retain(|&c| c != key);
                         // Extra check: if key is still present, forcibly remove
                         if parent.children.contains(&key) {
                             parent.children.retain(|&c| c != key);
-                            println!(
-                                "[REMOVE] Forcibly removed key {:?} from parent.children",
-                                key
-                            );
                         }
                     }
                 }

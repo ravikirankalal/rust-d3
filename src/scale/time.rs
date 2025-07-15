@@ -82,85 +82,165 @@ impl ScaleTime {
         let start = self.domain[0];
         let stop = self.domain[1];
 
+        // Handle reverse case
+        let reverse = stop < start;
+        let (start, stop) = if reverse { (stop, start) } else { (start, stop) };
+
         // Choose appropriate time interval based on domain span
         let interval = self.tick_interval(count);
 
-        match interval {
+        // Generate ticks with inclusive stop (D3 behavior)
+        let mut ticks = match interval {
             TimeTickInterval::Second(step) => {
                 let sec = Second;
-                if step == 1 {
-                    sec.range(start, stop, 1)
-                } else {
-                    sec.range(start, stop, step as i32)
+                let mut result = sec.range(start, stop, step as i32);
+                // Add inclusive stop if not already present
+                if !result.is_empty() && result.last().unwrap() < &stop {
+                    result.push(stop);
                 }
+                result
             }
             TimeTickInterval::Minute(step) => {
                 let min = Minute;
-                min.range(start, stop, step as i32)
+                let mut result = min.range(start, stop, step as i32);
+                if !result.is_empty() && result.last().unwrap() < &stop {
+                    result.push(stop);
+                }
+                result
             }
             TimeTickInterval::Hour(step) => {
                 let hour = Hour;
-                hour.range(start, stop, step as i32)
+                let mut result = hour.range(start, stop, step as i32);
+                if !result.is_empty() && result.last().unwrap() < &stop {
+                    result.push(stop);
+                }
+                result
             }
             TimeTickInterval::Day(step) => {
                 let day = Day;
-                day.range(start, stop, step as i32)
+                let mut result = day.range(start, stop, step as i32);
+                if !result.is_empty() && result.last().unwrap() < &stop {
+                    result.push(stop);
+                }
+                result
             }
             TimeTickInterval::Week(step) => {
                 let week = Week;
-                week.range(start, stop, step as i32)
+                let mut result = week.range(start, stop, step as i32);
+                if !result.is_empty() && result.last().unwrap() < &stop {
+                    result.push(stop);
+                }
+                result
             }
             TimeTickInterval::Month(step) => {
                 let month = Month;
-                month.range(start, stop, step as i32)
+                let mut result = month.range(start, stop, step as i32);
+                if !result.is_empty() && result.last().unwrap() < &stop {
+                    result.push(stop);
+                }
+                result
             }
             TimeTickInterval::Year(step) => {
                 let year = Year;
-                year.range(start, stop, step as i32)
+                let mut result = year.range(start, stop, step as i32);
+                if !result.is_empty() && result.last().unwrap() < &stop {
+                    result.push(stop);
+                }
+                result
             }
+        };
+
+        // Return in original order
+        if reverse {
+            ticks.reverse();
         }
+        ticks
     }
 
     fn tick_interval(&self, count: usize) -> TimeTickInterval {
         let start = self.domain[0];
         let stop = self.domain[1];
-        let duration = stop.signed_duration_since(start);
+        
+        // D3 tick intervals in milliseconds (matching D3's duration.js)
+        const DURATION_SECOND: i64 = 1000;
+        const DURATION_MINUTE: i64 = DURATION_SECOND * 60;
+        const DURATION_HOUR: i64 = DURATION_MINUTE * 60;
+        const DURATION_DAY: i64 = DURATION_HOUR * 24;
+        const DURATION_WEEK: i64 = DURATION_DAY * 7;
+        const DURATION_MONTH: i64 = DURATION_DAY * 30;
+        const DURATION_YEAR: i64 = DURATION_DAY * 365;
 
-        let total_seconds = duration.num_seconds();
-        let target_interval = total_seconds / count as i64;
+        // D3 tick intervals array (matching D3's ticks.js)
+        let tick_intervals = vec![
+            (TimeTickInterval::Second(1), 1, DURATION_SECOND),
+            (TimeTickInterval::Second(5), 5, 5 * DURATION_SECOND),
+            (TimeTickInterval::Second(15), 15, 15 * DURATION_SECOND),
+            (TimeTickInterval::Second(30), 30, 30 * DURATION_SECOND),
+            (TimeTickInterval::Minute(1), 1, DURATION_MINUTE),
+            (TimeTickInterval::Minute(5), 5, 5 * DURATION_MINUTE),
+            (TimeTickInterval::Minute(15), 15, 15 * DURATION_MINUTE),
+            (TimeTickInterval::Minute(30), 30, 30 * DURATION_MINUTE),
+            (TimeTickInterval::Hour(1), 1, DURATION_HOUR),
+            (TimeTickInterval::Hour(3), 3, 3 * DURATION_HOUR),
+            (TimeTickInterval::Hour(6), 6, 6 * DURATION_HOUR),
+            (TimeTickInterval::Hour(12), 12, 12 * DURATION_HOUR),
+            (TimeTickInterval::Day(1), 1, DURATION_DAY),
+            (TimeTickInterval::Day(2), 2, 2 * DURATION_DAY),
+            (TimeTickInterval::Week(1), 1, DURATION_WEEK),
+            (TimeTickInterval::Month(1), 1, DURATION_MONTH),
+            (TimeTickInterval::Month(3), 3, 3 * DURATION_MONTH),
+            (TimeTickInterval::Year(1), 1, DURATION_YEAR),
+        ];
 
-        // Choose appropriate interval based on target interval
-        if target_interval < 1 {
-            TimeTickInterval::Second(1)
-        } else if target_interval < 60 {
-            TimeTickInterval::Second(Self::nice_step(target_interval, &[1, 5, 15, 30]))
-        } else if target_interval < 3600 {
-            let minutes = target_interval / 60;
-            TimeTickInterval::Minute(Self::nice_step(minutes, &[1, 5, 15, 30]))
-        } else if target_interval < 86400 {
-            let hours = target_interval / 3600;
-            TimeTickInterval::Hour(Self::nice_step(hours, &[1, 3, 6, 12]))
-        } else if target_interval < 604800 {
-            let days = target_interval / 86400;
-            TimeTickInterval::Day(Self::nice_step(days, &[1, 2, 3, 7]))
-        } else if target_interval < 2419200 {
-            let weeks = target_interval / 604800;
-            TimeTickInterval::Week(Self::nice_step(weeks, &[1, 2, 4]))
-        } else if target_interval < 31536000 {
-            let months = target_interval / 2419200;
-            TimeTickInterval::Month(Self::nice_step(months, &[1, 2, 3, 6]))
+        let start_millis = start.and_utc().timestamp_millis();
+        let stop_millis = stop.and_utc().timestamp_millis();
+        let target = (stop_millis - start_millis).abs() / count as i64;
+
+        // Binary search for the appropriate interval (matching D3's bisector logic)
+        let mut i = 0;
+        while i < tick_intervals.len() && tick_intervals[i].2 < target {
+            i += 1;
+        }
+
+        if i == tick_intervals.len() {
+            // Use years with tick_step logic
+            let years = Self::tick_step(start_millis / DURATION_YEAR, stop_millis / DURATION_YEAR, count);
+            return TimeTickInterval::Year(years.max(1));
+        }
+
+        if i == 0 {
+            // Use milliseconds/seconds with tick_step logic
+            let step = Self::tick_step(start_millis, stop_millis, count).max(1);
+            return TimeTickInterval::Second(step / 1000);
+        }
+
+        // Choose between current and previous interval based on proximity
+        let current_step = tick_intervals[i].2;
+        let prev_step = tick_intervals[i - 1].2;
+        
+        if (target as f64) / (prev_step as f64) < (current_step as f64) / (target as f64) {
+            tick_intervals[i - 1].0.clone()
         } else {
-            let years = target_interval / 31536000;
-            TimeTickInterval::Year(Self::nice_step(years, &[1, 2, 5, 10]))
+            tick_intervals[i].0.clone()
         }
     }
 
-    fn nice_step(target: i64, steps: &[i64]) -> i64 {
-        steps
-            .iter()
-            .find(|&&step| step >= target)
-            .copied()
-            .unwrap_or(*steps.last().unwrap())
+    fn tick_step(start: i64, stop: i64, count: usize) -> i64 {
+        let step = (stop - start) / count.max(1) as i64;
+        let power = (step as f64).log10().floor() as i32;
+        let error = step as f64 / 10.0_f64.powi(power);
+        
+        let factor = if error >= 50.0_f64.sqrt() {
+            10.0
+        } else if error >= 10.0_f64.sqrt() {
+            5.0
+        } else if error >= 2.0_f64.sqrt() {
+            2.0
+        } else {
+            1.0
+        };
+        
+        (10.0_f64.powi(power) * factor) as i64
     }
 
     pub fn tick_format(

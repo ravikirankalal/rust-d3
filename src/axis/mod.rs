@@ -16,7 +16,7 @@ pub mod ticks;
 
 pub use axis_constructors::{axis_bottom, axis_left, axis_right, axis_top};
 pub use axis_renderable::AxisRenderable;
-pub use axis_structs::{Axis, AxisLayout};
+pub use axis_structs::{Axis, AxisLayout, GridStyle, TitleStyle, TickLabelStyle, AxisLineStyle};
 pub use orientation::AxisOrientation;
 pub use ticks::{Tick, TickFormat};
 // All AxisRenderable implementations are now in their own files for each scale type.

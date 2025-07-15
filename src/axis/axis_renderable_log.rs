@@ -5,6 +5,16 @@ use super::orientation::AxisOrientation;
 
 impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleLog> {
     fn render(&self, selection: &mut crate::selection::Selection) {
+        // Apply half-pixel offset for crisp lines based on orientation
+        let transform = match self.orientation {
+            AxisOrientation::Bottom | AxisOrientation::Top => {
+                format!("translate({},0)", self.offset)
+            }
+            AxisOrientation::Left | AxisOrientation::Right => {
+                format!("translate(0,{})", self.offset)
+            }
+        };
+        selection.attr("transform", &transform);
         let ticks = self.ticks();
         // Draw grid lines if enabled
         if self.grid {
