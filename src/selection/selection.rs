@@ -62,7 +62,11 @@ impl Selection {
         {
             let mut arena = self.arena.borrow_mut();
             for &key in &self.keys {
-                arena.nodes[key].attributes.insert(name.to_string(), value.to_string());
+                if value.is_empty() {
+                    arena.nodes[key].attributes.remove(name);
+                } else {
+                    arena.nodes[key].attributes.insert(name.to_string(), value.to_string());
+                }
             }
         }
         self
@@ -73,7 +77,11 @@ impl Selection {
             let mut arena = self.arena.borrow_mut();
             for (i, &key) in self.keys.iter().enumerate() {
                 let value = f(&arena.nodes[key], i);
-                arena.nodes[key].attributes.insert(name.to_string(), value);
+                if value.is_empty() {
+                    arena.nodes[key].attributes.remove(name);
+                } else {
+                    arena.nodes[key].attributes.insert(name.to_string(), value);
+                }
             }
         }
         self
@@ -140,7 +148,7 @@ impl Selection {
         }
         self
     }
-    pub fn join_nodes(&mut self, tag: &str) -> &mut Self {
+    pub fn join(&mut self, tag: &str) -> &mut Self {
         {
             let mut arena = self.arena.borrow_mut();
             let parent = if self.keys.is_empty() {
@@ -315,7 +323,11 @@ impl Selection {
         {
             let mut arena = self.arena.borrow_mut();
             for &key in &self.keys {
-                arena.nodes[key].properties.insert(name.to_string(), value.to_string());
+                if value.is_empty() {
+                    arena.nodes[key].properties.remove(name);
+                } else {
+                    arena.nodes[key].properties.insert(name.to_string(), value.to_string());
+                }
             }
         }
         self

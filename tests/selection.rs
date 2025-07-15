@@ -150,7 +150,7 @@ fn test_render_node_svg() {
     let mut rect = g.append("rect");
     rect.attr("x", "10").attr("y", "20").attr("width", "30").attr("height", "40");
     let root_key = *svg.iter().next().unwrap();
-    let svg_str = Selection::render_node(&arena.borrow(), root_key);
+    let svg_str = Selection::render_node(&arena, root_key);
     assert!(svg_str.contains("<svg"));
     assert!(svg_str.contains("<g"));
     assert!(svg_str.contains("<rect"));
@@ -348,4 +348,77 @@ fn test_data_join_chained_attr() {
     assert_eq!(nodes[0].attributes.get("custom"), Some(&"rect-0".to_string()));
     assert_eq!(nodes[1].attributes.get("custom"), Some(&"rect-1".to_string()));
     assert_eq!(nodes[2].attributes.get("custom"), Some(&"rect-2".to_string()));
+}
+
+#[test]
+fn test_empty_selection_no_op() {
+    let arena = Rc::new(RefCell::new(Arena { nodes: SlotMap::with_key() }));
+    let mut svg = Selection::root(Rc::clone(&arena), "svg");
+    
+    // Create empty selection
+    let mut empty_selection = svg.select_all(Some("nonexistent"));
+    assert!(empty_selection.is_empty());
+    
+    // All operations on empty selection should be no-ops and return self
+    let result = empty_selection
+        .attr("width", "100")
+        .style("color", "red")
+        .property("value", "test")
+        .classed("active", true)
+        .text("content")
+        .html("<span>test</span>");
+    
+    // Should still be empty and chainable
+    assert!(result.is_empty());
+    assert_eq!(result.len(), 0);
+    
+    // Remove on empty selection should also be no-op
+    result.remove();
+    assert!(result.is_empty());
+    
+    // Verify the root svg node is unaffected
+    let svg_node = svg.node().unwrap();
+    assert_eq!(svg_node.tag, "svg");
+    assert!(svg_node.attributes.is_empty());
+}
+
+#[test]
+fn test_attr_none_value_removes_attribute() {
+    let arena = Rc::new(RefCell::new(Arena { nodes: SlotMap::with_key() }));
+    let mut svg = Selection::root(Rc::clone(&arena), "svg");
+    
+    // Set an attribute
+    svg.attr("width", "100").attr("height", "200");
+    let mut node = svg.node().unwrap();
+    assert_eq!(node.attributes.get("width"), Some(&"100".to_string()));
+    assert_eq!(node.attributes.get("height"), Some(&"200".to_string()));
+    
+    // Remove attribute by setting empty string (D3 behavior)
+    svg.attr("width", "");
+    node = svg.node().unwrap();
+    
+    // In D3, empty string removes the attribute
+    // Our implementation should match this behavior
+    assert_eq!(node.attributes.get("width"), None);
+    assert_eq!(node.attributes.get("height"), Some(&"200".to_string()));
+}
+
+#[test]
+fn test_style_none_value_removes_style() {
+    let arena = Rc::new(RefCell::new(Arena { nodes: SlotMap::with_key() }));
+    let mut svg = Selection::root(Rc::clone(&arena), "svg");
+    
+    // Set multiple styles
+    svg.style("color", "red").style("font-size", "12px");
+    let mut node = svg.node().unwrap();
+    let style = node.attributes.get("style").unwrap();
+    assert!(style.contains("color:red"));
+    assert!(style.contains("font-size:12px"));
+    
+    // Remove style by setting empty string
+    svg.style("color", "");
+    node = svg.node().unwrap();
+    let style = node.attributes.get("style").unwrap();
+    assert!(!style.contains("color"));
+    assert!(style.contains("font-size:12px"));
 }
