@@ -5,7 +5,7 @@ use slotmap::SlotMap;
 use crate::selection::arena::{Arena, NodeKey};
 use crate::selection::node::Node;
 use crate::selection::data_join::DataJoin;
-use crate::selection::utils::{remove_node_recursively, find_matching_descendants};
+use crate::selection::utils::remove_node_recursively;
 
 pub struct Selection {
     arena: Rc<RefCell<Arena>>,
@@ -577,7 +577,7 @@ impl Selection {
             }
             
             // For each parent, reorder its children to match the selection order
-            for (parent_key, mut selected_keys) in parent_groups {
+            for (parent_key, selected_keys) in parent_groups {
                 if let Some(parent_key) = parent_key {
                     if let Some(parent) = arena.nodes.get_mut(parent_key) {
                         // Create a new children vector with selected keys in selection order
