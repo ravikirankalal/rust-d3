@@ -112,14 +112,16 @@ impl<T: Clone + PartialEq + ToString> super::axis_renderable::AxisRenderable for
                         .attr("x2", &tick.position.to_string())
                         .attr("y1", "0")
                         .attr("y2", &self.tick_size_inner.to_string())
-                        .attr("stroke", "black");
+                        .attr("stroke", "black")
+                        .attr("class", "tick");
                     let mut text = selection.append("text");
                     text.attr("x", &tick.position.to_string())
                         .attr("y", &format!("{}", self.tick_size_inner + self.tick_padding + 12.0))
                         .attr("text-anchor", "middle")
                         .attr("font-size", "12px")
                         .attr("fill", "black")
-                        .attr("font-family", "Arial, sans-serif");
+                        .attr("font-family", "Arial, sans-serif")
+                        .attr("class", "tick-label");
                     if let Some(angle) = self.tick_label_angle {
                         text.attr("transform", &format!("rotate({},{},{})", angle, tick.position, self.tick_size_inner + self.tick_padding + 12.0));
                     }
@@ -140,14 +142,16 @@ impl<T: Clone + PartialEq + ToString> super::axis_renderable::AxisRenderable for
                         .attr("x2", &self.tick_size_inner.to_string())
                         .attr("y1", &tick.position.to_string())
                         .attr("y2", &tick.position.to_string())
-                        .attr("stroke", "black");
+                        .attr("stroke", "black")
+                        .attr("class", "tick");
                     let mut text = selection.append("text");
                     text.attr("x", &format!("{}", self.tick_size_inner + self.tick_padding + 2.0))
                         .attr("y", &tick.position.to_string())
                         .attr("text-anchor", "start")
                         .attr("font-size", "12px")
                         .attr("fill", "black")
-                        .attr("font-family", "Arial, sans-serif");
+                        .attr("font-family", "Arial, sans-serif")
+                        .attr("class", "tick-label");
                     if let Some(angle) = self.tick_label_angle {
                         text.attr("transform", &format!("rotate({},{},{})", angle, self.tick_size_inner + self.tick_padding + 2.0, tick.position));
                     }
@@ -168,14 +172,16 @@ impl<T: Clone + PartialEq + ToString> super::axis_renderable::AxisRenderable for
                         .attr("x2", &tick.position.to_string())
                         .attr("y1", &(-self.tick_size_inner).to_string())
                         .attr("y2", "0")
-                        .attr("stroke", "black");
+                        .attr("stroke", "black")
+                        .attr("class", "tick");
                     let mut text = selection.append("text");
                     text.attr("x", &tick.position.to_string())
                         .attr("y", &format!("{}", -(self.tick_size_inner + self.tick_padding)))
                         .attr("text-anchor", "middle")
                         .attr("font-size", "12px")
                         .attr("fill", "black")
-                        .attr("font-family", "Arial, sans-serif");
+                        .attr("font-family", "Arial, sans-serif")
+                        .attr("class", "tick-label");
                     if let Some(angle) = self.tick_label_angle {
                         text.attr("transform", &format!("rotate({},{},{})", angle, tick.position, -(self.tick_size_inner + self.tick_padding)));
                     }
@@ -196,14 +202,16 @@ impl<T: Clone + PartialEq + ToString> super::axis_renderable::AxisRenderable for
                         .attr("x2", &(-self.tick_size_inner).to_string())
                         .attr("y1", &tick.position.to_string())
                         .attr("y2", &tick.position.to_string())
-                        .attr("stroke", "black");
+                        .attr("stroke", "black")
+                        .attr("class", "tick");
                     let mut text = selection.append("text");
                     text.attr("x", &format!("{}", -(self.tick_size_inner + self.tick_padding)))
                         .attr("y", &tick.position.to_string())
                         .attr("text-anchor", "end")
                         .attr("font-size", "12px")
                         .attr("fill", "black")
-                        .attr("font-family", "Arial, sans-serif");
+                        .attr("font-family", "Arial, sans-serif")
+                        .attr("class", "tick-label");
                     if let Some(angle) = self.tick_label_angle {
                         text.attr("transform", &format!("rotate({},{},{})", angle, -(self.tick_size_inner + self.tick_padding), tick.position));
                     }
