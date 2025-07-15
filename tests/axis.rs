@@ -183,16 +183,18 @@ fn test_axis_line_style() {
 
 #[test]
 fn test_axis_on_render_hook() {
+    use std::sync::{Arc, Mutex};
     let scale = ScaleLinear::new([0.0, 1.0], [0.0, 10.0]);
-    let mut called = false;
-    let axis = Axis::new(scale, AxisOrientation::Bottom).on_render(|| {
-        called = true;
+    let called = Arc::new(Mutex::new(false));
+    let called_clone = called.clone();
+    let axis = Axis::new(scale, AxisOrientation::Bottom).on_render(move || {
+        *called_clone.lock().unwrap() = true;
     });
     // Simulate calling the hook
     if let Some(hook) = &axis.on_render {
         hook();
     }
-    assert!(called);
+    assert!(*called.lock().unwrap());
 }
 
 #[test]

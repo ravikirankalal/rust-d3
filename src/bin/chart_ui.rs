@@ -43,7 +43,7 @@ fn generate_svg_chart() -> String {
     let margin_bottom: i32 = 30;
     let margin_left: i32 = 40;
     let _n = closes.len();
-    let min_close = closes.iter().cloned().fold(f32::INFINITY, f32::min);
+    let min_close = 0;
     let max_close = closes.iter().cloned().fold(f32::NEG_INFINITY, f32::max);
     let arena = Rc::new(RefCell::new(Arena {
         nodes: SlotMap::with_key(),
@@ -87,7 +87,7 @@ fn generate_svg_chart() -> String {
         axis_bottom(x.clone())
             .grid(false)
             .tick_count(width / 80)
-            .tick_size_inner(6.0)
+            .tick_size_outer(6.0)
             .tick_padding(3.0)
             .render(sel);
     });

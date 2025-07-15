@@ -1279,4 +1279,13 @@ impl Selection {
     pub fn debug_print_all_children(&self, label: &str) {
         self.debug_print_children(label, |_| true);
     }
+    
+    /// Render the first node in the selection as an HTML string
+    pub fn render(&self) -> String {
+        if let Some(&key) = self.keys.first() {
+            Self::render_node(&self.arena, key)
+        } else {
+            String::new()
+        }
+    }
 }

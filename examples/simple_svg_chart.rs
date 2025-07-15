@@ -1,4 +1,4 @@
-use rust_d3::selection::{Arena, NodeKey, Selection};
+use rust_d3::selection::Selection;
 
 fn main() {
     let mut data = [30, 80, 45, 60, 20, 90, 55];
@@ -7,10 +7,7 @@ fn main() {
     let bar_width = 30;
     let bar_gap = 10;
 
-    // Create arena and root SVG node using Selection API
-    let mut arena = Arena {
-        nodes: slotmap::SlotMap::with_key(),
-    };
+    // Create SVG selection
     let mut svg = Selection::create("svg");
 
     svg.attr("width", &width.to_string())
@@ -28,8 +25,8 @@ fn main() {
         .enter()
         .exit()
         .append("rect")
-        .attr_fn("x", |_, i| (i * (bar_width + bar_gap)).to_string())
-        .attr_fn("y", |n, _| {
+        .attr_fn("x", |_, i, _| (i * (bar_width + bar_gap)).to_string())
+        .attr_fn("y", |n, _, _| {
             let d = n
                 .data
                 .as_ref()
@@ -38,7 +35,7 @@ fn main() {
             (height - d).to_string()
         })
         .attr("width", &bar_width.to_string())
-        .attr_fn("height", |n, _| {
+        .attr_fn("height", |n, _, _| {
             n.data.as_ref().cloned().unwrap_or_else(|| "0".to_string())
         })
         .attr("fill", "steelblue");
@@ -57,33 +54,7 @@ fn main() {
         .attr("y2", &height.to_string())
         .attr("stroke", "black");
 
-    // Render SVG as string
-    fn render_node(arena: &Arena, key: NodeKey) -> String {
-        let node = &arena.nodes[key];
-        let mut s = String::new();
-        s.push('<');
-        s.push_str(&node.tag);
-        for (k, v) in &node.attributes {
-            s.push(' ');
-            s.push_str(k);
-            s.push_str("=\"");
-            s.push_str(v);
-            s.push('"');
-        }
-        if node.children.is_empty() {
-            s.push_str("/>");
-            return s;
-        }
-        s.push('>');
-        for &child in &node.children {
-            s.push_str(&render_node(arena, child));
-        }
-        s.push_str(&format!("</{}>", node.tag));
-        s
-    }
-
-    // Get the root key from the selection
-    let root_key = svg.iter().next().copied().unwrap();
-    let svg_str = render_node(&arena, root_key);
+    // Render SVG as string using Selection's render method
+    let svg_str = svg.render();
     println!("{}", svg_str);
 }
