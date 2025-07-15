@@ -4,8 +4,10 @@ use rust_d3::scale::ScaleLinear;
 use rust_d3::selection::{Arena, Selection};
 use rust_d3::shape::Area;
 use rust_d3::time::format::time_parse;
+use std::cell::RefCell;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use std::rc::Rc;
 
 fn main() {
     // Read CSV data from a file (aapl.csv)
@@ -42,10 +44,10 @@ fn main() {
     let min_close = closes.iter().cloned().fold(f32::INFINITY, f32::min);
     let max_close = closes.iter().cloned().fold(f32::NEG_INFINITY, f32::max);
     // Create arena and root SVG node
-    let mut arena = Arena {
+    let arena = Rc::new(RefCell::new(Arena {
         nodes: slotmap::SlotMap::with_key(),
-    };
-    let mut svg = Selection::root(&mut arena, "svg");
+    }));
+    let mut svg = Selection::root(arena.clone(), "svg");
     svg.attr("width", &width.to_string())
         .attr("height", &height.to_string())
         .attr("viewBox", &format!("0 0 {} {}", width, height))

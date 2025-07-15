@@ -105,7 +105,7 @@ fn generate_svg_chart() -> String {
     });
     // Adjust tick lines for x-axis
     y_axis_group.call(|g| {
-        g.select_by(".tick")
+        g.select_by(".tick").clone()
             .attr(
                 "x2",
                 (width as i32 - margin_left - margin_right)
