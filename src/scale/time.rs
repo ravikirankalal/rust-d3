@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use chrono::{NaiveDate, Duration};
+    use chrono::{NaiveDate, Datelike};
     use super::*;
 
     #[test]
@@ -112,6 +112,166 @@ mod tests {
         // The exact number depends on the algorithm but should be reasonable
         assert!(ticks.len() <= 30, "Long span should not have too many ticks");
     }
+    
+    #[test]
+    fn test_ticks_within_domain_bounds() {
+        let start_date = NaiveDate::from_ymd_opt(2007, 4, 23).unwrap().and_hms_opt(0, 0, 0).unwrap();
+        let end_date = NaiveDate::from_ymd_opt(2012, 5, 1).unwrap().and_hms_opt(0, 0, 0).unwrap();
+        let time_scale = ScaleTime::new([start_date, end_date], [40.0, 898.0]);
+
+        let ticks = time_scale.ticks(11);
+        
+        // All ticks should be within the domain bounds
+        for tick in &ticks {
+            assert!(*tick >= start_date && *tick <= end_date, 
+                   "Tick {:?} is outside domain [{:?}, {:?}]", tick, start_date, end_date);
+        }
+        
+        // Check that scaled positions are within range bounds
+        for tick in &ticks {
+            let scaled_pos = time_scale.scale(*tick);
+            assert!(scaled_pos >= 40.0 && scaled_pos <= 898.0, 
+                   "Scaled position {} for tick {:?} is outside range [40.0, 898.0]", 
+                   scaled_pos, tick);
+        }
+        
+        println!("Tick positions within domain test passed for {} ticks", ticks.len());
+    }
+    
+    #[test]
+    fn test_tick_spacing_consistency() {
+        let start_date = NaiveDate::from_ymd_opt(2020, 1, 1).unwrap().and_hms_opt(0, 0, 0).unwrap();
+        let end_date = NaiveDate::from_ymd_opt(2025, 1, 1).unwrap().and_hms_opt(0, 0, 0).unwrap();
+        let time_scale = ScaleTime::new([start_date, end_date], [0.0, 500.0]);
+
+        let ticks = time_scale.ticks(6);
+        
+        // For yearly intervals, spacing should be consistent
+        if ticks.len() > 2 {
+            let first_gap = ticks[1].signed_duration_since(ticks[0]);
+            
+            // Check that all gaps are approximately equal (within reasonable tolerance)
+            for i in 2..ticks.len() {
+                let gap = ticks[i].signed_duration_since(ticks[i-1]);
+                let gap_diff = (gap - first_gap).num_days().abs();
+                assert!(gap_diff <= 31, // Allow up to 31 days difference for month variations
+                       "Inconsistent spacing: gap {} differs from first gap {} by {} days", 
+                       gap, first_gap, gap_diff);
+            }
+        }
+        
+        println!("Tick spacing consistency test passed for {} ticks", ticks.len());
+    }
+    
+    #[test]
+    fn test_monthly_ticks_alignment() {
+        let start_date = NaiveDate::from_ymd_opt(2020, 1, 1).unwrap().and_hms_opt(0, 0, 0).unwrap();
+        let end_date = NaiveDate::from_ymd_opt(2020, 12, 31).unwrap().and_hms_opt(0, 0, 0).unwrap();
+        let time_scale = ScaleTime::new([start_date, end_date], [0.0, 500.0]);
+
+        let ticks = time_scale.ticks(12);
+        
+        // Check that monthly ticks are aligned to month boundaries
+        for tick in &ticks {
+            // Monthly ticks should typically be at the start of months
+            // (except for the explicit start/end dates)
+            if *tick != start_date && *tick != end_date {
+                // Allow some flexibility, but day should be 1 for most monthly ticks
+                assert!(tick.day() <= 2, 
+                       "Monthly tick {:?} is not aligned to month start (day {})", 
+                       tick, tick.day());
+            }
+        }
+        
+        println!("Monthly tick alignment test passed for {} ticks", ticks.len());
+    }
+    
+    #[test]
+    fn test_chart_ui_scenario() {
+        // Test the exact scenario from chart_ui that was problematic
+        let start_date = NaiveDate::from_ymd_opt(2007, 4, 23).unwrap().and_hms_opt(0, 0, 0).unwrap();
+        let end_date = NaiveDate::from_ymd_opt(2012, 5, 1).unwrap().and_hms_opt(0, 0, 0).unwrap();
+        let time_scale = ScaleTime::new([start_date, end_date], [40.0, 898.0]);
+
+        let ticks = time_scale.ticks(11);
+        
+        // Verify first and last ticks
+        assert_eq!(ticks.first().unwrap(), &start_date, "First tick should be domain start");
+        assert_eq!(ticks.last().unwrap(), &end_date, "Last tick should be domain end");
+        
+        // All ticks should be within domain
+        for tick in &ticks {
+            assert!(*tick >= start_date && *tick <= end_date, 
+                   "Tick {:?} outside domain", tick);
+        }
+        
+        // Check scaled positions
+        for tick in &ticks {
+            let pos = time_scale.scale(*tick);
+            assert!(pos >= 40.0 && pos <= 898.0, 
+                   "Scaled position {} outside range [40.0, 898.0] for tick {:?}", 
+                   pos, tick);
+        }
+        
+        // Verify tick count is reasonable
+        assert!(ticks.len() >= 5 && ticks.len() <= 15, 
+               "Tick count {} should be between 5 and 15 for requested count 11", 
+               ticks.len());
+        
+        println!("Chart UI scenario test passed: {} ticks generated", ticks.len());
+        for (i, tick) in ticks.iter().enumerate() {
+            println!("  Tick {}: {:?} -> position {:.1}", i, tick, time_scale.scale(*tick));
+        }
+    }
+    
+    #[test]
+    fn test_tick_ordering_and_uniqueness() {
+        let start_date = NaiveDate::from_ymd_opt(2020, 1, 1).unwrap().and_hms_opt(0, 0, 0).unwrap();
+        let end_date = NaiveDate::from_ymd_opt(2025, 12, 31).unwrap().and_hms_opt(0, 0, 0).unwrap();
+        let time_scale = ScaleTime::new([start_date, end_date], [0.0, 1000.0]);
+
+        let ticks = time_scale.ticks(8);
+        
+        // Check ordering
+        for i in 1..ticks.len() {
+            assert!(ticks[i] > ticks[i-1], 
+                   "Ticks not in ascending order: {:?} > {:?}", 
+                   ticks[i-1], ticks[i]);
+        }
+        
+        // Check uniqueness
+        for i in 0..ticks.len() {
+            for j in i+1..ticks.len() {
+                assert!(ticks[i] != ticks[j], 
+                       "Duplicate tick found: {:?} appears at positions {} and {}", 
+                       ticks[i], i, j);
+            }
+        }
+        
+        println!("Tick ordering and uniqueness test passed for {} ticks", ticks.len());
+    }
+    
+    #[test]
+    fn test_edge_case_single_day() {
+        let start_date = NaiveDate::from_ymd_opt(2020, 6, 15).unwrap().and_hms_opt(0, 0, 0).unwrap();
+        let end_date = NaiveDate::from_ymd_opt(2020, 6, 15).unwrap().and_hms_opt(23, 59, 59).unwrap();
+        let time_scale = ScaleTime::new([start_date, end_date], [0.0, 100.0]);
+
+        let ticks = time_scale.ticks(5);
+        
+        // Should have at least the start and end
+        assert!(ticks.len() >= 2, "Should have at least 2 ticks for single day");
+        assert_eq!(ticks.first().unwrap(), &start_date);
+        assert_eq!(ticks.last().unwrap(), &end_date);
+        
+        // All ticks should be within the same day
+        for tick in &ticks {
+            assert!(tick.date() == start_date.date(), 
+                   "Tick {:?} is not on the same day as domain", tick);
+        }
+        
+        println!("Single day edge case test passed for {} ticks", ticks.len());
+    }
 }
 
 // d3-scale: ScaleTime
@@ -197,71 +357,48 @@ impl ScaleTime {
         let start = self.domain[0];
         let stop = self.domain[1];
 
+        println!("[DEBUG] ScaleTime::ticks - requested count: {}, domain: {:?} to {:?}", count, start, stop);
+
         // Handle reverse case
         let reverse = stop < start;
         let (start, stop) = if reverse { (stop, start) } else { (start, stop) };
 
+        println!("[DEBUG] ScaleTime::ticks - normalized domain: {:?} to {:?}, reverse: {}", start, stop, reverse);
+
         // Choose appropriate time interval based on domain span
         let interval = self.tick_interval(count);
 
-        // Generate ticks with inclusive stop (D3 behavior)
+        println!("[DEBUG] ScaleTime::ticks - selected interval: {:?}", interval);
+
+        // Generate ticks with domain-aware boundaries
         let mut ticks = match interval {
             TimeTickInterval::Second(step) => {
                 let sec = Second;
-                let mut result = sec.range(start, stop, step as i32);
-                // Add inclusive stop if not already present
-                if !result.is_empty() && result.last().unwrap() < &stop {
-                    result.push(stop);
-                }
-                result
+                self.generate_domain_aware_ticks(sec, start, stop, step as i32)
             }
             TimeTickInterval::Minute(step) => {
                 let min = Minute;
-                let mut result = min.range(start, stop, step as i32);
-                if !result.is_empty() && result.last().unwrap() < &stop {
-                    result.push(stop);
-                }
-                result
+                self.generate_domain_aware_ticks(min, start, stop, step as i32)
             }
             TimeTickInterval::Hour(step) => {
                 let hour = Hour;
-                let mut result = hour.range(start, stop, step as i32);
-                if !result.is_empty() && result.last().unwrap() < &stop {
-                    result.push(stop);
-                }
-                result
+                self.generate_domain_aware_ticks(hour, start, stop, step as i32)
             }
             TimeTickInterval::Day(step) => {
                 let day = Day;
-                let mut result = day.range(start, stop, step as i32);
-                if !result.is_empty() && result.last().unwrap() < &stop {
-                    result.push(stop);
-                }
-                result
+                self.generate_domain_aware_ticks(day, start, stop, step as i32)
             }
             TimeTickInterval::Week(step) => {
                 let week = Week;
-                let mut result = week.range(start, stop, step as i32);
-                if !result.is_empty() && result.last().unwrap() < &stop {
-                    result.push(stop);
-                }
-                result
+                self.generate_domain_aware_ticks(week, start, stop, step as i32)
             }
             TimeTickInterval::Month(step) => {
                 let month = Month;
-                let mut result = month.range(start, stop, step as i32);
-                if !result.is_empty() && result.last().unwrap() < &stop {
-                    result.push(stop);
-                }
-                result
+                self.generate_domain_aware_ticks(month, start, stop, step as i32)
             }
             TimeTickInterval::Year(step) => {
                 let year = Year;
-                let mut result = year.range(start, stop, step as i32);
-                if !result.is_empty() && result.last().unwrap() < &stop {
-                    result.push(stop);
-                }
-                result
+                self.generate_domain_aware_ticks(year, start, stop, step as i32)
             }
         };
 
@@ -276,6 +413,9 @@ impl ScaleTime {
         let start = self.domain[0];
         let stop = self.domain[1];
         
+        // Handle reverse case for calculations
+        let (start_calc, stop_calc) = if stop < start { (stop, start) } else { (start, stop) };
+        
         // D3 tick intervals in milliseconds (matching D3's duration.js)
         const DURATION_SECOND: i64 = 1000;
         const DURATION_MINUTE: i64 = DURATION_SECOND * 60;
@@ -284,7 +424,7 @@ impl ScaleTime {
         const DURATION_WEEK: i64 = DURATION_DAY * 7;
         const DURATION_MONTH: i64 = DURATION_DAY * 30;
         const DURATION_YEAR: i64 = DURATION_DAY * 365;
-
+        
         // D3 tick intervals array (matching D3's ticks.js)
         let tick_intervals = vec![
             (TimeTickInterval::Second(1), 1, DURATION_SECOND),
@@ -307,56 +447,144 @@ impl ScaleTime {
             (TimeTickInterval::Year(1), 1, DURATION_YEAR),
         ];
 
-        let start_millis = start.and_utc().timestamp_millis();
-        let stop_millis = stop.and_utc().timestamp_millis();
+        let start_millis = start_calc.and_utc().timestamp_millis();
+        let stop_millis = stop_calc.and_utc().timestamp_millis();
         let target = (stop_millis - start_millis).abs() / count as i64;
 
-        // Binary search for the appropriate interval (matching D3's bisector logic)
-        let mut i = 0;
-        while i < tick_intervals.len() && tick_intervals[i].2 < target {
-            i += 1;
-        }
+        println!("[DEBUG] tick_interval - start_millis: {}, stop_millis: {}, target: {}", start_millis, stop_millis, target);
+        println!("[DEBUG] tick_interval - span (days): {}", (stop_millis - start_millis) / (24 * 60 * 60 * 1000));
 
-        if i == tick_intervals.len() {
-            // Use years with tick_step logic
-            let years = Self::tick_step(start_millis / DURATION_YEAR, stop_millis / DURATION_YEAR, count);
-            return TimeTickInterval::Year(years.max(1));
-        }
-
-        if i == 0 {
-            // Use milliseconds/seconds with tick_step logic
-            let step = Self::tick_step(start_millis, stop_millis, count).max(1);
-            return TimeTickInterval::Second(step / 1000);
-        }
-
-        // Choose between current and previous interval based on proximity
-        let current_step = tick_intervals[i].2;
-        let prev_step = tick_intervals[i - 1].2;
+        // For each interval, calculate how many ticks it would actually produce
+        let mut best_interval = TimeTickInterval::Year(1);
+        let mut best_score = f64::INFINITY;
         
-        if (target as f64) / (prev_step as f64) < (current_step as f64) / (target as f64) {
-            tick_intervals[i - 1].0.clone()
-        } else {
-            tick_intervals[i].0.clone()
+        for &(ref interval, _step, _duration) in &tick_intervals {
+            // Calculate actual tick count for this interval
+            let actual_ticks = self.count_ticks_for_interval(start_calc, stop_calc, interval);
+            
+            // Score based on how close the actual tick count is to the requested count
+            let score = ((actual_ticks as f64) - (count as f64)).abs();
+            
+            println!("[DEBUG] tick_interval - interval: {:?}, actual_ticks: {}, score: {}", interval, actual_ticks, score);
+            
+            if score < best_score {
+                best_score = score;
+                best_interval = interval.clone();
+            }
         }
+        
+        // Also consider year intervals with different steps
+        for year_step in 1..=10 {
+            let year_interval = TimeTickInterval::Year(year_step);
+            let actual_ticks = self.count_ticks_for_interval(start_calc, stop_calc, &year_interval);
+            let score = ((actual_ticks as f64) - (count as f64)).abs();
+            
+            println!("[DEBUG] tick_interval - year interval: {:?}, actual_ticks: {}, score: {}", year_interval, actual_ticks, score);
+            
+            if score < best_score {
+                best_score = score;
+                best_interval = year_interval;
+            }
+        }
+
+        println!("[DEBUG] tick_interval - best interval: {:?} with score: {}", best_interval, best_score);
+        best_interval
     }
-
-    fn tick_step(start: i64, stop: i64, count: usize) -> i64 {
-        let step = (stop - start) / count.max(1) as i64;
-        let power = (step as f64).log10().floor() as i32;
-        let error = step as f64 / 10.0_f64.powi(power);
+    
+    fn count_ticks_for_interval(&self, start: chrono::NaiveDateTime, stop: chrono::NaiveDateTime, interval: &TimeTickInterval) -> usize {
+        // Generate actual ticks and count them (simplified version)
+        use crate::time::{Day, Hour, Minute, Month, Second, Week, Year};
         
-        let factor = if error >= 50.0_f64.sqrt() {
-            10.0
-        } else if error >= 10.0_f64.sqrt() {
-            5.0
-        } else if error >= 2.0_f64.sqrt() {
-            2.0
-        } else {
-            1.0
+        let ticks = match interval {
+            TimeTickInterval::Second(step) => {
+                let sec = Second;
+                let mut result = sec.range(start, stop, *step as i32);
+                if !result.is_empty() && result.last().unwrap() < &stop {
+                    result.push(stop);
+                }
+                result
+            }
+            TimeTickInterval::Minute(step) => {
+                let min = Minute;
+                let mut result = min.range(start, stop, *step as i32);
+                if !result.is_empty() && result.last().unwrap() < &stop {
+                    result.push(stop);
+                }
+                result
+            }
+            TimeTickInterval::Hour(step) => {
+                let hour = Hour;
+                let mut result = hour.range(start, stop, *step as i32);
+                if !result.is_empty() && result.last().unwrap() < &stop {
+                    result.push(stop);
+                }
+                result
+            }
+            TimeTickInterval::Day(step) => {
+                let day = Day;
+                let mut result = day.range(start, stop, *step as i32);
+                if !result.is_empty() && result.last().unwrap() < &stop {
+                    result.push(stop);
+                }
+                result
+            }
+            TimeTickInterval::Week(step) => {
+                let week = Week;
+                let mut result = week.range(start, stop, *step as i32);
+                if !result.is_empty() && result.last().unwrap() < &stop {
+                    result.push(stop);
+                }
+                result
+            }
+            TimeTickInterval::Month(step) => {
+                let month = Month;
+                let mut result = month.range(start, stop, *step as i32);
+                if !result.is_empty() && result.last().unwrap() < &stop {
+                    result.push(stop);
+                }
+                result
+            }
+            TimeTickInterval::Year(step) => {
+                let year = Year;
+                let mut result = year.range(start, stop, *step as i32);
+                if !result.is_empty() && result.last().unwrap() < &stop {
+                    result.push(stop);
+                }
+                result
+            }
         };
         
-        (10.0_f64.powi(power) * factor) as i64
+        ticks.len()
     }
+    
+    fn generate_domain_aware_ticks<T: TimeInterval>(&self, interval: T, start: chrono::NaiveDateTime, stop: chrono::NaiveDateTime, step: i32) -> Vec<chrono::NaiveDateTime> {
+        let mut ticks = Vec::new();
+        
+        // Always start with the domain start
+        ticks.push(start);
+        
+        // Find the next interval boundary after the start
+        let mut current = interval.floor(start);
+        if current < start {
+            current = interval.offset(current, step);
+        }
+        
+        // Generate intermediate ticks
+        while current < stop {
+            if current > start {
+                ticks.push(current);
+            }
+            current = interval.offset(current, step);
+        }
+        
+        // Always end with the domain stop (if not already added)
+        if ticks.last() != Some(&stop) {
+            ticks.push(stop);
+        }
+        
+        ticks
+    }
+
 
     pub fn tick_format(
         &self,

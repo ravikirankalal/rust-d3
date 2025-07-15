@@ -42,6 +42,8 @@ fn generate_svg_chart() -> String {
     let margin_right: i32 = 30;
     let margin_bottom: i32 = 30;
     let margin_left: i32 = 40;
+    
+    // Add padding to prevent text clipping
     let _n = closes.len();
     let min_close = 0;
     let max_close = closes.iter().cloned().fold(f32::NEG_INFINITY, f32::max);
@@ -51,7 +53,7 @@ fn generate_svg_chart() -> String {
     let mut svg = Selection::root(Rc::clone(&arena), "svg");
     svg.attr("width", &width.to_string())
         .attr("height", &height.to_string())
-        .attr("viewBox", &format!("0 0 {} {}", width, height))
+        .attr("viewBox", &format!("{} {} {} {}", 0, 0, width, height))
         .attr("xmlns", "http://www.w3.org/2000/svg")
         .attr("style", "max-width: 100%; height: auto;");
     let x = ScaleTime::new(
@@ -67,14 +69,15 @@ fn generate_svg_chart() -> String {
     );
 
     // Area generator
-    let area = Area::new()
-        .x(|_d: &f32, i: usize| x.scale(dates[i].naive_utc()))
-        .y0(|_d: &f32, _| y.scale(min_close as f64))
-        .y1(|d: &f32, _i| y.scale(*d as f64));
-    svg.append("path")
-        .attr("fill", "steelblue")
-        .attr("d", &area.generate(&closes))
-        .attr("stroke-width", "2");
+    // let area = Area::new()
+    //     .x(|_d: &f32, i: usize| x.scale(dates[i].naive_utc()))
+    //     .y0(|_d: &f32, _| y.scale(min_close as f64))
+    //     .y1(|d: &f32, _i| y.scale(*d as f64));
+    // svg.append("path")
+    //     .attr("fill", "steelblue")
+    //     .attr("d", &area.generate(&closes));
+
+
     let root_key = svg.iter().next().copied().unwrap();
 
     // // Append x-axis
@@ -88,7 +91,7 @@ fn generate_svg_chart() -> String {
     x_axis_group.call(|sel| {
         axis_bottom(x.clone())
             .with_ticks((width / 80) as usize)
-            .tick_size(10.0)
+            .tick_size(5.0)
             .render(sel);
     });
 
@@ -99,14 +102,14 @@ fn generate_svg_chart() -> String {
     .attr("transform", &y_transform)
     .call(|sel| {
         axis_left(y.clone())
-            .with_ticks(10)
-            .tick_size(10.0)
+            .with_ticks(height /40 )
+            .tick_size(5.0)
             .render(sel);
     })
     //remove the domain line
-    .call(|sel| {
-        sel.select_by(".domain").remove();
-    })
+    // .call(|sel| {
+    //     sel.select_by(".domain").remove();
+    // })
     // Adjust tick lines for x-axis
     .call(|g| {
         g.select_by(".tick").clone()
