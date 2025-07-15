@@ -1,7 +1,122 @@
+#[cfg(test)]
+mod tests {
+    use chrono::{NaiveDate, Duration};
+    use super::*;
+
+    #[test]
+    fn test_ticks_time_scale() {
+        let start_date = NaiveDate::from_ymd_opt(2020, 1, 1).unwrap().and_hms_opt(0, 0, 0).unwrap();
+        let end_date = NaiveDate::from_ymd_opt(2020, 12, 31).unwrap().and_hms_opt(0, 0, 0).unwrap();
+        let time_scale = ScaleTime::new([start_date, end_date], [0.0, 500.0]);
+
+        // Test tick count and validity
+        let ticks = time_scale.ticks(10);
+        assert!(!ticks.is_empty(), "Ticks should not be empty");
+        assert!(ticks.len() >= 2, "Should be at least 2 ticks including both domain ends");
+        assert_eq!(ticks.first().unwrap(), &start_date, "First tick should match domain start");
+        assert_eq!(ticks.last().unwrap(), &end_date, "Last tick should match domain end");
+        for i in 1..ticks.len() {
+            assert!(ticks[i] > ticks[i - 1], "Ticks should be ordered");
+        }
+
+        // Printing for debug, can be removed if needed
+        println!("Generated ticks: {:?}", ticks);
+    }
+    
+    #[test]
+    fn test_ticks_time_scale_reverse() {
+        let start_date = NaiveDate::from_ymd_opt(2020, 12, 31).unwrap().and_hms_opt(0, 0, 0).unwrap();
+        let end_date = NaiveDate::from_ymd_opt(2020, 1, 1).unwrap().and_hms_opt(0, 0, 0).unwrap();
+        let time_scale = ScaleTime::new([start_date, end_date], [0.0, 500.0]);
+
+        // Test tick count and validity in reverse order
+        let ticks = time_scale.ticks(10);
+        assert!(!ticks.is_empty(), "Ticks should not be empty");
+        assert!(ticks.len() >= 2, "Should be at least 2 ticks including both domain ends");
+        assert_eq!(ticks.first().unwrap(), &start_date, "First tick should match domain start in reverse");
+        assert_eq!(ticks.last().unwrap(), &end_date, "Last tick should match domain end in reverse");
+        for i in 1..ticks.len() {
+            assert!(ticks[i] < ticks[i - 1], "Ticks should be ordered reversing");
+        }
+        
+        // Printing for debug, can be removed if needed
+        println!("Generated reverse ticks: {:?}", ticks);
+    }
+    
+    #[test]
+    fn test_ticks_time_scale_different_counts() {
+        let start_date = NaiveDate::from_ymd_opt(2020, 1, 1).unwrap().and_hms_opt(0, 0, 0).unwrap();
+        let end_date = NaiveDate::from_ymd_opt(2020, 12, 31).unwrap().and_hms_opt(0, 0, 0).unwrap();
+        let time_scale = ScaleTime::new([start_date, end_date], [0.0, 500.0]);
+
+        // Test different tick counts
+        let ticks_5 = time_scale.ticks(5);
+        let ticks_10 = time_scale.ticks(10);
+        let ticks_20 = time_scale.ticks(20);
+        
+        println!("5 ticks: {:?}", ticks_5);
+        println!("10 ticks: {:?}", ticks_10);
+        println!("20 ticks: {:?}", ticks_20);
+        
+        // All should have at least 2 ticks (start and end)
+        assert!(ticks_5.len() >= 2, "5 ticks should be at least 2");
+        assert!(ticks_10.len() >= 2, "10 ticks should be at least 2");
+        assert!(ticks_20.len() >= 2, "20 ticks should be at least 2");
+        
+        // All should start and end at the same place
+        assert_eq!(ticks_5.first().unwrap(), &start_date);
+        assert_eq!(ticks_5.last().unwrap(), &end_date);
+        assert_eq!(ticks_10.first().unwrap(), &start_date);
+        assert_eq!(ticks_10.last().unwrap(), &end_date);
+        assert_eq!(ticks_20.first().unwrap(), &start_date);
+        assert_eq!(ticks_20.last().unwrap(), &end_date);
+        
+        // Check that tick counts are reasonable (not exact since D3 uses approximate counts)
+        assert!(ticks_5.len() <= 15, "5 ticks should not exceed 15");
+        assert!(ticks_10.len() <= 20, "10 ticks should not exceed 20");
+        assert!(ticks_20.len() <= 35, "20 ticks should not exceed 35");
+    }
+    
+    #[test]
+    fn test_ticks_time_scale_short_span() {
+        let start_date = NaiveDate::from_ymd_opt(2020, 1, 1).unwrap().and_hms_opt(0, 0, 0).unwrap();
+        let end_date = NaiveDate::from_ymd_opt(2020, 1, 2).unwrap().and_hms_opt(0, 0, 0).unwrap();
+        let time_scale = ScaleTime::new([start_date, end_date], [0.0, 500.0]);
+
+        // Test short time span (1 day)
+        let ticks = time_scale.ticks(10);
+        println!("Short span ticks: {:?}", ticks);
+        
+        assert!(!ticks.is_empty(), "Short span should still have ticks");
+        assert!(ticks.len() >= 2, "Should be at least 2 ticks");
+        assert_eq!(ticks.first().unwrap(), &start_date);
+        assert_eq!(ticks.last().unwrap(), &end_date);
+    }
+    
+    #[test]
+    fn test_ticks_time_scale_long_span() {
+        let start_date = NaiveDate::from_ymd_opt(2000, 1, 1).unwrap().and_hms_opt(0, 0, 0).unwrap();
+        let end_date = NaiveDate::from_ymd_opt(2020, 12, 31).unwrap().and_hms_opt(0, 0, 0).unwrap();
+        let time_scale = ScaleTime::new([start_date, end_date], [0.0, 500.0]);
+
+        // Test long time span (20 years)
+        let ticks = time_scale.ticks(10);
+        println!("Long span ticks: {:?}", ticks);
+        
+        assert!(!ticks.is_empty(), "Long span should have ticks");
+        assert!(ticks.len() >= 2, "Should be at least 2 ticks");
+        assert_eq!(ticks.first().unwrap(), &start_date);
+        assert_eq!(ticks.last().unwrap(), &end_date);
+        
+        // For 20 years, we should get yearly ticks
+        // The exact number depends on the algorithm but should be reasonable
+        assert!(ticks.len() <= 30, "Long span should not have too many ticks");
+    }
+}
+
 // d3-scale: ScaleTime
 use crate::time::{Day, Hour, Minute, Month, Second, TimeInterval, Week, Year, utc_format};
 use chrono::{Duration, NaiveDateTime};
-
 #[derive(Debug, Clone)]
 pub struct ScaleTime {
     pub domain: [NaiveDateTime; 2],
