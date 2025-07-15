@@ -57,7 +57,7 @@ fn generate_svg_chart() -> String {
             dates.first().unwrap().naive_utc(),
             dates.last().unwrap().naive_utc(),
         ],
-        [(margin_left*2) as f64, (width as i32 - margin_right) as f64],
+        [(margin_left) as f64, (width as i32 - margin_right) as f64],
     );
     let y = ScaleLinear::new(
         [min_close as f64, max_close as f64],
@@ -82,7 +82,7 @@ fn generate_svg_chart() -> String {
         &format!("translate(0,{})", height as i32 - margin_bottom),
     );
     x_axis_group.call(|sel| {
-        axis_bottom(x.clone())
+        axis_bottom(x.clone()).grid(false)
             .tick_count(width / 80)
             .tick_size_inner(6.0)
             .tick_padding(3.0)
@@ -90,19 +90,19 @@ fn generate_svg_chart() -> String {
     });
     // Append y-axis
     let mut y_axis_group = svg.append("g");
-    y_axis_group.attr("transform", &format!("translate({},{})", margin_left*2, 0));
+    y_axis_group.attr("transform", &format!("translate({},{})", margin_left, 0));
     y_axis_group.call(|sel| {
-        axis_left(y.clone()).grid(true).tick_count(height / 40).render(sel);
+        axis_left(y.clone()).grid(false).tick_count(height / 40).render(sel);
     });
     y_axis_group.call(|sel| {
         sel.select_by(".domain").remove();
     });
     // Adjust tick lines for x-axis
     y_axis_group.call(|g| {
-        g.select_all(Some(".tick line")).clone()
-            .attr("x2",(width as i32 - margin_left - margin_right).to_string().as_str())
-            .attr("stroke-opacity", "1")
-            .attr("stroke", "#888");
+        g.select_by(".tick")
+        .attr("x2",(width as i32 - margin_left - margin_right).to_string().as_str())
+        .attr("stroke-opacity", "0.1");
+            // .attr("stroke", "#888");
     });
 
     
