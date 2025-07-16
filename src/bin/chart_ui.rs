@@ -42,7 +42,7 @@ fn generate_svg_chart() -> String {
     let margin_right: i32 = 30;
     let margin_bottom: i32 = 30;
     let margin_left: i32 = 40;
-    
+
     // Add padding to prevent text clipping
     let _n = closes.len();
     let min_close = 0;
@@ -63,20 +63,22 @@ fn generate_svg_chart() -> String {
         ],
         [(margin_left) as f64, (width as i32 - margin_right) as f64],
     );
-    let y = ScaleLinear::new(
+    let mut y = ScaleLinear::new(
         [min_close as f64, max_close as f64],
         [(height as i32 - margin_bottom) as f64, 20.0],
     );
+    
+    // Use nice() to round the domain to nice numbers for better ticks
+    y.nice(Some(height / 40));
 
     // Area generator
-    // let area = Area::new()
-    //     .x(|_d: &f32, i: usize| x.scale(dates[i].naive_utc()))
-    //     .y0(|_d: &f32, _| y.scale(min_close as f64))
-    //     .y1(|d: &f32, _i| y.scale(*d as f64));
-    // svg.append("path")
-    //     .attr("fill", "steelblue")
-    //     .attr("d", &area.generate(&closes));
-
+    let area = Area::new()
+        .x(|_d: &f32, i: usize| x.scale(dates[i].naive_utc()))
+        .y0(|_d: &f32, _| y.scale(min_close as f64))
+        .y1(|d: &f32, _i| y.scale(*d as f64));
+    svg.append("path")
+        .attr("fill", "steelblue")
+        .attr("d", &area.generate(&closes));
 
     let root_key = svg.iter().next().copied().unwrap();
 
@@ -84,10 +86,7 @@ fn generate_svg_chart() -> String {
     let mut x_axis_group = svg.append("g");
     let x_transform = format!("translate(0,{})", height as i32 - margin_bottom);
     println!("[DEBUG] Setting x-axis transform: {}", x_transform);
-    x_axis_group.attr(
-        "transform",
-        &x_transform,
-    );
+    x_axis_group.attr("transform", &x_transform);
     x_axis_group.call(|sel| {
         axis_bottom(x.clone())
             .with_ticks((width / 80) as usize)
@@ -99,29 +98,30 @@ fn generate_svg_chart() -> String {
     let y_transform = format!("translate({},{})", margin_left, 0);
     println!("[DEBUG] Setting y-axis transform: {}", y_transform);
     svg.append("g")
-    .attr("transform", &y_transform)
-    .call(|sel| {
-        axis_left(y.clone())
-            .with_ticks(height /40 )
-            .tick_size(5.0)
-            .render(sel);
-    })
-    //remove the domain line
-    // .call(|sel| {
-    //     sel.select_by(".domain").remove();
-    // })
-    // Adjust tick lines for x-axis
-    .call(|g| {
-        g.select_by(".tick").clone()
-            .attr(
-                "x2",
-                (width as i32 - margin_left - margin_right)
-                    .to_string()
-                    .as_str(),
-            )
-            .attr("stroke-opacity", "0.1");
-        // .attr("stroke", "#888");
-    });
+        .attr("transform", &y_transform)
+        .call(|sel| {
+            axis_left(y.clone())
+                .with_ticks(height / 40)
+                .tick_size(5.0)
+                .render(sel);
+        })
+        //remove the domain line
+        .call(|sel| {
+            sel.select_by(".domain").remove();
+        })
+        // Adjust tick lines for x-axis
+        .call(|g| {
+            g.select_by(".tick")
+                .clone()
+                .attr(
+                    "x2",
+                    (width as i32 - margin_left - margin_right)
+                        .to_string()
+                        .as_str(),
+                )
+                .attr("stroke-opacity", "0.1");
+            // .attr("stroke", "#888");
+        });
 
     Selection::render_node(&arena, root_key)
 }
@@ -181,5 +181,4 @@ fn main() -> eframe::Result<()> {
             }))
         }),
     )
-    
 }

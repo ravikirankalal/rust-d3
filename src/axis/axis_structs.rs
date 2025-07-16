@@ -1,5 +1,18 @@
 // Axis struct and AxisLayout struct
 // Implements Axis<S> and AxisLayout for D3-like axes
+//
+// Design decisions:
+// - Generic over scale type S to support different scale implementations
+// - Separates styling concerns into dedicated structs (GridStyle, TitleStyle, etc.)
+// - Supports both explicit tick values and computed tick generation
+// - Includes locale support for internationalized number formatting
+// - Provides extensive customization options while maintaining D3 compatibility
+//
+// Key features:
+// - tick_arguments: Supports D3-style axis.ticks(count, specifier) functionality
+// - tick_format: Custom formatting function override
+// - Styling: Modular styling system for different axis components
+// - Grid lines: Optional grid rendering with customizable appearance
 
 use super::orientation::AxisOrientation;
 use super::ticks::{Tick, TickFormat};

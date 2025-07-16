@@ -403,7 +403,7 @@ impl ScaleTime {
         ticks
     }
 
-    fn tick_interval(&self, count: usize) -> TimeTickInterval {
+    pub fn tick_interval(&self, count: usize) -> TimeTickInterval {
         let start = self.domain[0];
         let stop = self.domain[1];
         
@@ -652,7 +652,7 @@ impl ScaleTime {
 }
 
 #[derive(Debug, Clone)]
-enum TimeTickInterval {
+pub enum TimeTickInterval {
     Second(i64),
     Minute(i64),
     Hour(i64),

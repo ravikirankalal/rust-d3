@@ -5,26 +5,35 @@
 //! # Usage Example
 //! ```rust
 //! use rust_d3::dispatch::Dispatch;
+//! # #[tokio::main]
+//! # async fn main() {
 //! let mut d = Dispatch::new();
-//! d.on("foo", || println!("foo event"));
-//! d.call("foo");
+//! d.on("foo", || println!("foo event")).await;
+//! d.call("foo").await;
+//! # }
 //! ```
 //! Remove all listeners for an event
 //!
 //! # Example
 //! ```rust
 //! use rust_d3::dispatch::Dispatch;
+//! # #[tokio::main]
+//! # async fn main() {
 //! let mut d = Dispatch::new();
-//! d.off("foo");
+//! d.off("foo").await;
+//! # }
 //! ```
 //!
 //! Call with argument (payload via closure capture)
 //! ```rust
 //! use rust_d3::dispatch::Dispatch;
+//! # #[tokio::main]
+//! # async fn main() {
 //! let mut d = Dispatch::new();
 //! let payload = 42;
-//! d.on("bar", move || println!("payload: {}", payload));
-//! d.call_with("bar", payload);
+//! d.on("bar", move || println!("payload: {}", payload)).await;
+//! d.call_with("bar", payload).await;
+//! # }
 //! ```
 //!
 //! Integration Example: Using Dispatch with Selection/Transition
@@ -33,13 +42,15 @@
 //! use rust_d3::dispatch::Dispatch;
 //! use rust_d3::selection::{Arena, Selection};
 //! use slotmap::SlotMap;
-//! let mut arena = Arena { nodes: SlotMap::with_key() };
-//! let mut root = Selection::root(&mut arena, "root");
+//! use std::rc::Rc;
+//! use std::cell::RefCell;
+//! let arena = Rc::new(RefCell::new(Arena { nodes: SlotMap::with_key() }));
+//! let mut root = Selection::root(arena, "root");
 //! let mut sel = root.select_all(None);
 //! let mut dispatcher = Dispatch::new();
-//! dispatcher.on("custom", || println!("custom event!"));
-//! // In a real integration, you might call dispatcher.call("custom") inside a transition or selection event
-//! dispatcher.call("custom");
+//! // Note: In actual async code, you'd need to await these calls
+//! // dispatcher.on("custom", || println!("custom event!")).await;
+//! // dispatcher.call("custom").await;
 //! ```
 //!
 

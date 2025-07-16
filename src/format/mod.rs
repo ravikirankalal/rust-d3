@@ -1,4 +1,6 @@
 // d3-format parity root
+// Handles number formatting to match D3.js standards, supporting various formats.
+// Includes methods for formatting based on locale and custom specifications.
 // Re-export all submodules here as you implement them
 
 pub mod specifier;

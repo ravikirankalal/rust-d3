@@ -1,5 +1,17 @@
 // d3-axis parity root
 // Implements Axis, AxisOrientation, and tick generation for D3-like axes
+//
+// This module provides comprehensive axis functionality including:
+// - Tick generation for different scale types (linear, logarithmic, time-based)
+// - Customizable tick formatting with locale support
+// - Axis rendering with grid lines, titles, and styling options
+// - Context-aware formatting decisions based on data range and scale type
+//
+// Key design decisions:
+// - Tick generation uses D3-compatible algorithms for consistent spacing
+// - Formatting defaults to D3's ".6g" format but supports custom formatters
+// - Time scales use context-aware format patterns based on tick intervals
+// - Axis styling is modular with separate style structs for different components
 
 pub mod axis_constructors;
 pub mod axis_impl;

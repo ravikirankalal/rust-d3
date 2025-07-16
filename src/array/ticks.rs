@@ -4,6 +4,8 @@ const E5: f64 = 3.1622776601683793319988935444327; // Math.sqrt(10) in D3
 const E2: f64 = 1.4142135623730950488016887242097; // Math.sqrt(2) in D3
 
 // D3-compatible tick specification function
+// Calculates optimal ticks within a given start and stop range by determining factor and increment
+// Used primarily to generate human-readable ticks based on D3-like specifications for better visualization
 fn tick_spec(start: f64, stop: f64, count: usize) -> (i32, i32, f64) {
     let count = count.max(1) as f64;
     let step = (stop - start) / count;
@@ -44,6 +46,31 @@ fn tick_spec(start: f64, stop: f64, count: usize) -> (i32, i32, f64) {
     (i1, i2, inc)
 }
 
+/// Generates evenly spaced ticks between start and stop values.
+///
+/// This function creates a vector of tick values that are nicely spaced for
+/// visualization purposes. It uses D3-compatible logic with predefined constants
+/// (E10, E5, E2) to determine appropriate spacing factors.
+///
+/// # Arguments
+/// * `start` - The starting value of the range
+/// * `stop` - The ending value of the range
+/// * `count` - The desired number of ticks (actual count may vary)
+///
+/// # Returns
+/// A vector of f64 values representing tick positions
+///
+/// # Examples
+/// ```
+/// let tick_values = ticks(0.0, 100.0, 5);
+/// // Returns approximately [0, 20, 40, 60, 80, 100]
+/// ```
+///
+/// # Edge Cases
+/// - Returns empty vector if count is 0
+/// - Returns single value if start == stop
+/// - Returns empty vector for NaN inputs
+/// - Handles reversed domains (stop < start)
 pub fn ticks(start: f64, stop: f64, count: usize) -> Vec<f64> {
     // Handle edge cases
     if count == 0 {

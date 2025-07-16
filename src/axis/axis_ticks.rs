@@ -1,4 +1,6 @@
 // Axis ticks logic for different scale types
+// Responsible for generating visual ticks across different axis types like linear, log, and time.
+// Includes context-aware format patterns for time-based scales to ensure accurate display.
 
 use super::axis_structs::Axis;
 use super::ticks::Tick;
@@ -131,6 +133,53 @@ impl Axis<crate::scale::ScaleLog> {
 }
 
 impl Axis<crate::scale::ScaleTime> {
+    /// Get context-aware format pattern based on the tick interval
+    fn get_context_aware_format_pattern(&self, tick_interval: &crate::scale::time::TimeTickInterval) -> &'static str {
+        use crate::scale::time::TimeTickInterval;
+        
+        // Get the domain span to determine if we need special handling
+        let start = self.scale.domain[0];
+        let stop = self.scale.domain[1];
+        let duration = (stop - start).abs();
+        
+        match tick_interval {
+            TimeTickInterval::Second(_) => {
+                // For very short spans (< 10 seconds), use date format like original ScaleTime
+                if duration.num_seconds() < 10 {
+                    "%Y-%m-%d"
+                } else if duration.num_seconds() < 60 {
+                    // For seconds less than 1 minute, use time format
+                    "%H:%M:%S"
+                } else {
+                    // For larger spans, use date format
+                    "%Y-%m-%d %H:%M:%S"
+                }
+            }
+            TimeTickInterval::Minute(_) => {
+                // For minutes less than 1 hour
+                if duration.num_minutes() < 60 {
+                    "%H:%M"
+                } else {
+                    // For larger spans, use date format
+                    "%Y-%m-%d %H:%M"
+                }
+            }
+            TimeTickInterval::Hour(_) => {
+                // For hours less than 1 day, use 24-hour clock
+                if duration.num_hours() < 24 {
+                    "%H:%M"
+                } else {
+                    // For larger spans, use date format
+                    "%Y-%m-%d %H:%M"
+                }
+            }
+            TimeTickInterval::Day(_) => "%Y-%m-%d",
+            TimeTickInterval::Week(_) => "%Y-%m-%d",
+            TimeTickInterval::Month(_) => "%Y-%m-%d",
+            TimeTickInterval::Year(_) => "%Y-%m-%d",
+        }
+    }
+
     pub fn generate_ticks_with(&self, tick_values: Option<Vec<chrono::NaiveDateTime>>) -> Vec<Tick> {
         let values = if let Some(values) = tick_values {
             values
@@ -142,6 +191,14 @@ impl Axis<crate::scale::ScaleTime> {
         } else {
             self.scale.ticks(self.tick_count)
         };
+        
+        // Determine the tick interval to select appropriate format
+        let tick_count = if let Some(ref args) = self.tick_arguments {
+            args.get(0).map(|&c| c as usize).unwrap_or(self.tick_count)
+        } else {
+            self.tick_count
+        };
+        let tick_interval = self.scale.tick_interval(tick_count);
         
         values
             .iter()
@@ -156,15 +213,14 @@ impl Axis<crate::scale::ScaleTime> {
                         // Could implement specifier parsing here in the future
                         dt.format("%Y-%m-%d %H:%M:%S").to_string()
                     } else {
-                        // Use the scale's tick_format method for consistent formatting
-                        let count = args.get(0).map(|&c| c as usize).unwrap_or(self.tick_count);
-                        let format_fn = self.scale.tick_format(count, None);
-                        format_fn(&dt)
+                        // Use context-aware format based on tick interval
+                        let format_pattern = self.get_context_aware_format_pattern(&tick_interval);
+                        dt.format(format_pattern).to_string()
                     }
                 } else {
-                    // Use the scale's tick_format method for consistent formatting
-                    let format_fn = self.scale.tick_format(self.tick_count, None);
-                    format_fn(&dt)
+                    // Use context-aware format based on tick interval
+                    let format_pattern = self.get_context_aware_format_pattern(&tick_interval);
+                    dt.format(format_pattern).to_string()
                 };
                 Tick {
                     position,
@@ -181,6 +237,19 @@ impl Axis<crate::scale::ScaleTime> {
 
 
 // D3-format compatible formatter matching formatDefaultLocale(".6g")
+// 
+// This function replicates D3's default number formatting behavior:
+// - Uses "g" format type (general format) with 6 digits of precision
+// - Switches between fixed-point and exponential notation based on magnitude
+// - Handles special values (NaN, Infinity) with appropriate symbols
+// - Applies trimming to remove trailing zeros for cleaner output
+// - Uses scientific notation for very large (>=1e6) or very small (<1e-4) values
+//
+// Formatting decisions:
+// - Integers < 1e6 are formatted without decimal points
+// - Very small values (< 1e-6) are formatted as "0.000000"
+// - Large numbers use scientific notation with proper exponent formatting
+// - Trailing zeros are removed from decimal representations
 fn d3_format_default_locale_6g(value: f64) -> String {
     // Handle special cases
     if value.is_nan() {
