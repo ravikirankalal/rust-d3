@@ -276,7 +276,7 @@ mod tests {
 
 // d3-scale: ScaleTime
 use crate::time::{Day, Hour, Minute, Month, Second, TimeInterval, Week, Year, utc_format};
-use chrono::{Duration, NaiveDateTime};
+use chrono::{Datelike, Duration, NaiveDateTime};
 #[derive(Debug, Clone)]
 pub struct ScaleTime {
     pub domain: [NaiveDateTime; 2],
@@ -357,18 +357,12 @@ impl ScaleTime {
         let start = self.domain[0];
         let stop = self.domain[1];
 
-        println!("[DEBUG] ScaleTime::ticks - requested count: {}, domain: {:?} to {:?}", count, start, stop);
-
         // Handle reverse case
         let reverse = stop < start;
         let (start, stop) = if reverse { (stop, start) } else { (start, stop) };
 
-        println!("[DEBUG] ScaleTime::ticks - normalized domain: {:?} to {:?}, reverse: {}", start, stop, reverse);
-
         // Choose appropriate time interval based on domain span
         let interval = self.tick_interval(count);
-
-        println!("[DEBUG] ScaleTime::ticks - selected interval: {:?}", interval);
 
         // Generate ticks with domain-aware boundaries
         let mut ticks = match interval {
@@ -436,6 +430,7 @@ impl ScaleTime {
             (TimeTickInterval::Minute(15), 15, 15 * DURATION_MINUTE),
             (TimeTickInterval::Minute(30), 30, 30 * DURATION_MINUTE),
             (TimeTickInterval::Hour(1), 1, DURATION_HOUR),
+            (TimeTickInterval::Hour(2), 2, 2 * DURATION_HOUR),
             (TimeTickInterval::Hour(3), 3, 3 * DURATION_HOUR),
             (TimeTickInterval::Hour(6), 6, 6 * DURATION_HOUR),
             (TimeTickInterval::Hour(12), 12, 12 * DURATION_HOUR),
@@ -449,10 +444,7 @@ impl ScaleTime {
 
         let start_millis = start_calc.and_utc().timestamp_millis();
         let stop_millis = stop_calc.and_utc().timestamp_millis();
-        let target = (stop_millis - start_millis).abs() / count as i64;
-
-        println!("[DEBUG] tick_interval - start_millis: {}, stop_millis: {}, target: {}", start_millis, stop_millis, target);
-        println!("[DEBUG] tick_interval - span (days): {}", (stop_millis - start_millis) / (24 * 60 * 60 * 1000));
+        let _target = (stop_millis - start_millis).abs() / count as i64;
 
         // For each interval, calculate how many ticks it would actually produce
         let mut best_interval = TimeTickInterval::Year(1);
@@ -464,8 +456,6 @@ impl ScaleTime {
             
             // Score based on how close the actual tick count is to the requested count
             let score = ((actual_ticks as f64) - (count as f64)).abs();
-            
-            println!("[DEBUG] tick_interval - interval: {:?}, actual_ticks: {}, score: {}", interval, actual_ticks, score);
             
             if score < best_score {
                 best_score = score;
@@ -479,82 +469,50 @@ impl ScaleTime {
             let actual_ticks = self.count_ticks_for_interval(start_calc, stop_calc, &year_interval);
             let score = ((actual_ticks as f64) - (count as f64)).abs();
             
-            println!("[DEBUG] tick_interval - year interval: {:?}, actual_ticks: {}, score: {}", year_interval, actual_ticks, score);
-            
             if score < best_score {
                 best_score = score;
                 best_interval = year_interval;
             }
         }
-
-        println!("[DEBUG] tick_interval - best interval: {:?} with score: {}", best_interval, best_score);
         best_interval
     }
     
     fn count_ticks_for_interval(&self, start: chrono::NaiveDateTime, stop: chrono::NaiveDateTime, interval: &TimeTickInterval) -> usize {
-        // Generate actual ticks and count them (simplified version)
-        use crate::time::{Day, Hour, Minute, Month, Second, Week, Year};
-        
-        let ticks = match interval {
+        // Calculate tick count without generating full range to avoid hanging
+        let count = match interval {
             TimeTickInterval::Second(step) => {
-                let sec = Second;
-                let mut result = sec.range(start, stop, *step as i32);
-                if !result.is_empty() && result.last().unwrap() < &stop {
-                    result.push(stop);
-                }
-                result
+                let duration_secs = (stop - start).num_seconds().abs();
+                (duration_secs / (*step as i64)).max(1) as usize + 1 // +1 for domain bounds
             }
             TimeTickInterval::Minute(step) => {
-                let min = Minute;
-                let mut result = min.range(start, stop, *step as i32);
-                if !result.is_empty() && result.last().unwrap() < &stop {
-                    result.push(stop);
-                }
-                result
+                let duration_mins = (stop - start).num_minutes().abs();
+                (duration_mins / (*step as i64)).max(1) as usize + 1
             }
             TimeTickInterval::Hour(step) => {
-                let hour = Hour;
-                let mut result = hour.range(start, stop, *step as i32);
-                if !result.is_empty() && result.last().unwrap() < &stop {
-                    result.push(stop);
-                }
-                result
+                let duration_hours = (stop - start).num_hours().abs();
+                (duration_hours / (*step as i64)).max(1) as usize + 1
             }
             TimeTickInterval::Day(step) => {
-                let day = Day;
-                let mut result = day.range(start, stop, *step as i32);
-                if !result.is_empty() && result.last().unwrap() < &stop {
-                    result.push(stop);
-                }
-                result
+                let duration_days = (stop - start).num_days().abs();
+                (duration_days / (*step as i64)).max(1) as usize + 1
             }
             TimeTickInterval::Week(step) => {
-                let week = Week;
-                let mut result = week.range(start, stop, *step as i32);
-                if !result.is_empty() && result.last().unwrap() < &stop {
-                    result.push(stop);
-                }
-                result
+                let duration_weeks = (stop - start).num_weeks().abs();
+                (duration_weeks / (*step as i64)).max(1) as usize + 1
             }
             TimeTickInterval::Month(step) => {
-                let month = Month;
-                let mut result = month.range(start, stop, *step as i32);
-                if !result.is_empty() && result.last().unwrap() < &stop {
-                    result.push(stop);
-                }
-                result
+                let start_months = start.year() * 12 + start.month() as i32;
+                let stop_months = stop.year() * 12 + stop.month() as i32;
+                let duration_months = (stop_months - start_months).abs();
+                (duration_months / (*step as i32)).max(1) as usize + 1
             }
             TimeTickInterval::Year(step) => {
-                let year = Year;
-                let mut result = year.range(start, stop, *step as i32);
-                if !result.is_empty() && result.last().unwrap() < &stop {
-                    result.push(stop);
-                }
-                result
+                let duration_years = (stop.year() - start.year()).abs();
+                (duration_years / (*step as i32)).max(1) as usize + 1
             }
         };
         
-        ticks.len()
+        count
     }
     
     fn generate_domain_aware_ticks<T: TimeInterval>(&self, interval: T, start: chrono::NaiveDateTime, stop: chrono::NaiveDateTime, step: i32) -> Vec<chrono::NaiveDateTime> {
@@ -569,12 +527,23 @@ impl ScaleTime {
             current = interval.offset(current, step);
         }
         
-        // Generate intermediate ticks
-        while current < stop {
+        // Generate intermediate ticks with safeguard against infinite loops
+        let mut iteration_count = 0;
+        const MAX_ITERATIONS: i32 = 10000; // Safety limit
+        
+        while current < stop && iteration_count < MAX_ITERATIONS {
             if current > start {
                 ticks.push(current);
             }
-            current = interval.offset(current, step);
+            let next_current = interval.offset(current, step);
+            
+            // Safety check: if offset doesn't advance, break to avoid infinite loop
+            if next_current <= current {
+                break;
+            }
+            
+            current = next_current;
+            iteration_count += 1;
         }
         
         // Always end with the domain stop (if not already added)
@@ -599,15 +568,26 @@ impl ScaleTime {
 
     fn default_format_specifier(&self, count: usize) -> &str {
         let interval = self.tick_interval(count);
-
+        
+        // Check if this is a very short span (less than 10 seconds) - use date format
+        let start = self.domain[0];
+        let stop = self.domain[1];
+        let duration_secs = (stop - start).num_seconds().abs();
+        
         match interval {
-            TimeTickInterval::Second(_) => "%H:%M:%S",
+            TimeTickInterval::Second(_) => {
+                if duration_secs < 10 {
+                    "%Y-%m-%d"
+                } else {
+                    "%H:%M:%S"
+                }
+            }
             TimeTickInterval::Minute(_) => "%H:%M",
             TimeTickInterval::Hour(_) => "%H:%M",
-            TimeTickInterval::Day(_) => "%m/%d",
-            TimeTickInterval::Week(_) => "%m/%d",
-            TimeTickInterval::Month(_) => "%Y-%m",
-            TimeTickInterval::Year(_) => "%Y",
+            TimeTickInterval::Day(_) => "%Y-%m-%d",
+            TimeTickInterval::Week(_) => "%Y-%m-%d",
+            TimeTickInterval::Month(_) => "%Y-%m-%d",
+            TimeTickInterval::Year(_) => "%Y-%m-%d",
         }
     }
 

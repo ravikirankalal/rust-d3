@@ -87,9 +87,15 @@ mod tests {
     #[test]
     fn test_point_export() {
         let s = ScalePoint::new(vec!["a", "b", "c"], [0.0, 100.0], 0.5);
-        assert!((s.scale(&"a").unwrap() - 0.0).abs() < 1e-6);
+        // With padding = 0.5, domain length = 3:
+        // step = 100 / max(1, 3 - 1 + 2 * 0.5) = 100 / 3 = 33.333...
+        // start = 0 + 0.5 * 33.333... = 16.666...
+        // a: 16.666... + 0 * 33.333... = 16.666...
+        // b: 16.666... + 1 * 33.333... = 50.0
+        // c: 16.666... + 2 * 33.333... = 83.333...
+        assert!((s.scale(&"a").unwrap() - 16.666666666666668).abs() < 1e-6);
         assert!((s.scale(&"b").unwrap() - 50.0).abs() < 1e-6);
-        assert!((s.scale(&"c").unwrap() - 100.0).abs() < 1e-6);
+        assert!((s.scale(&"c").unwrap() - 83.33333333333334).abs() < 1e-6);
     }
 
     #[test]

@@ -39,19 +39,49 @@ impl Axis<crate::scale::ScaleLinear> {
     }
 
     pub fn generate_ticks_with(&self, tick_input: Option<&[f64]>) -> Vec<Tick> {
-        let values: Vec<f64> = if let Some(input) = tick_input {
-            input.to_vec()
-        } else if let Some(ref values) = self.tick_values {
-            values.clone()
+        let mut values: Vec<f64>;
+        let should_include_domain_bounds: bool;
+        
+        if let Some(input) = tick_input {
+            values = input.to_vec();
+            should_include_domain_bounds = false; // Don't modify explicitly provided tick values
+        } else if let Some(ref values_ref) = self.tick_values {
+            values = values_ref.clone();
+            should_include_domain_bounds = false; // Don't modify explicitly set tick values
         } else if let Some(ref args) = self.tick_arguments {
             // Use tick_arguments to call scale.ticks() with custom parameters
             // args[0] is the count, following D3's axis.ticks(count, specifier) signature
             let count = args.get(0).map(|&c| c as usize).unwrap_or(self.tick_count);
-            self.scale.ticks(count)
+            values = self.scale.ticks(count);
+            should_include_domain_bounds = true; // Apply domain bounds to auto-generated ticks
         } else {
             // Use the D3-compatible ticks method from ScaleLinear
-            self.scale.ticks(self.tick_count)
+            values = self.scale.ticks(self.tick_count);
+            should_include_domain_bounds = true; // Apply domain bounds to auto-generated ticks
         };
+        
+        // Apply domain bounds inclusion only for auto-generated ticks
+        if should_include_domain_bounds && !values.is_empty() {
+            // Get domain bounds
+            let domain = self.scale.domain();
+            let domain_min = domain[0];
+            let domain_max = domain[1];
+            let tolerance = 1e-10;
+            
+            // Check if first tick is outside tolerance of domain minimum
+            if (values[0] - domain_min).abs() > tolerance {
+                values.insert(0, domain_min);
+            }
+            
+            // Check if last tick is outside tolerance of domain maximum
+            let last_idx = values.len() - 1;
+            if (values[last_idx] - domain_max).abs() > tolerance {
+                values.push(domain_max);
+            }
+            
+            // Sort the values to ensure proper ordering
+            values.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+        }
         
         let ticks: Vec<Tick> = values
             .into_iter()
@@ -126,10 +156,15 @@ impl Axis<crate::scale::ScaleTime> {
                         // Could implement specifier parsing here in the future
                         dt.format("%Y-%m-%d %H:%M:%S").to_string()
                     } else {
-                        dt.format("%Y-%m-%d").to_string()
+                        // Use the scale's tick_format method for consistent formatting
+                        let count = args.get(0).map(|&c| c as usize).unwrap_or(self.tick_count);
+                        let format_fn = self.scale.tick_format(count, None);
+                        format_fn(&dt)
                     }
                 } else {
-                    dt.format("%Y-%m-%d").to_string()
+                    // Use the scale's tick_format method for consistent formatting
+                    let format_fn = self.scale.tick_format(self.tick_count, None);
+                    format_fn(&dt)
                 };
                 Tick {
                     position,
@@ -168,10 +203,10 @@ fn d3_format_default_locale_6g(value: f64) -> String {
     }
     
     // For integers or values that are very close to integers, format as integer
-    // But only if they are not too large (should use SI prefix for large numbers)
+    // But only if they are not too large (should use scientific notation for large numbers)
     if (value - value.round()).abs() < 1e-10 {
         let rounded = value.round();
-        if rounded.abs() < 1e6 { // Use SI prefix for integers >= 1e6
+        if rounded.abs() < 1e6 { // Use scientific notation for integers >= 1e6
             return format!("{}", rounded as i64);
         }
     }
@@ -188,8 +223,22 @@ fn d3_format_default_locale_6g(value: f64) -> String {
         }
         result
     } else if abs_value >= 1e6 {
-        // Use SI prefix notation for large numbers
-        format_with_si_prefix(value, precision)
+        // Use scientific notation for large numbers
+        let mut result = format!("{:.prec$e}", value, prec = precision - 1);
+        
+        // Remove trailing zeros from the coefficient and ensure proper exponent format
+        if let Some(e_pos) = result.find('e') {
+            let (coeff, exp) = result.split_at(e_pos);
+            let mut coeff = coeff.trim_end_matches('0').trim_end_matches('.').to_string();
+            if coeff.is_empty() || coeff == "-" {
+                coeff = "0".to_string();
+            }
+            
+            // Parse exponent and format with + sign and at least two digits
+            let exp_num = exp[1..].parse::<i32>().unwrap_or(0);
+            result = format!("{}e+{:02}", coeff, exp_num);
+        }
+        result
     } else {
         // Use exponential notation for very small or very large numbers
         let mut result = format!("{:.prec$e}", value, prec = precision - 1);
@@ -209,34 +258,9 @@ fn d3_format_default_locale_6g(value: f64) -> String {
     formatted
 }
 
-// Helper function to format with SI prefix for large numbers
-fn format_with_si_prefix(value: f64, precision: usize) -> String {
-    let prefixes = [
-        "y", "z", "a", "f", "p", "n", "µ", "m", "", "k", "M", "G", "T", "P", "E", "Z", "Y",
-    ];
-    
-    let abs_value = value.abs();
-    let exponent = (abs_value.log10() / 3.0).floor() as isize;
-    let clamped_exp = exponent.max(-8).min(8);
-    let prefix_index = (clamped_exp + 8) as usize;
-    
-    if prefix_index < prefixes.len() {
-        let scale = 10f64.powf((clamped_exp * 3) as f64);
-        let scaled_value = value / scale;
-        let prefix = prefixes[prefix_index];
-        
-        // Format with appropriate precision and trim trailing zeros
-        let mut result = format!("{:.prec$}", scaled_value, prec = precision - 1);
-        if result.contains('.') {
-            result = result.trim_end_matches('0').trim_end_matches('.').to_string();
-        }
-        
-        format!("{}{}", result, prefix)
-    } else {
-        // Fallback to exponential notation
-        format!("{:.prec$e}", value, prec = precision - 1)
-    }
-}
+// Note: format_with_si_prefix function removed as SI prefix formatting
+// is no longer used by default for large numbers >= 1e6.
+// Scientific notation is used instead to ensure consistent formatting.
 
 #[cfg(test)]
 mod tests {
@@ -265,30 +289,18 @@ mod tests {
         assert_eq!(d3_format_default_locale_6g(0.001), "0.001");
         assert_eq!(d3_format_default_locale_6g(0.0001), "0.0001");
         
-        // Test large numbers with SI prefix
-        assert_eq!(d3_format_default_locale_6g(1e6), "1M");
-        assert_eq!(d3_format_default_locale_6g(1.5e6), "1.5M");
-        assert_eq!(d3_format_default_locale_6g(1e9), "1G");
-        assert_eq!(d3_format_default_locale_6g(1.23e9), "1.23G");
+        // Test large numbers with scientific notation
+        assert_eq!(d3_format_default_locale_6g(1e6), "1e+06");
+        assert_eq!(d3_format_default_locale_6g(1.5e6), "1.5e+06");
+        assert_eq!(d3_format_default_locale_6g(1e9), "1e+09");
+        assert_eq!(d3_format_default_locale_6g(1.23e9), "1.23e+09");
         
         // Test numbers that should use exponential notation
         assert_eq!(d3_format_default_locale_6g(1e-5), "1e-5");
         assert_eq!(d3_format_default_locale_6g(1.23e-5), "1.23e-5");
     }
     
-    #[test]
-    fn test_format_with_si_prefix() {
-        // Test basic SI prefix formatting
-        assert_eq!(format_with_si_prefix(1000.0, 6), "1k");
-        assert_eq!(format_with_si_prefix(1500.0, 6), "1.5k");
-        assert_eq!(format_with_si_prefix(1000000.0, 6), "1M");
-        assert_eq!(format_with_si_prefix(1500000.0, 6), "1.5M");
-        assert_eq!(format_with_si_prefix(1000000000.0, 6), "1G");
-        
-        // Test negative numbers
-        assert_eq!(format_with_si_prefix(-1000.0, 6), "-1k");
-        assert_eq!(format_with_si_prefix(-1500000.0, 6), "-1.5M");
-    }
+// Note: test_format_with_si_prefix removed as the function is obsolete
 
     // Note: The TickFormat override functionality is implemented in the main code 
     // where the label is generated. The logic checks self.tick_format first,

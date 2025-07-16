@@ -17,29 +17,20 @@ impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleLinear> 
             }
         };
         
-        // Combine existing transform with offset
+        // Combine existing transform with offset - always set transform attribute
         let final_transform = match &existing_transform {
             Some(existing) => {
-                if self.offset != 0.0 {
-                    format!("{} {}", existing, offset_transform)
-                } else {
-                    existing.clone()
-                }
+                format!("{} {}", existing, offset_transform)
             }
             None => {
-                if self.offset != 0.0 {
-                    offset_transform
-                } else {
-                    String::new()
-                }
+                offset_transform
             }
         };
         
         println!("[DEBUG] Axis render - existing: {:?}, offset: {}, final: '{}'", existing_transform, self.offset, final_transform);
         
-        if !final_transform.is_empty() {
-            selection.attr("transform", &final_transform);
-        }
+        // Always set the transform attribute
+        selection.attr("transform", &final_transform);
         
         let ticks = self.ticks();
         let range = self.scale.range();

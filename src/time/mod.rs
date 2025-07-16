@@ -282,10 +282,15 @@ impl TimeInterval for Year {
             .unwrap()
     }
     fn offset(&self, date: NaiveDateTime, step: i32) -> NaiveDateTime {
-        chrono::NaiveDate::from_ymd_opt(date.year() + step, 1, 1)
-            .unwrap()
+        let new_year = date.year() + step;
+        // Handle edge cases for year overflow/underflow
+        if new_year < 1 || new_year > 9999 {
+            return date; // Return original date if year is out of bounds
+        }
+        chrono::NaiveDate::from_ymd_opt(new_year, 1, 1)
+            .unwrap_or(date.date())
             .and_hms_opt(0, 0, 0)
-            .unwrap()
+            .unwrap_or(date)
     }
     fn range(&self, start: NaiveDateTime, stop: NaiveDateTime, step: i32) -> Vec<NaiveDateTime> {
         let mut v = Vec::new();
