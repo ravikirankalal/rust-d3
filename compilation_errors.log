@@ -1,0 +1,98 @@
+Compilation Error Log - rust-d3 Project
+========================================
+
+Command: cargo test
+Date: Step 2 - Reproduce the compilation errors
+
+Error Output:
+   Compiling libc v0.2.174
+   Compiling fastrand v2.3.0
+   Compiling once_cell v1.21.3
+   Compiling errno v0.3.13
+   Compiling getrandom v0.3.3
+   Compiling rustix v1.0.7
+   Compiling tempfile v3.20.0
+   Compiling rust-d3 v0.1.0 (/Users/ravikiran.kalal/workspace/rust-d3)
+error[E0433]: failed to resolve: could not find `selection` in `rust_d3`
+   --> tests/selector_tests.rs:136:18
+    |
+136 |     use rust_d3::selection::utils::parse_selector;
+    |                  ^^^^^^^^^ could not find `selection` in `rust_d3`
+
+error[E0432]: unresolved import `rust_d3::selection`
+ --> tests/selector_tests.rs:1:14
+  |
+1 | use rust_d3::selection::{Arena, Selection};
+  |              ^^^^^^^^^ could not find `selection` in `rust_d3`
+
+error[E0432]: unresolved import `test_case`
+ --> tests/selector_tests.rs:4:5
+  |
+4 | use test_case::test_case;
+  |     ^^^^^^^^^ use of unresolved module or unlinked crate `test_case`
+  |
+  = help: if you wanted to use a crate named `test_case`, use `cargo add test_case` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `slotmap`
+  --> tests/selector_tests.rs:13:16
+   |
+13 |         nodes: slotmap::SlotMap::with_key(),
+   |                ^^^^^^^ use of unresolved module or unlinked crate `slotmap`
+   |
+   = help: if you wanted to use a crate named `slotmap`, use `cargo add slotmap` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: could not find `selection` in `rust_d3`
+  --> tests/selector_tests.rs:22:36
+   |
+22 |     let parsed_selector = rust_d3::selection::utils::parse_selector(selector);
+   |                                    ^^^^^^^^^ could not find `selection` in `rust_d3`
+
+error[E0433]: failed to resolve: could not find `selection` in `rust_d3`
+  --> tests/selector_tests.rs:31:36
+   |
+31 |     let parsed_selector = rust_d3::selection::utils::parse_selector(id_selector);
+   |                                    ^^^^^^^^^ could not find `selection` in `rust_d3`
+
+error[E0433]: failed to resolve: could not find `selection` in `rust_d3`
+  --> tests/selector_tests.rs:40:36
+   |
+40 |     let parsed_selector = rust_d3::selection::utils::parse_selector(class_selector);
+   |                                    ^^^^^^^^^ could not find `selection` in `rust_d3`
+
+error[E0433]: failed to resolve: could not find `selection` in `rust_d3`
+  --> tests/selector_tests.rs:49:36
+   |
+49 |     let parsed_selector = rust_d3::selection::utils::parse_selector(compound_selector);
+   |                                    ^^^^^^^^^ could not find `selection` in `rust_d3`
+
+error[E0433]: failed to resolve: could not find `selection` in `rust_d3`
+  --> tests/selector_tests.rs:58:36
+   |
+58 |     let parsed_selector = rust_d3::selection::utils::parse_selector(wildcard_selector);
+   |                                    ^^^^^^^^^ could not find `selection` in `rust_d3`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `slotmap`
+  --> tests/selector_tests.rs:76:16
+   |
+76 |         nodes: slotmap::SlotMap::with_key(),
+   |                ^^^^^^^ use of unresolved module or unlinked crate `slotmap`
+   |
+   = help: if you wanted to use a crate named `slotmap`, use `cargo add slotmap` to add it to your `Cargo.toml`
+
+Some errors have detailed explanations: E0432, E0433.
+For more information about an error, try `rustc --explain E0432`.
+error: could not compile `rust-d3` (test "selector_tests") due to 10 previous errors
+warning: build failed, waiting for other jobs to finish...
+
+Exit code: 101
+
+Summary of Issues:
+1. Missing `selection` module in rust_d3 library
+2. Missing `test_case` dependency in Cargo.toml  
+3. Missing `slotmap` dependency in Cargo.toml
+4. Tests trying to use unimplemented/missing `selection` functionality
+
+Files affected:
+- tests/selector_tests.rs (main file with compilation errors)
+- Cargo.toml (missing dependencies)
+- src/lib.rs (missing selection module export)

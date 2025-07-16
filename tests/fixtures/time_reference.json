@@ -1,0 +1,169 @@
+{
+  "seconds": [
+    {
+      "value": "2019-12-31T17:00:00.000Z",
+      "position": 0,
+      "label": "Wed Jan 01 2020 00:00:00 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2019-12-31T17:00:01.000Z",
+      "position": 25,
+      "label": "Wed Jan 01 2020 00:00:01 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2019-12-31T17:00:02.000Z",
+      "position": 50,
+      "label": "Wed Jan 01 2020 00:00:02 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2019-12-31T17:00:03.000Z",
+      "position": 75,
+      "label": "Wed Jan 01 2020 00:00:03 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2019-12-31T17:00:04.000Z",
+      "position": 100,
+      "label": "Wed Jan 01 2020 00:00:04 GMT+0700 (Indochina Time)"
+    }
+  ],
+  "minutes": [
+    {
+      "value": "2019-12-31T17:00:00.000Z",
+      "position": 0,
+      "label": "Wed Jan 01 2020 00:00:00 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2019-12-31T17:01:00.000Z",
+      "position": 20,
+      "label": "Wed Jan 01 2020 00:01:00 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2019-12-31T17:02:00.000Z",
+      "position": 40,
+      "label": "Wed Jan 01 2020 00:02:00 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2019-12-31T17:03:00.000Z",
+      "position": 60,
+      "label": "Wed Jan 01 2020 00:03:00 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2019-12-31T17:04:00.000Z",
+      "position": 80,
+      "label": "Wed Jan 01 2020 00:04:00 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2019-12-31T17:05:00.000Z",
+      "position": 100,
+      "label": "Wed Jan 01 2020 00:05:00 GMT+0700 (Indochina Time)"
+    }
+  ],
+  "hours": [
+    {
+      "value": "2019-12-31T17:00:00.000Z",
+      "position": 0,
+      "label": "Wed Jan 01 2020 00:00:00 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2019-12-31T18:00:00.000Z",
+      "position": 25,
+      "label": "Wed Jan 01 2020 01:00:00 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2019-12-31T19:00:00.000Z",
+      "position": 50,
+      "label": "Wed Jan 01 2020 02:00:00 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2019-12-31T20:00:00.000Z",
+      "position": 75,
+      "label": "Wed Jan 01 2020 03:00:00 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2019-12-31T21:00:00.000Z",
+      "position": 100,
+      "label": "Wed Jan 01 2020 04:00:00 GMT+0700 (Indochina Time)"
+    }
+  ],
+  "days": [
+    {
+      "value": "2019-12-31T17:00:00.000Z",
+      "position": 0,
+      "label": "Wed Jan 01 2020 00:00:00 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2020-01-01T17:00:00.000Z",
+      "position": 25,
+      "label": "Thu Jan 02 2020 00:00:00 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2020-01-02T17:00:00.000Z",
+      "position": 50,
+      "label": "Fri Jan 03 2020 00:00:00 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2020-01-03T17:00:00.000Z",
+      "position": 75,
+      "label": "Sat Jan 04 2020 00:00:00 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2020-01-04T17:00:00.000Z",
+      "position": 100,
+      "label": "Sun Jan 05 2020 00:00:00 GMT+0700 (Indochina Time)"
+    }
+  ],
+  "months": [
+    {
+      "value": "2019-12-31T17:00:00.000Z",
+      "position": 0,
+      "label": "Wed Jan 01 2020 00:00:00 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2020-01-31T17:00:00.000Z",
+      "position": 25.6198347107438,
+      "label": "Sat Feb 01 2020 00:00:00 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2020-02-29T17:00:00.000Z",
+      "position": 49.586776859504134,
+      "label": "Sun Mar 01 2020 00:00:00 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2020-03-31T17:00:00.000Z",
+      "position": 75.20661157024794,
+      "label": "Wed Apr 01 2020 00:00:00 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2020-04-30T17:00:00.000Z",
+      "position": 100,
+      "label": "Fri May 01 2020 00:00:00 GMT+0700 (Indochina Time)"
+    }
+  ],
+  "years": [
+    {
+      "value": "2019-12-31T17:00:00.000Z",
+      "position": 0,
+      "label": "Wed Jan 01 2020 00:00:00 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2020-12-31T17:00:00.000Z",
+      "position": 25.051334702258725,
+      "label": "Fri Jan 01 2021 00:00:00 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2021-12-31T17:00:00.000Z",
+      "position": 50.03422313483915,
+      "label": "Sat Jan 01 2022 00:00:00 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2022-12-31T17:00:00.000Z",
+      "position": 75.01711156741958,
+      "label": "Sun Jan 01 2023 00:00:00 GMT+0700 (Indochina Time)"
+    },
+    {
+      "value": "2023-12-31T17:00:00.000Z",
+      "position": 100,
+      "label": "Mon Jan 01 2024 00:00:00 GMT+0700 (Indochina Time)"
+    }
+  ]
+}

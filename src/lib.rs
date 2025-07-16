@@ -1,43 +1,47 @@
-//! # Rust D3
-//!
-//! A Rust library for D3-style data visualizations.
-//!
-//! This library provides tools for creating various types of charts and data visualizations,
-//! similar to the popular D3.js library but written in Rust.
-//!
-//! ## Features
-//!
-//! - Bar charts
-//! - Line charts
-//! - Pie charts
-//! - Customizable scales and axes
-//! - SVG output generation
-//!
-//! ## Example
-//!
-//! ```rust
-//! use rust_d3::charts::{BarChart, Chart};
-//! use rust_d3::data::DataPoint;
-//!
-//! let data = vec![
-//!     DataPoint::new("A", 10.0),
-//!     DataPoint::new("B", 20.0),
-//!     DataPoint::new("C", 15.0),
-//! ];
-//!
-//! let chart = BarChart::new()
-//!     .width(400)
-//!     .height(300)
-//!     .data(data);
-//!
-//! let svg = chart.render();
-//! ```
+// Only export the array module for isolated testing
+pub mod array;
+pub mod axis;
+pub mod chord;
+pub mod collection;
+pub mod color;
+pub mod contour;
+pub mod dispatch;
+pub mod ease;
+pub mod format;
+pub mod geojson;
+pub mod hierarchy;
+pub mod interpolate;
+pub mod path;
+pub mod polygon;
+pub mod quadtree;
+pub mod random;
+pub mod scale;
+pub mod scale_chromatic;
+pub mod selection;
+pub mod shape;
+pub mod time;
+pub mod timer;
 
-pub mod charts;
-pub mod data;
-pub mod scales;
-pub mod svg_utils;
+pub use array::bisector::bisector;
+pub use array::quickselect::quickselect;
+pub use array::transpose::transpose;
+pub use axis::Axis;
+pub use polygon::*;
+pub use quadtree::*;
+pub use selection::Selection;
+pub use shape::{Symbol, SymbolType};
 
-pub use charts::*;
-pub use data::*;
-pub use scales::*;
+// Example integration: use hierarchy with shape for tree visualization
+// use crate::hierarchy::{Node, TreeLayout};
+// use crate::shape::{Line, LinearCurve};
+//
+// let mut root = Node::new((0.0, 0.0));
+// root.add_child(Node::new((1.0, 1.0)));
+// let tree = TreeLayout::new();
+// tree.layout(&mut root);
+// let mut line = Line::new()
+//     .x(|d, _| d.0)
+//     .y(|d, _| d.1)
+//     .curve(LinearCurve::default());
+// let path = line.generate(&[root.data, root.children[0].data]);
+// println!("SVG Path: {}", path);
