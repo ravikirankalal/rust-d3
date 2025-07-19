@@ -62,6 +62,7 @@ fn tick_spec(start: f64, stop: f64, count: usize) -> (i32, i32, f64) {
 ///
 /// # Examples
 /// ```
+/// use rust_d3::array::ticks::ticks;
 /// let tick_values = ticks(0.0, 100.0, 5);
 /// // Returns approximately [0, 20, 40, 60, 80, 100]
 /// ```
