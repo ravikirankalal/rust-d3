@@ -2,21 +2,28 @@
 use super::axis_structs::Axis;
 use super::axis_structs::GridStyle;
 use super::orientation::AxisOrientation;
+use super::util::TransformBuilder;
 
 // Only keep this implementation here, remove any duplicate impls from axis_renderable.rs
 impl<T: Clone + PartialEq + ToString> super::axis_renderable::AxisRenderable
     for Axis<crate::scale::ScaleBand<T>>
 {
     fn render(&self, selection: &mut crate::selection::Selection) {
-        // Apply offset for crisp lines based on orientation
-        let transform = match self.orientation {
-            AxisOrientation::Bottom | AxisOrientation::Top => {
-                format!("translate({},0)", self.offset)
-            }
-            AxisOrientation::Left | AxisOrientation::Right => {
-                format!("translate(0,{})", self.offset)
-            }
-        };
+        // Get existing transform if any
+        let existing_transform = selection.get_attr("transform");
+        
+        // Apply offset for crisp lines based on orientation using TransformBuilder
+        let transform = TransformBuilder::with_existing(existing_transform.clone())
+            .translate(match self.orientation {
+                AxisOrientation::Bottom | AxisOrientation::Top => self.offset,
+                AxisOrientation::Left | AxisOrientation::Right => 0.0,
+            }, match self.orientation {
+                AxisOrientation::Bottom | AxisOrientation::Top => 0.0,
+                AxisOrientation::Left | AxisOrientation::Right => self.offset,
+            })
+            .build();
+        
+        // Always set the transform attribute to mirror D3 behavior
         selection.attr("transform", &transform);
         
         let ticks = self.ticks();
@@ -62,16 +69,16 @@ impl<T: Clone + PartialEq + ToString> super::axis_renderable::AxisRenderable
                 }
             }
         }
-        // // Draw domain line using scale.range() for all orientations
-        // self.draw_domain_line(selection, range0, range1);
+        // Band scales use different domain line calculation
+        let range = self.scale.range();
+        let range0 = range[0] + self.offset;
+        let range1 = range[1] + self.offset;
+        super::axis_common::draw_domain_line(self, selection, range0, range1);
         
-        // // Draw ticks and labels for all orientations
-        // self.draw_ticks_and_labels(selection, &ticks);
+        // Draw ticks and labels for all orientations
+        super::axis_common::draw_ticks_and_labels(self, selection, &ticks);
         
-        // // Draw minor ticks if enabled
-        // if let Some(ref minor_ticks) = self.minor_ticks {
-        //     self.draw_minor_ticks(selection, minor_ticks);
-        // }
+        // Band scales don't typically support minor ticks
         
         // Draw axis title if set
         if let Some(ref title) = self.title {

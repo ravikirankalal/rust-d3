@@ -2752,6 +2752,7 @@ dependencies = [
  "tokio",
  "ureq",
  "usvg",
+ "web-sys",
 ]
 
 [[package]]

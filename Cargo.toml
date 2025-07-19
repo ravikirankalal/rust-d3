@@ -22,3 +22,6 @@ slotmap = "1.0.7"
 eframe = "0.32.0"
 egui_extras = "0.32.0"
 test-case = "2.0.0" # Added for parameterized tests
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+web-sys = { version = "0.3", features = ["Window"] }

@@ -56,6 +56,13 @@ impl<T: Clone + PartialEq> ScaleBand<T> {
     }
 }
 
+// Implementation for axis rendering
+impl<T: Clone + PartialEq> crate::axis::axis_common::ScaleWithRange for ScaleBand<T> {
+    fn range(&self) -> [f64; 2] {
+        self.range()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

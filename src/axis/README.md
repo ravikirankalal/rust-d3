@@ -61,8 +61,62 @@ use d3_rust::scale::linear::ScaleLinear;
 let scale = ScaleLinear::new([0.0, 100.0], [0.0, 500.0]);
 let axis = axis_left(scale);
 ```
-
 ### Configuration Methods
+
+### Device Pixel Ratio
+
+Axis components can adjust for different device pixel ratios using the `set_device_pixel_ratio` method. This adjustment ensures that tick lines and borders render sharply across various screen types.
+
+```rust
+use d3_rust::axis::axis_bottom;
+use d3_rust::scale::linear::ScaleLinear;
+
+let scale = ScaleLinear::new([0.0, 100.0], [0.0, 500.0]);
+let axis = axis_bottom(scale)
+    .set_device_pixel_ratio(2.0); // High-DPR display
+
+// Get current device pixel ratio
+let current_dpr = axis.device_pixel_ratio();
+```
+
+### High-DPR Canvases
+
+For high-DPR canvases, combine the crisp-pixel strategy with a suitable `device_pixel_ratio`:
+
+```rust
+use d3_rust::axis::axis_left;
+use d3_rust::scale::linear::ScaleLinear;
+
+let scale = ScaleLinear::new([0.0, 100.0], [0.0, 500.0]);
+let axis = axis_left(scale)
+    .set_device_pixel_ratio(3.0) // Match canvas DPR
+    .offset(0.5); // Apply crisp offset
+```
+This configuration ensures that lines and ticks align with the canvas grid, minimizing visual artifacts.
+
+### Crisp-Pixel Strategy
+
+The crisp-pixel strategy automatically adjusts axis positioning for optimal rendering on different display densities. By default, the axis calculates the appropriate offset based on the device pixel ratio:
+
+```rust
+use d3_rust::axis::axis_bottom;
+use d3_rust::scale::linear::ScaleLinear;
+
+let scale = ScaleLinear::new([0.0, 100.0], [0.0, 500.0]);
+
+// Automatic crisp-pixel adjustment (recommended)
+let axis = axis_bottom(scale);
+
+// Manual control for consistent behavior across devices
+let axis_manual = axis_bottom(scale.clone())
+    .offset(0.5) // Force half-pixel offset
+    .set_device_pixel_ratio(1.0); // Standard DPR
+
+// High-DPR optimization
+let axis_high_dpr = axis_bottom(scale.clone())
+    .set_device_pixel_ratio(2.0); // Will use 0.0 offset for crisp edges
+```
+
 
 <a name="axis_tick_count" href="#axis_tick_count">#</a> *axis*.**tick_count**(*count*)
 
@@ -206,6 +260,32 @@ use d3_rust::scale::linear::ScaleLinear;
 let scale = ScaleLinear::new([0.0, 100.0], [0.0, 500.0]);
 let axis = axis_bottom(scale)
     .locale("en-US"); // Use US English locale for formatting
+```
+
+<a name="axis_set_device_pixel_ratio" href="#axis_set_device_pixel_ratio">#</a> *axis*.**set_device_pixel_ratio**(*ratio*)
+
+Sets the device pixel ratio for crisp rendering and returns the axis. This affects how the axis calculates pixel-perfect positioning.
+
+```rust
+use d3_rust::axis::axis_bottom;
+use d3_rust::scale::linear::ScaleLinear;
+
+let scale = ScaleLinear::new([0.0, 100.0], [0.0, 500.0]);
+let axis = axis_bottom(scale)
+    .set_device_pixel_ratio(2.0); // High-DPR display
+```
+
+<a name="axis_device_pixel_ratio" href="#axis_device_pixel_ratio">#</a> *axis*.**device_pixel_ratio**()
+
+Returns the current device pixel ratio value.
+
+```rust
+use d3_rust::axis::axis_bottom;
+use d3_rust::scale::linear::ScaleLinear;
+
+let scale = ScaleLinear::new([0.0, 100.0], [0.0, 500.0]);
+let axis = axis_bottom(scale).set_device_pixel_ratio(3.0);
+let dpr = axis.device_pixel_ratio(); // Returns 3.0
 ```
 
 ### Tick Generation Methods

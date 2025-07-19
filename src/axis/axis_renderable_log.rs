@@ -2,18 +2,25 @@
 use super::axis_structs::Axis;
 use super::axis_structs::GridStyle;
 use super::orientation::AxisOrientation;
+use super::util::TransformBuilder;
 
 impl super::axis_renderable::AxisRenderable for Axis<crate::scale::ScaleLog> {
     fn render(&self, selection: &mut crate::selection::Selection) {
-        // Apply half-pixel offset for crisp lines based on orientation
-        let transform = match self.orientation {
-            AxisOrientation::Bottom | AxisOrientation::Top => {
-                format!("translate({},0)", self.offset)
-            }
-            AxisOrientation::Left | AxisOrientation::Right => {
-                format!("translate(0,{})", self.offset)
-            }
-        };
+        // Get existing transform if any
+        let existing_transform = selection.get_attr("transform");
+        
+        // Apply offset for crisp lines based on orientation using TransformBuilder
+        let transform = TransformBuilder::with_existing(existing_transform.clone())
+            .translate(match self.orientation {
+                AxisOrientation::Bottom | AxisOrientation::Top => self.offset,
+                AxisOrientation::Left | AxisOrientation::Right => 0.0,
+            }, match self.orientation {
+                AxisOrientation::Bottom | AxisOrientation::Top => 0.0,
+                AxisOrientation::Left | AxisOrientation::Right => self.offset,
+            })
+            .build();
+        
+        // Always set the transform attribute to mirror D3 behavior
         selection.attr("transform", &transform);
         let ticks = self.ticks();
         // Draw grid lines if enabled

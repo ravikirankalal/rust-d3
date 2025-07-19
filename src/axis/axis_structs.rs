@@ -39,6 +39,7 @@ pub struct Axis<S> {
     pub tick_label_style: Option<TickLabelStyle>, // Tick label styling
     pub axis_line_style: Option<AxisLineStyle>, // Axis line styling
     pub on_render: Option<Box<dyn Fn()>>, // Event hook: before/after render
+    pub dpr: f64,                         // Device pixel ratio for crisp rendering
 }
 
 // Styling structs

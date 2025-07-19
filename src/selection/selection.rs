@@ -182,9 +182,13 @@ impl Selection {
                 if value.is_empty() {
                     arena.nodes[key].attributes.remove(name);
                 } else {
-                    arena.nodes[key]
-                        .attributes
-                        .insert(name.to_string(), value.to_string());
+                    // Micro-performance optimization: skip re-setting if value is identical
+                    let current_value = arena.nodes[key].attributes.get(name);
+                    if current_value.map_or(true, |current| current != value) {
+                        arena.nodes[key]
+                            .attributes
+                            .insert(name.to_string(), value.to_string());
+                    }
                 }
             }
         }
@@ -199,15 +203,25 @@ impl Selection {
             for (i, &key) in self.keys.iter().enumerate() {
                 let previous_value = arena.nodes[key].attributes.get(name).cloned();
                 let node = &arena.nodes[key];
-                let value = f(node, i, previous_value);
+                let value = f(node, i, previous_value.clone());
                 if value.is_empty() {
                     arena.nodes[key].attributes.remove(name);
                 } else {
-                    arena.nodes[key].attributes.insert(name.to_string(), value.clone());
+                    // Micro-performance optimization: skip re-setting if value is identical
+                    if previous_value.as_ref().map_or(true, |current| current != &value) {
+                        arena.nodes[key].attributes.insert(name.to_string(), value.clone());
+                    }
                 }
             }
         }
         self
+    }
+
+    /// Convenience method to set attribute with f64 value using px() formatting
+    /// Automatically converts f64 to string using the px() function for SVG coordinates
+    pub fn attr_px(&mut self, name: &str, value: f64) -> &mut Self {
+        let px_value = crate::px(value);
+        self.attr(name, &px_value)
     }
     pub fn select_all(&mut self, tag: Option<&str>) -> Selection {
         let mut found = Vec::new();

@@ -4,9 +4,11 @@
 use super::axis_structs::{Axis, AxisLayout};
 use super::orientation::AxisOrientation;
 use super::ticks::{Tick, TickFormat};
+use super::util::{effective_offset, default_device_pixel_ratio};
 
 impl<S> Axis<S> {
     pub fn new(scale: S, orientation: AxisOrientation) -> Self {
+        let dpr = default_device_pixel_ratio();
         Self {
             scale,
             orientation,
@@ -17,7 +19,7 @@ impl<S> Axis<S> {
             tick_size_outer: 6.0,
             tick_padding: 3.0,
             tick_arguments: None,
-            offset: 0.5,
+            offset: effective_offset(None),
             locale: None,
             grid: false,
             grid_style: None,
@@ -29,6 +31,7 @@ impl<S> Axis<S> {
             tick_label_style: None,
             axis_line_style: None,
             on_render: None,
+            dpr,
         }
     }
     pub fn tick_count(mut self, count: usize) -> Self {
@@ -141,6 +144,17 @@ impl<S> Axis<S> {
     pub fn locale_value(&self) -> Option<&str> {
         self.locale.as_deref()
     }
+    
+    /// Returns the current device pixel ratio
+    pub fn device_pixel_ratio(&self) -> f64 {
+        self.dpr
+    }
+    
+    /// Sets the device pixel ratio for crisp rendering
+    pub fn set_device_pixel_ratio(mut self, dpr: f64) -> Self {
+        self.dpr = dpr;
+        self
+    }
 }
 
 // D3-style ticks method for different scale types
@@ -193,5 +207,42 @@ impl Axis<crate::scale::ScaleTime> {
     /// Returns the tick values using the specified values instead of the scale's automatic tick generator
     pub fn ticks_with(&self, tick_values: Option<Vec<chrono::NaiveDateTime>>) -> Vec<Tick> {
         self.generate_ticks_with(tick_values)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::scale::linear::ScaleLinear;
+    use super::super::axis_constructors::axis_bottom;
+
+    #[test]
+    fn test_axis_uses_crisp_util() {
+        let scale = ScaleLinear::new([0.0, 100.0], [0.0, 500.0]);
+        let axis = axis_bottom(scale);
+        
+        // The offset should be computed using effective_offset
+        let offset = axis.offset_value();
+        
+        // The offset should be either 0.5 (standard DPI) or 0.0 (high DPI)
+        assert!(offset == 0.5 || offset == 0.0, "Axis offset should be computed from crisp utility, got: {}", offset);
+    }
+
+    #[test]
+    fn test_axis_offset_override() {
+        let scale = ScaleLinear::new([0.0, 100.0], [0.0, 500.0]);
+        let axis = axis_bottom(scale).offset(0.25);
+        
+        // Custom offset should override the computed one
+        assert_eq!(axis.offset_value(), 0.25);
+    }
+
+    #[test]
+    fn test_axis_stores_dpr() {
+        let scale = ScaleLinear::new([0.0, 100.0], [0.0, 500.0]);
+        let axis = axis_bottom(scale);
+        
+        // Axis should store the device pixel ratio
+        let dpr = axis.device_pixel_ratio();
+        assert!(dpr >= 1.0, "Device pixel ratio should be at least 1.0, got: {}", dpr);
     }
 }

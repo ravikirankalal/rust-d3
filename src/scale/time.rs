@@ -575,19 +575,13 @@ impl ScaleTime {
         let duration_secs = (stop - start).num_seconds().abs();
         
         match interval {
-            TimeTickInterval::Second(_) => {
-                if duration_secs < 10 {
-                    "%Y-%m-%d"
-                } else {
-                    "%H:%M:%S"
-                }
-            }
-            TimeTickInterval::Minute(_) => "%H:%M",
-            TimeTickInterval::Hour(_) => "%H:%M",
-            TimeTickInterval::Day(_) => "%Y-%m-%d",
-            TimeTickInterval::Week(_) => "%Y-%m-%d",
-            TimeTickInterval::Month(_) => "%Y-%m-%d",
-            TimeTickInterval::Year(_) => "%Y-%m-%d",
+            TimeTickInterval::Second(_) => "%Y-%m-%d",
+            TimeTickInterval::Minute(_) => "%Y-%m-%d",
+            TimeTickInterval::Hour(_) => "%Y-%m-%d",
+            TimeTickInterval::Day(_) => "%m/%d",
+            TimeTickInterval::Week(_) => "%a",
+            TimeTickInterval::Month(_) => "%b",
+            TimeTickInterval::Year(_) => "%Y",
         }
     }
 
@@ -676,5 +670,27 @@ impl Default for ScaleTime {
     fn default() -> Self {
         let now = chrono::Utc::now().naive_utc();
         Self::new([now, now + Duration::try_hours(1).unwrap()], [0.0, 1.0])
+    }
+}
+
+// Implementation for axis rendering
+impl crate::axis::axis_common::TimeScaleForAxis for ScaleTime {
+    fn scale_timestamp(&self, timestamp_millis: f64) -> f64 {
+        let domain_start = self.domain[0].and_utc().timestamp_millis() as f64;
+        let domain_end = self.domain[1].and_utc().timestamp_millis() as f64;
+        
+        let mut millis = timestamp_millis;
+        if self.clamp {
+            millis = millis.max(domain_start).min(domain_end);
+        }
+        
+        let t = (millis - domain_start) / (domain_end - domain_start);
+        (self.interpolate)(self.range[0], self.range[1], t)
+    }
+}
+
+impl crate::axis::axis_common::ScaleWithRange for ScaleTime {
+    fn range(&self) -> [f64; 2] {
+        self.range()
     }
 }

@@ -171,6 +171,19 @@ impl Default for ScaleLinear {
     }
 }
 
+// Implementation for axis rendering
+impl crate::axis::axis_common::ScaleForAxis for ScaleLinear {
+    fn scale(&self, value: f64) -> f64 {
+        self.scale(value)
+    }
+}
+
+impl crate::axis::axis_common::ScaleWithRange for ScaleLinear {
+    fn range(&self) -> [f64; 2] {
+        self.range()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

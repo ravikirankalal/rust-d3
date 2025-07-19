@@ -144,39 +144,15 @@ impl Axis<crate::scale::ScaleTime> {
         
         match tick_interval {
             TimeTickInterval::Second(_) => {
-                // For very short spans (< 10 seconds), use date format like original ScaleTime
-                if duration.num_seconds() < 10 {
-                    "%Y-%m-%d"
-                } else if duration.num_seconds() < 60 {
-                    // For seconds less than 1 minute, use time format
-                    "%H:%M:%S"
-                } else {
-                    // For larger spans, use date format
-                    "%Y-%m-%d %H:%M:%S"
-                }
+                // For second-level ticks, default to date-time format
+                "%Y-%m-%d"
             }
-            TimeTickInterval::Minute(_) => {
-                // For minutes less than 1 hour
-                if duration.num_minutes() < 60 {
-                    "%H:%M"
-                } else {
-                    // For larger spans, use date format
-                    "%Y-%m-%d %H:%M"
-                }
-            }
-            TimeTickInterval::Hour(_) => {
-                // For hours less than 1 day, use 24-hour clock
-                if duration.num_hours() < 24 {
-                    "%H:%M"
-                } else {
-                    // For larger spans, use date format
-                    "%Y-%m-%d %H:%M"
-                }
-            }
-            TimeTickInterval::Day(_) => "%Y-%m-%d",
-            TimeTickInterval::Week(_) => "%Y-%m-%d",
-            TimeTickInterval::Month(_) => "%Y-%m-%d",
-            TimeTickInterval::Year(_) => "%Y-%m-%d",
+            TimeTickInterval::Minute(_) => "%Y-%m-%d",
+            TimeTickInterval::Hour(_) => "%Y-%m-%d",
+            TimeTickInterval::Day(_) => "%m/%d",
+            TimeTickInterval::Week(_) => "%a",
+            TimeTickInterval::Month(_) => "%b",
+            TimeTickInterval::Year(_) => "%Y",
         }
     }
 

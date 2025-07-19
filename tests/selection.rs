@@ -894,3 +894,123 @@ fn test_order_method() {
         .collect();
     assert_eq!(reordered_ids, vec!["rect3", "rect2", "rect1"]);
 }
+
+#[test]
+fn test_attr_micro_performance_optimization() {
+    use std::cell::RefCell;
+    
+    let arena = Rc::new(RefCell::new(Arena {
+        nodes: SlotMap::with_key(),
+    }));
+    let mut svg = Selection::root(Rc::clone(&arena), "svg");
+    
+    // Set an attribute first time
+    svg.attr("width", "100");
+    let node = svg.node().unwrap();
+    assert_eq!(node.attributes.get("width"), Some(&"100".to_string()));
+    
+    // Set the same value again - should be optimized to skip insertion
+    svg.attr("width", "100");
+    let node = svg.node().unwrap();
+    assert_eq!(node.attributes.get("width"), Some(&"100".to_string()));
+    
+    // Set different value - should update
+    svg.attr("width", "200");
+    let node = svg.node().unwrap();
+    assert_eq!(node.attributes.get("width"), Some(&"200".to_string()));
+    
+    // Set empty value - should remove attribute
+    svg.attr("width", "");
+    let node = svg.node().unwrap();
+    assert_eq!(node.attributes.get("width"), None);
+}
+
+#[test]
+fn test_attr_fn_micro_performance_optimization() {
+    let arena = Rc::new(RefCell::new(Arena {
+        nodes: SlotMap::with_key(),
+    }));
+    let mut svg = Selection::root(Rc::clone(&arena), "svg");
+    
+    // Set an attribute first time using attr_fn
+    svg.attr_fn("test-attr", |_, _, _| "value1".to_string());
+    let node = svg.node().unwrap();
+    assert_eq!(node.attributes.get("test-attr"), Some(&"value1".to_string()));
+    
+    // Set the same value again using attr_fn - should be optimized to skip insertion
+    svg.attr_fn("test-attr", |_, _, prev| {
+        assert_eq!(prev, Some("value1".to_string()));
+        "value1".to_string() // Same value
+    });
+    let node = svg.node().unwrap();
+    assert_eq!(node.attributes.get("test-attr"), Some(&"value1".to_string()));
+    
+    // Set different value using attr_fn - should update
+    svg.attr_fn("test-attr", |_, _, prev| {
+        assert_eq!(prev, Some("value1".to_string()));
+        "value2".to_string() // Different value
+    });
+    let node = svg.node().unwrap();
+    assert_eq!(node.attributes.get("test-attr"), Some(&"value2".to_string()));
+}
+
+#[test]
+fn test_attr_px_convenience_method() {
+    let arena = Rc::new(RefCell::new(Arena {
+        nodes: SlotMap::with_key(),
+    }));
+    let mut svg = Selection::root(Rc::clone(&arena), "svg");
+    
+    // Test attr_px with various f64 values
+    svg.attr_px("width", 100.0)
+        .attr_px("height", 50.5)
+        .attr_px("x", 10.333333)
+        .attr_px("y", 0.0)
+        .attr_px("r", 1.0/3.0); // Should be rounded to 6 decimal places
+    
+    let node = svg.node().unwrap();
+    
+    // Check that px() formatting is applied correctly
+    assert_eq!(node.attributes.get("width"), Some(&"100".to_string()));
+    assert_eq!(node.attributes.get("height"), Some(&"50.5".to_string()));
+    assert_eq!(node.attributes.get("x"), Some(&"10.333333".to_string()));
+    assert_eq!(node.attributes.get("y"), Some(&"0".to_string()));
+    assert_eq!(node.attributes.get("r"), Some(&"0.333333".to_string()));
+}
+
+#[test]
+fn test_attr_px_vs_manual_px_consistency() {
+    use rust_d3::px;
+    
+    let arena = Rc::new(RefCell::new(Arena {
+        nodes: SlotMap::with_key(),
+    }));
+    let mut svg = Selection::root(Rc::clone(&arena), "svg");
+    
+    // Create two identical elements
+    let mut rect1 = svg.append("rect");
+    let mut rect2 = svg.append("rect");
+    
+    // Set attributes using manual px() conversion
+    rect1.attr("x", &px(25.75))
+         .attr("y", &px(30.0))
+         .attr("width", &px(100.5));
+    
+    // Set attributes using convenience attr_px() method
+    rect2.attr_px("x", 25.75)
+         .attr_px("y", 30.0)
+         .attr_px("width", 100.5);
+    
+    let rect1_node = rect1.node().unwrap();
+    let rect2_node = rect2.node().unwrap();
+    
+    // Both approaches should produce identical results
+    assert_eq!(rect1_node.attributes.get("x"), rect2_node.attributes.get("x"));
+    assert_eq!(rect1_node.attributes.get("y"), rect2_node.attributes.get("y"));
+    assert_eq!(rect1_node.attributes.get("width"), rect2_node.attributes.get("width"));
+    
+    // Verify actual values
+    assert_eq!(rect1_node.attributes.get("x"), Some(&"25.75".to_string()));
+    assert_eq!(rect1_node.attributes.get("y"), Some(&"30".to_string()));
+    assert_eq!(rect1_node.attributes.get("width"), Some(&"100.5".to_string()));
+}

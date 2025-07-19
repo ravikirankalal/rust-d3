@@ -7,7 +7,6 @@ use rust_d3::axis::{axis_bottom, axis_left};
 use rust_d3::scale::ScaleLinear;
 use rust_d3::scale::ScaleTime;
 use rust_d3::selection::{Arena, Selection};
-use rust_d3::shape::Area;
 use rust_d3::time::format::time_parse;
 use slotmap::SlotMap;
 use std::cell::RefCell;
@@ -67,18 +66,18 @@ fn generate_svg_chart() -> String {
         [min_close as f64, max_close as f64],
         [(height as i32 - margin_bottom) as f64, 20.0],
     );
-    
+
     // Use nice() to round the domain to nice numbers for better ticks
     y.nice(Some(height / 40));
 
     // Area generator
-    let area = Area::new()
-        .x(|_d: &f32, i: usize| x.scale(dates[i].naive_utc()))
-        .y0(|_d: &f32, _| y.scale(min_close as f64))
-        .y1(|d: &f32, _i| y.scale(*d as f64));
-    svg.append("path")
-        .attr("fill", "steelblue")
-        .attr("d", &area.generate(&closes));
+    // let area = Area::new()
+    //     .x(|_d: &f32, i: usize| x.scale(dates[i].naive_utc()))
+    //     .y0(|_d: &f32, _| y.scale(min_close as f64))
+    //     .y1(|d: &f32, _i| y.scale(*d as f64));
+    // svg.append("path")
+    //     .attr("fill", "steelblue")
+    //     .attr("d", &area.generate(&closes));
 
     let root_key = svg.iter().next().copied().unwrap();
 
@@ -89,6 +88,7 @@ fn generate_svg_chart() -> String {
     x_axis_group.attr("transform", &x_transform);
     x_axis_group.call(|sel| {
         axis_bottom(x.clone())
+            .set_device_pixel_ratio(2.0)
             .with_ticks((width / 80) as usize)
             .tick_size(5.0)
             .render(sel);
