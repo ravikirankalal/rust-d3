@@ -563,7 +563,7 @@ fn test_data_join_keyed_vs_unkeyed() {
 
     // Test keyed join with same data
     let key_fn = |d: &&str, _: usize| d.to_string();
-    let join2 = root.select_all(Some("p")).data_with_key(&data1, key_fn);
+    let _join2 = root.select_all(Some("p")).data_with_key(&data1, key_fn);
 
     // Test keyed join with same data (using IDs)
     let data2 = vec!["A", "B", "C"];

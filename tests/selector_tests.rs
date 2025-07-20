@@ -8,7 +8,7 @@ use test_case::test_case;
 #[test_case(".axis", None, &["axis", "major"], true ; "class selector")]
 #[test_case("svg.axis.major", None, &["axis", "major"], true ; "compound selector")]
 #[test_case("*", None, &[], true ; "wildcard selector")]
-fn test_selector_parsing(selector: &str, id: Option<&str>, classes: &[&str], expected: bool) {
+fn test_selector_parsing(_selector: &str, _id: Option<&str>, _classes: &[&str], _expected: bool) {
     let arena = Rc::new(RefCell::new(Arena {
         nodes: slotmap::SlotMap::with_key(),
     }));
@@ -70,7 +70,7 @@ fn test_selector_parsing(selector: &str, id: Option<&str>, classes: &[&str], exp
 #[test_case("*", 5; "wildcard selector")]
 #[test_case("rect.axis.major", 1; "compound tag and class selector")]
 #[test_case("circle", 0; "non-matching selector")]
-fn test_d3_selector_examples(selector: &str, expected_len: usize) {
+fn test_d3_selector_examples(_selector: &str, _expected_len: usize) {
     // Test cases mirroring D3 selector spec examples
     let arena = Rc::new(RefCell::new(Arena {
         nodes: slotmap::SlotMap::with_key(),

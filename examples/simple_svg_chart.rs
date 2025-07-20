@@ -1,7 +1,7 @@
 use rust_d3::selection::Selection;
 
 fn main() {
-    let mut data = [30, 80, 45, 60, 20, 90, 55];
+    let data = [30, 80, 45, 60, 20, 90, 55];
     let width = 300;
     let height = 120;
     let bar_width = 30;
@@ -17,7 +17,7 @@ fn main() {
         .attr("style", "max-width: 100%; height: auto;");
 
     // Add a rect for each bar.
-    let data_join = svg
+    let _data_join = svg
         .append("g")
         .attr("fill", "steelblue")
         .select_all(None)

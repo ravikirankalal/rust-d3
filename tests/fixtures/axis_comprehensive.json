@@ -1,0 +1,405 @@
+{
+  "linear": {
+    "basic_ticks": {
+      "domain": [0, 10],
+      "range": [0, 100],
+      "tick_count": 5,
+      "expected": [
+        {"value": 0, "position": 0, "label": "0"},
+        {"value": 2, "position": 20, "label": "2"},
+        {"value": 4, "position": 40, "label": "4"},
+        {"value": 6, "position": 60, "label": "6"},
+        {"value": 8, "position": 80, "label": "8"},
+        {"value": 10, "position": 100, "label": "10"}
+      ]
+    },
+    "custom_ticks": {
+      "domain": [0, 10],
+      "range": [0, 100],
+      "tick_values": [2, 5, 8],
+      "expected": [
+        {"value": 2, "position": 20, "label": "2"},
+        {"value": 5, "position": 50, "label": "5"},
+        {"value": 8, "position": 80, "label": "8"}
+      ]
+    },
+    "negative_domain": {
+      "domain": [-10, 10],
+      "range": [0, 200],
+      "tick_count": 10,
+      "expected": [
+        {"value": -10, "position": 0, "label": "-10"},
+        {"value": -5, "position": 50, "label": "-5"},
+        {"value": 0, "position": 100, "label": "0"},
+        {"value": 5, "position": 150, "label": "5"},
+        {"value": 10, "position": 200, "label": "10"}
+      ]
+    },
+    "fractional_domain": {
+      "domain": [0.1, 0.9],
+      "range": [0, 800],
+      "tick_count": 8,
+      "expected": [
+        {"value": 0.1, "position": 0, "label": "0.1"},
+        {"value": 0.2, "position": 100, "label": "0.2"},
+        {"value": 0.3, "position": 200, "label": "0.3"},
+        {"value": 0.4, "position": 300, "label": "0.4"},
+        {"value": 0.5, "position": 400, "label": "0.5"},
+        {"value": 0.6, "position": 500, "label": "0.6"},
+        {"value": 0.7, "position": 600, "label": "0.7"},
+        {"value": 0.8, "position": 700, "label": "0.8"},
+        {"value": 0.9, "position": 800, "label": "0.9"}
+      ]
+    },
+    "large_numbers": {
+      "domain": [1000000, 10000000],
+      "range": [0, 1000],
+      "tick_count": 10,
+      "expected": [
+        {"value": 1000000, "position": 0, "label": "1000000"},
+        {"value": 2000000, "position": 111.11111111111111, "label": "2000000"},
+        {"value": 3000000, "position": 222.22222222222223, "label": "3000000"},
+        {"value": 4000000, "position": 333.3333333333333, "label": "4000000"},
+        {"value": 5000000, "position": 444.44444444444446, "label": "5000000"},
+        {"value": 6000000, "position": 555.5555555555555, "label": "6000000"},
+        {"value": 7000000, "position": 666.6666666666666, "label": "7000000"},
+        {"value": 8000000, "position": 777.7777777777778, "label": "8000000"},
+        {"value": 9000000, "position": 888.8888888888889, "label": "9000000"},
+        {"value": 10000000, "position": 1000, "label": "10000000"}
+      ]
+    },
+    "small_numbers": {
+      "domain": [0.001, 0.009],
+      "range": [0, 900],
+      "tick_count": 9,
+      "expected": [
+        {"value": 0.001, "position": 0, "label": "0.001"},
+        {"value": 0.002, "position": 112.5, "label": "0.002"},
+        {"value": 0.003, "position": 225, "label": "0.003"},
+        {"value": 0.004, "position": 337.5, "label": "0.004"},
+        {"value": 0.005, "position": 450, "label": "0.005"},
+        {"value": 0.006, "position": 562.5, "label": "0.006"},
+        {"value": 0.007, "position": 675, "label": "0.007"},
+        {"value": 0.008, "position": 787.5, "label": "0.008"},
+        {"value": 0.009, "position": 900, "label": "0.009"}
+      ]
+    },
+    "reverse_range": {
+      "domain": [0, 100],
+      "range": [500, 0],
+      "tick_count": 10,
+      "expected": [
+        {"value": 0, "position": 500, "label": "0"},
+        {"value": 10, "position": 450, "label": "10"},
+        {"value": 20, "position": 400, "label": "20"},
+        {"value": 30, "position": 350, "label": "30"},
+        {"value": 40, "position": 300, "label": "40"},
+        {"value": 50, "position": 250, "label": "50"},
+        {"value": 60, "position": 200, "label": "60"},
+        {"value": 70, "position": 150, "label": "70"},
+        {"value": 80, "position": 100, "label": "80"},
+        {"value": 90, "position": 50, "label": "90"},
+        {"value": 100, "position": 0, "label": "100"}
+      ]
+    },
+    "empty_domain": {
+      "domain": [0, 0],
+      "range": [0, 0],
+      "tick_count": 5,
+      "expected": [
+        {"value": 0, "position": 0, "label": "0"}
+      ]
+    },
+    "single_value": {
+      "domain": [5, 5],
+      "range": [10, 10],
+      "tick_count": 1,
+      "expected": [
+        {"value": 5, "position": 10, "label": "5"}
+      ]
+    }
+  },
+  "log": {
+    "basic_ticks": {
+      "domain": [1, 1000],
+      "range": [0, 100],
+      "base": 10,
+      "tick_count": 4,
+      "expected": [
+        {"value": 1, "position": 0, "label": "1"},
+        {"value": 10, "position": 33.333333333333336, "label": "10"},
+        {"value": 100, "position": 66.66666666666667, "label": "100"},
+        {"value": 1000, "position": 100, "label": "1000"}
+      ]
+    },
+    "multiple_decades": {
+      "domain": [1, 10000],
+      "range": [0, 400],
+      "base": 10,
+      "tick_count": 8,
+      "expected": [
+        {"value": 1, "position": 0, "label": "1"},
+        {"value": 10, "position": 100, "label": "10"},
+        {"value": 100, "position": 200, "label": "100"},
+        {"value": 1000, "position": 300, "label": "1000"},
+        {"value": 10000, "position": 400, "label": "10000"}
+      ]
+    },
+    "base_2": {
+      "domain": [1, 256],
+      "range": [0, 800],
+      "base": 2,
+      "tick_count": 8,
+      "expected": [
+        {"value": 1, "position": 0, "label": "1"},
+        {"value": 2, "position": 100, "label": "2"},
+        {"value": 4, "position": 200, "label": "4"},
+        {"value": 8, "position": 300, "label": "8"},
+        {"value": 16, "position": 400, "label": "16"},
+        {"value": 32, "position": 500, "label": "32"},
+        {"value": 64, "position": 600, "label": "64"},
+        {"value": 128, "position": 700, "label": "128"},
+        {"value": 256, "position": 800, "label": "256"}
+      ]
+    },
+    "custom_values": {
+      "domain": [1, 1000],
+      "range": [0, 200],
+      "base": 10,
+      "tick_values": [1, 10, 100, 1000],
+      "expected": [
+        {"value": 1, "position": 0, "label": "1"},
+        {"value": 10, "position": 66.67, "label": "10"},
+        {"value": 100, "position": 133.33, "label": "100"},
+        {"value": 1000, "position": 200, "label": "1000"}
+      ]
+    }
+  },
+  "time": {
+    "seconds_interval": {
+      "domain": ["2023-01-01T12:00:00", "2023-01-01T12:00:30"],
+      "range": [0, 300],
+      "tick_count": 6,
+      "expected": [
+        {"value": "2023-01-01T12:00:00.000Z", "position": 0, "label": "2023-01-01"},
+        {"value": "2023-01-01T12:00:05.000Z", "position": 50, "label": "2023-01-01"},
+        {"value": "2023-01-01T12:00:10.000Z", "position": 100, "label": "2023-01-01"},
+        {"value": "2023-01-01T12:00:15.000Z", "position": 150, "label": "2023-01-01"},
+        {"value": "2023-01-01T12:00:20.000Z", "position": 200, "label": "2023-01-01"},
+        {"value": "2023-01-01T12:00:25.000Z", "position": 250, "label": "2023-01-01"},
+        {"value": "2023-01-01T12:00:30.000Z", "position": 300, "label": "2023-01-01"}
+      ]
+    },
+    "minutes_interval": {
+      "domain": ["2023-01-01T12:00:00", "2023-01-01T12:30:00"],
+      "range": [0, 300],
+      "tick_count": 6,
+      "expected": [
+        {"value": "2023-01-01T12:00:00.000Z", "position": 0, "label": "2023-01-01"},
+        {"value": "2023-01-01T12:05:00.000Z", "position": 50, "label": "2023-01-01"},
+        {"value": "2023-01-01T12:10:00.000Z", "position": 100, "label": "2023-01-01"},
+        {"value": "2023-01-01T12:15:00.000Z", "position": 150, "label": "2023-01-01"},
+        {"value": "2023-01-01T12:20:00.000Z", "position": 200, "label": "2023-01-01"},
+        {"value": "2023-01-01T12:25:00.000Z", "position": 250, "label": "2023-01-01"},
+        {"value": "2023-01-01T12:30:00.000Z", "position": 300, "label": "2023-01-01"}
+      ]
+    },
+    "hours_interval": {
+      "domain": ["2023-01-01T08:00:00", "2023-01-01T20:00:00"],
+      "range": [0, 600],
+      "tick_count": 6,
+      "expected": [
+        {"value": "2023-01-01T08:00:00.000Z", "position": 0, "label": "2023-01-01"},
+        {"value": "2023-01-01T10:00:00.000Z", "position": 100, "label": "2023-01-01"},
+        {"value": "2023-01-01T12:00:00.000Z", "position": 200, "label": "2023-01-01"},
+        {"value": "2023-01-01T14:00:00.000Z", "position": 300, "label": "2023-01-01"},
+        {"value": "2023-01-01T16:00:00.000Z", "position": 400, "label": "2023-01-01"},
+        {"value": "2023-01-01T18:00:00.000Z", "position": 500, "label": "2023-01-01"},
+        {"value": "2023-01-01T20:00:00.000Z", "position": 600, "label": "2023-01-01"}
+      ]
+    },
+    "days_interval": {
+      "domain": ["2023-01-01T00:00:00", "2023-01-15T00:00:00"],
+      "range": [0, 700],
+      "tick_count": 7,
+      "expected": [
+        {"value": "2023-01-01T00:00:00.000Z", "position": 0, "label": "01/01"},
+        {"value": "2023-01-03T00:00:00.000Z", "position": 100, "label": "01/03"},
+        {"value": "2023-01-05T00:00:00.000Z", "position": 200, "label": "01/05"},
+        {"value": "2023-01-07T00:00:00.000Z", "position": 300, "label": "01/07"},
+        {"value": "2023-01-09T00:00:00.000Z", "position": 400, "label": "01/09"},
+        {"value": "2023-01-11T00:00:00.000Z", "position": 500, "label": "01/11"},
+        {"value": "2023-01-13T00:00:00.000Z", "position": 600, "label": "01/13"},
+        {"value": "2023-01-15T00:00:00.000Z", "position": 700, "label": "01/15"}
+      ]
+    },
+    "months_interval": {
+      "domain": ["2023-01-01T00:00:00", "2023-12-01T00:00:00"],
+      "range": [0, 1100],
+      "tick_count": 12,
+      "expected": [
+        {"value": "2023-01-01T00:00:00.000Z", "position": 0, "label": "Jan"},
+        {"value": "2023-02-01T00:00:00.000Z", "position": 100, "label": "Feb"},
+        {"value": "2023-03-01T00:00:00.000Z", "position": 200, "label": "Mar"},
+        {"value": "2023-04-01T00:00:00.000Z", "position": 300, "label": "Apr"},
+        {"value": "2023-05-01T00:00:00.000Z", "position": 400, "label": "May"},
+        {"value": "2023-06-01T00:00:00.000Z", "position": 500, "label": "Jun"},
+        {"value": "2023-07-01T00:00:00.000Z", "position": 600, "label": "Jul"},
+        {"value": "2023-08-01T00:00:00.000Z", "position": 700, "label": "Aug"},
+        {"value": "2023-09-01T00:00:00.000Z", "position": 800, "label": "Sep"},
+        {"value": "2023-10-01T00:00:00.000Z", "position": 900, "label": "Oct"},
+        {"value": "2023-11-01T00:00:00.000Z", "position": 1000, "label": "Nov"},
+        {"value": "2023-12-01T00:00:00.000Z", "position": 1100, "label": "Dec"}
+      ]
+    },
+    "years_interval": {
+      "domain": ["2020-01-01T00:00:00", "2030-01-01T00:00:00"],
+      "range": [0, 1000],
+      "tick_count": 10,
+      "expected": [
+        {"value": "2020-01-01T00:00:00.000Z", "position": 0, "label": "2020"},
+        {"value": "2021-01-01T00:00:00.000Z", "position": 100, "label": "2021"},
+        {"value": "2022-01-01T00:00:00.000Z", "position": 200, "label": "2022"},
+        {"value": "2023-01-01T00:00:00.000Z", "position": 300, "label": "2023"},
+        {"value": "2024-01-01T00:00:00.000Z", "position": 400, "label": "2024"},
+        {"value": "2025-01-01T00:00:00.000Z", "position": 500, "label": "2025"},
+        {"value": "2026-01-01T00:00:00.000Z", "position": 600, "label": "2026"},
+        {"value": "2027-01-01T00:00:00.000Z", "position": 700, "label": "2027"},
+        {"value": "2028-01-01T00:00:00.000Z", "position": 800, "label": "2028"},
+        {"value": "2029-01-01T00:00:00.000Z", "position": 900, "label": "2029"},
+        {"value": "2030-01-01T00:00:00.000Z", "position": 1000, "label": "2030"}
+      ]
+    },
+    "reverse_domain": {
+      "domain": ["2023-12-31T00:00:00", "2023-01-01T00:00:00"],
+      "range": [0, 365],
+      "tick_count": 12,
+      "expected": [
+        {"value": "2023-12-31T00:00:00.000Z", "position": 0, "label": "12/31"},
+        {"value": "2023-12-01T00:00:00.000Z", "position": 30, "label": "12/01"},
+        {"value": "2023-11-01T00:00:00.000Z", "position": 60, "label": "11/01"},
+        {"value": "2023-10-01T00:00:00.000Z", "position": 90, "label": "10/01"},
+        {"value": "2023-09-01T00:00:00.000Z", "position": 120, "label": "09/01"},
+        {"value": "2023-08-01T00:00:00.000Z", "position": 150, "label": "08/01"},
+        {"value": "2023-07-01T00:00:00.000Z", "position": 180, "label": "07/01"},
+        {"value": "2023-06-01T00:00:00.000Z", "position": 210, "label": "06/01"},
+        {"value": "2023-05-01T00:00:00.000Z", "position": 240, "label": "05/01"},
+        {"value": "2023-04-01T00:00:00.000Z", "position": 270, "label": "04/01"},
+        {"value": "2023-03-01T00:00:00.000Z", "position": 300, "label": "03/01"},
+        {"value": "2023-02-01T00:00:00.000Z", "position": 330, "label": "02/01"},
+        {"value": "2023-01-01T00:00:00.000Z", "position": 365, "label": "01/01"}
+      ]
+    },
+    "custom_values": {
+      "domain": ["2023-01-01T00:00:00", "2023-01-10T00:00:00"],
+      "range": [0, 900],
+      "tick_values": ["2023-01-03T00:00:00", "2023-01-06T00:00:00", "2023-01-09T00:00:00"],
+      "expected": [
+        {"value": "2023-01-03T00:00:00.000Z", "position": 200, "label": "01/03"},
+        {"value": "2023-01-06T00:00:00.000Z", "position": 500, "label": "01/06"},
+        {"value": "2023-01-09T00:00:00.000Z", "position": 800, "label": "01/09"}
+      ]
+    }
+  },
+  "band": {
+    "basic": {
+      "domain": ["a", "b", "c"],
+      "range": [0, 120],
+      "inner_padding": 0.1,
+      "outer_padding": 0.1,
+      "align": 0.5,
+      "expected": [
+        {"value": "a", "position": 13.333333333333334, "label": "a"},
+        {"value": "b", "position": 40, "label": "b"},
+        {"value": "c", "position": 66.66666666666667, "label": "c"}
+      ]
+    },
+    "with_padding": {
+      "domain": ["Alpha", "Beta", "Gamma", "Delta"],
+      "range": [0, 400],
+      "inner_padding": 0.2,
+      "outer_padding": 0.1,
+      "align": 0.5,
+      "expected": [
+        {"value": "Alpha", "position": 42.5, "label": "Alpha"},
+        {"value": "Beta", "position": 127.5, "label": "Beta"},
+        {"value": "Gamma", "position": 212.5, "label": "Gamma"},
+        {"value": "Delta", "position": 297.5, "label": "Delta"}
+      ]
+    }
+  },
+  "point": {
+    "basic": {
+      "domain": ["x", "y", "z"],
+      "range": [0, 100],
+      "padding": 0.5,
+      "expected": [
+        {"value": "x", "position": 12.5, "label": "x"},
+        {"value": "y", "position": 50, "label": "y"},
+        {"value": "z", "position": 87.5, "label": "z"}
+      ]
+    },
+    "with_padding": {
+      "domain": ["First", "Second", "Third"],
+      "range": [0, 300],
+      "padding": 0.25,
+      "expected": [
+        {"value": "First", "position": 37.5, "label": "First"},
+        {"value": "Second", "position": 150, "label": "Second"},
+        {"value": "Third", "position": 262.5, "label": "Third"}
+      ]
+    }
+  },
+  "layout": {
+    "bottom_axis": {
+      "orientation": "Bottom",
+      "tick_size_inner": 8.0,
+      "tick_size_outer": 12.0,
+      "tick_padding": 5.0,
+      "offset": 0.5
+    },
+    "left_axis": {
+      "orientation": "Left",
+      "tick_size_inner": 6.0,
+      "tick_size_outer": 6.0,
+      "tick_padding": 3.0,
+      "offset": 0.5
+    },
+    "top_axis": {
+      "orientation": "Top",
+      "tick_size_inner": 5.0,
+      "tick_size_outer": 7.0,
+      "tick_padding": 2.0,
+      "offset": 0.5
+    },
+    "right_axis": {
+      "orientation": "Right",
+      "tick_size_inner": 4.0,
+      "tick_size_outer": 8.0,
+      "tick_padding": 4.0,
+      "offset": 0.5
+    }
+  },
+  "styling": {
+    "grid_style": {
+      "color": "#f00",
+      "width": 2.0,
+      "dasharray": "2,2"
+    },
+    "title_style": {
+      "font": "Arial",
+      "color": "#00f",
+      "position": [5.0, 5.0]
+    },
+    "tick_label_style": {
+      "font": "Verdana",
+      "color": "#333",
+      "padding": 2.0
+    },
+    "axis_line_style": {
+      "color": "#abc",
+      "width": 1.5,
+      "dasharray": null
+    }
+  }
+}

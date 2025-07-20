@@ -2,7 +2,6 @@
 use super::axis_structs::Axis;
 use super::orientation::AxisOrientation;
 use super::ticks::Tick;
-use super::util::TransformBuilder;
 use super::util::crisp::effective_offset;
 use crate::px;
 

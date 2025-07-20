@@ -18,6 +18,16 @@ This project is a Rust port of D3.js, aiming to provide data-driven document man
 - `src/lib.rs`: Main library code.
 - `tests/`: Integration tests.
 
+## Generating D3 Reference Fixtures
+
+To generate D3 reference fixtures for testing axes against D3.js behavior, use the following command:
+
+```sh
+npm run generate
+```
+
+This will create or update fixture files within the `tests/fixtures` directory, providing the necessary data to ensure parity with D3.js across multiple scenarios such as linear, logarithmic, and time-based scales.
+
 ## Crisp-Pixel Strategy
 To ensure sharp rendering on high-DPR (Device Pixel Ratio) displays, the Axis component includes a crisp-pixel strategy. By default, this feature adjusts positions by half a pixel to align with device pixels, preventing blurred lines. This can be customized using the `device_pixel_ratio` setter.
 

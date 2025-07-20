@@ -3,6 +3,7 @@ const d3 = require('d3-scale');
 const d3Axis = require('d3-axis');
 const d3Time = require('d3-time');
 const d3TimeFormat = require('d3-time-format');
+const path = require('path');
 
 // Helper function to extract tick values from D3 axis
 function getAxisTicks(scale, tickCount, isTimeScale = false) {
@@ -105,12 +106,20 @@ timeRanges.forEach(range => {
 // Output the reference data
 console.log('Writing reference data...');
 
+// Define directory to store the generated fixtures
+const fixturesDir = path.resolve(__dirname, 'fixtures');
+
+// Ensure the directory exists
+if (!fs.existsSync(fixturesDir)) {
+    fs.mkdirSync(fixturesDir);
+}
+
 // Write JSON files
-fs.writeFileSync('linear_reference.json', JSON.stringify(referenceData.linear, null, 2));
-fs.writeFileSync('time_reference.json', JSON.stringify(referenceData.time, null, 2));
+fs.writeFileSync(path.join(fixturesDir, 'linear_reference.json'), JSON.stringify(referenceData.linear, null, 2));
+fs.writeFileSync(path.join(fixturesDir, 'time_reference.json'), JSON.stringify(referenceData.time, null, 2));
 
 // Also create a combined file for easy access
-fs.writeFileSync('d3_axis_reference.json', JSON.stringify(referenceData, null, 2));
+fs.writeFileSync(path.join(fixturesDir, 'd3_axis_reference.json'), JSON.stringify(referenceData, null, 2));
 
 console.log('Reference data generated successfully!');
 console.log('Files created:');

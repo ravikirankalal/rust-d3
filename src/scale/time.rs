@@ -570,9 +570,8 @@ impl ScaleTime {
         let interval = self.tick_interval(count);
         
         // Check if this is a very short span (less than 10 seconds) - use date format
-        let start = self.domain[0];
-        let stop = self.domain[1];
-        let duration_secs = (stop - start).num_seconds().abs();
+        let _start = self.domain[0];
+        let _stop = self.domain[1];
         
         match interval {
             TimeTickInterval::Second(_) => "%Y-%m-%d",

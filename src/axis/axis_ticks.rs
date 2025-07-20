@@ -138,9 +138,8 @@ impl Axis<crate::scale::ScaleTime> {
         use crate::scale::time::TimeTickInterval;
         
         // Get the domain span to determine if we need special handling
-        let start = self.scale.domain[0];
-        let stop = self.scale.domain[1];
-        let duration = (stop - start).abs();
+        let _start = self.scale.domain[0];
+        let _stop = self.scale.domain[1];
         
         match tick_interval {
             TimeTickInterval::Second(_) => {
